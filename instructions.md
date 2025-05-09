@@ -1,6 +1,4 @@
-## All Languages
-
-Instructions for all programming languages:
+Coding instructions for all programming languages:
 
 - If no language is specified, assume the latest version of python.
 - If tokens or other secrets are needed, pull them from an environment variable
@@ -42,7 +40,6 @@ When writing database models:
 ## Shell Scripts
 
 - Assume zsh for any shell scripts. The latest version of modern utilities like ripgrep (rg), fdfind (fd), bat, httpie (http), zq (zed), jq, procs, rsync are installed and you can request I install additional utilities.
-
 
 ## React
 

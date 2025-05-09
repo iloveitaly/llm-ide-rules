@@ -72,92 +72,92 @@ def main():
 
     # General instructions
     general = extract_general(lines)
-    general_header = """
+    if any(line.strip() for line in general):
+        general_header = """
 ---
 description:
 alwaysApply: true
 ---
 """
-    write_rule(os.path.join(rules_dir, "general.mdc"), general_header, general)
-    # Copilot general instructions
-    copilot_general_header = """
----
-applyTo: "**"
----
-"""
-    write_rule(os.path.join(".github", "copilot-instructions.md"), copilot_general_header, general)
+        write_rule(os.path.join(rules_dir, "general.mdc"), general_header, general)
+        # Copilot general instructions (no frontmatter)
+        write_rule(os.path.join(".github", "copilot-instructions.md"), "", general)
 
     # Python section
     python_sec = extract_section(lines, "## Python")
-    python_header = """
+    if any(line.strip() for line in python_sec):
+        python_header = """
 ---
 description:
 globs: "*.py"
 alwaysApply: false
 ---
 """
-    write_rule(os.path.join(rules_dir, "python.mdc"), python_header, python_sec)
-    # Copilot Python instructions
-    copilot_python_header = """
+        write_rule(os.path.join(rules_dir, "python.mdc"), python_header, python_sec)
+        # Copilot Python instructions
+        copilot_python_header = """
 ---
 applyTo: "**/*.py"
 ---
 """
-    write_rule(os.path.join(copilot_dir, "python.instructions.md"), copilot_python_header, python_sec)
+        write_rule(os.path.join(copilot_dir, "python.instructions.md"), copilot_python_header, python_sec)
 
     # React section
     react_sec = extract_section(lines, "## React")
-    react_header = """
+    if any(line.strip() for line in react_sec):
+        react_header = """
 ---
 description:
 globs: "*.tsx"
 alwaysApply: false
 ---
 """
-    write_rule(os.path.join(rules_dir, "react.mdc"), react_header, react_sec)
-    # Copilot React instructions
-    copilot_react_header = """
+        write_rule(os.path.join(rules_dir, "react.mdc"), react_header, react_sec)
+        # Copilot React instructions
+        copilot_react_header = """
 ---
 applyTo: "**/*.tsx"
 ---
 """
-    write_rule(os.path.join(copilot_dir, "react.instructions.md"), copilot_react_header, react_sec)
+        write_rule(os.path.join(copilot_dir, "react.instructions.md"), copilot_react_header, react_sec)
 
     # Shell Scripts section
     shell_sec = extract_section(lines, "## Shell Scripts")
-    shell_header = """
+    if any(line.strip() for line in shell_sec):
+        shell_header = """
 ---
 description:
 globs: "*.sh"
 alwaysApply: false
 ---
 """
-    write_rule(os.path.join(rules_dir, "shell.mdc"), shell_header, shell_sec)
-    # Copilot Shell instructions
-    copilot_shell_header = """
+        write_rule(os.path.join(rules_dir, "shell.mdc"), shell_header, shell_sec)
+        # Copilot Shell instructions
+        copilot_shell_header = """
 ---
 applyTo: "**/*.sh"
 ---
 """
-    write_rule(os.path.join(copilot_dir, "shell.instructions.md"), copilot_shell_header, shell_sec)
+        write_rule(os.path.join(copilot_dir, "shell.instructions.md"), copilot_shell_header, shell_sec)
 
     # TypeScript section
     typescript_sec = extract_section(lines, "## TypeScript")
-    typescript_header = """
+    if any(line.strip() for line in typescript_sec):
+        typescript_header = """
 ---
 description:
 globs: "*.ts"
 alwaysApply: false
 ---
 """
-    write_rule(os.path.join(rules_dir, "typescript.mdc"), typescript_header, typescript_sec)
-    # Copilot TypeScript instructions
-    copilot_typescript_header = """
+        write_rule(os.path.join(rules_dir, "typescript.mdc"), typescript_header, typescript_sec)
+        # Copilot TypeScript instructions
+        copilot_typescript_header = """
 ---
 applyTo: "**/*.ts"
 ---
 """
-    write_rule(os.path.join(copilot_dir, "typescript.instructions.md"), copilot_typescript_header, typescript_sec)
+        write_rule(os.path.join(copilot_dir, "typescript.instructions.md"), copilot_typescript_header, typescript_sec)
 
     print("Created Cursor rules in .cursor/rules/ and Copilot instructions in .github/instructions/")
 
