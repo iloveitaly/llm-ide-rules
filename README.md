@@ -12,10 +12,10 @@ You can then download the rules into your project:
 
 ```sh
 # Download .cursor rules
-curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/install.sh | sh -s cursor
+curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/download.sh | sh -s cursor
 
 # Download .github rules
-curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/install.sh | sh -s github
+curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/download.sh | sh -s github
 ```
 
 ## Development

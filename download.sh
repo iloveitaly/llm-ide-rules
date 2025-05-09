@@ -29,6 +29,10 @@ esac
 
 curl -L "$ZIP_URL" -o repo.zip
 unzip -o repo.zip "$SUBDIR/*" -d tmp_extract
-rm -rf "$TARGET"
-mv "tmp_extract/$SUBDIR" "$TARGET"
+
+mkdir -p "$TARGET"
+# Copies all contents (including hidden files) from the extracted subdirectory to the target directory.
+# The dot (.) after the slash specifies to copy all files and folders within $SUBDIR, not the directory itself.
+cp -R "tmp_extract/$SUBDIR/." "$TARGET/"
+
 rm -rf tmp_extract repo.zip
