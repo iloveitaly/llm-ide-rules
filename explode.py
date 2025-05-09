@@ -141,6 +141,24 @@ applyTo: "**/*.sh"
 """
     write_rule(os.path.join(copilot_dir, "shell.instructions.md"), copilot_shell_header, shell_sec)
 
+    # TypeScript section
+    typescript_sec = extract_section(lines, "## TypeScript")
+    typescript_header = """
+---
+description:
+globs: "*.ts"
+alwaysApply: false
+---
+"""
+    write_rule(os.path.join(rules_dir, "typescript.mdc"), typescript_header, typescript_sec)
+    # Copilot TypeScript instructions
+    copilot_typescript_header = """
+---
+applyTo: "**/*.ts"
+---
+"""
+    write_rule(os.path.join(copilot_dir, "typescript.instructions.md"), copilot_typescript_header, typescript_sec)
+
     print("Created Cursor rules in .cursor/rules/ and Copilot instructions in .github/instructions/")
 
 
