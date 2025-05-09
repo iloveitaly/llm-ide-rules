@@ -20,7 +20,7 @@ curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/in
 
 ## Development
 
-All instructions in [[instructions.md]] are exploded out into the various files with default rules applied.
+All instructions in [instructions.md](instructions.md) are exploded out into the various files with default rules applied.
 
 ```shell
 just build
