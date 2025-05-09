@@ -85,7 +85,7 @@ alwaysApply: true
 applyTo: "**"
 ---
 """
-    write_rule(os.path.join(copilot_dir, "general.instructions.md"), copilot_general_header, general)
+    write_rule(os.path.join(".github", "copilot-instructions.md"), copilot_general_header, general)
 
     # Python section
     python_sec = extract_section(lines, "## Python")
