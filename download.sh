@@ -1,5 +1,5 @@
 #!/bin/zsh
-# https://github.com/iloveitaly/llm-ide-prompts
+# Description: Download and extract specific subdirectories from a GitHub repository.
 
 set -e
 
@@ -27,12 +27,13 @@ case $1 in
     ;;
 esac
 
-curl -L "$ZIP_URL" -o repo.zip
-unzip -o repo.zip "$SUBDIR/*" -d tmp_extract
+TMP_ZIP=$(mktemp)
+TMP_DIR=$(mktemp -d)
+
+curl -L "$ZIP_URL" -o "$TMP_ZIP"
+unzip -o "$TMP_ZIP" "$SUBDIR/*" -d "$TMP_DIR"
 
 mkdir -p "$TARGET"
-# Copies all contents (including hidden files) from the extracted subdirectory to the target directory.
-# The dot (.) after the slash specifies to copy all files and folders within $SUBDIR, not the directory itself.
-cp -R "tmp_extract/$SUBDIR/." "$TARGET/"
+cp -R "$TMP_DIR/$SUBDIR/." "$TARGET/"
 
-rm -rf tmp_extract repo.zip
+rm -rf "$TMP_DIR" "$TMP_ZIP"
