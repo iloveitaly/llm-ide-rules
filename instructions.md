@@ -37,10 +37,6 @@ When writing database models:
 * Use single double-quote docstrings (a string below the field definition) instead of comments to describe a field's purpose.
 * Use `ModelName.foreign_key()` when generating a foreign key field
 
-## Shell Scripts
-
-- Assume zsh for any shell scripts. The latest version of modern utilities like ripgrep (rg), fdfind (fd), bat, httpie (http), zq (zed), jq, procs, rsync are installed and you can request I install additional utilities.
-
 ## React
 
 1. Do not write any backend code. Just frontend logic.
@@ -58,3 +54,8 @@ When writing database models:
 14. use `pnpm` not `npm`
 15. Node libraries are not available
 16. Never edit the `components/ui/*.tsx` files
+
+## Shell
+
+- Assume zsh for any shell scripts. The latest version of modern utilities like ripgrep (rg), fdfind (fd), bat, httpie (http), zq (zed), jq, procs, rsync are installed and you can request I install additional utilities.
+

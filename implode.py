@@ -16,7 +16,9 @@ def bundle_cursor_rules(rules_dir, output_file):
                 content = f.read().strip()
                 if not content:
                     continue
-                out.write(f"# {rule_file.stem}\n\n")
+                content = strip_yaml_frontmatter(content)
+                if rule_file.stem != "general":
+                    out.write(f"## {rule_file.stem.capitalize()}\n\n")
                 out.write(content)
                 out.write("\n\n")
 
