@@ -89,7 +89,7 @@ alwaysApply: true
         python_header = """
 ---
 description:
-globs: "*.py"
+globs: *.py
 alwaysApply: false
 ---
 """
@@ -108,7 +108,7 @@ applyTo: "**/*.py"
         react_header = """
 ---
 description:
-globs: "*.tsx"
+globs: *.tsx
 alwaysApply: false
 ---
 """
@@ -127,7 +127,7 @@ applyTo: "**/*.tsx"
         shell_header = """
 ---
 description:
-globs: "*.sh"
+globs: *.sh
 alwaysApply: false
 ---
 """
@@ -146,7 +146,7 @@ applyTo: "**/*.sh"
         typescript_header = """
 ---
 description:
-globs: "*.ts"
+globs: *.ts
 alwaysApply: false
 ---
 """
