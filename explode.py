@@ -41,7 +41,7 @@ def write_rule(path, header_yaml, content_lines):
     Write a rule file with front matter and content.
     """
     with open(path, "w") as f:
-        f.write(header_yaml.rstrip() + "\n")
+        f.write(header_yaml.strip() + "\n")
         for line in content_lines:
             f.write(line)
 
