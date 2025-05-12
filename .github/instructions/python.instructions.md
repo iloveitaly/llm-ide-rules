@@ -15,7 +15,7 @@ When writing Python:
 * No variable interpolation in log messages.
 * When a particular need can be met with a mature, reasonably adopted and maintained package, I would prefer to use that package rather than engineering my own solution.
 
-## SQLModel & SQLAlchemy
+### SQLModel & SQLAlchemy
 
 When writing database models:
 
