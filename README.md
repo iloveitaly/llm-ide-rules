@@ -45,3 +45,4 @@ pbpaste | gpatch -p1
 ## Related Links
 
 * https://cursor.directory/rules
+* https://github.com/PatrickJS/awesome-cursorrules
