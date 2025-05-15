@@ -41,3 +41,7 @@ pbpaste | gpatch -p1
 ```
 
 `gpatch` is an updated version of patch on macOS that seems to work much better for me.
+
+## Related Links
+
+* https://cursor.directory/rules
