@@ -53,6 +53,7 @@ def bundle_github_instructions(instructions_dir, output_file):
                 if not content:
                     continue
                 content = strip_yaml_frontmatter(content)
+                # Convert dash-separated names to title case with spaces
                 header = instr_file.stem.replace('.instructions','').replace('-', ' ').title()
                 out.write(f"## {header}\n\n")
                 out.write(content)

@@ -46,6 +46,10 @@ def write_rule(path, header_yaml, content_lines):
             f.write(line)
 
 
+def header_to_filename(header):
+    return header.lower().replace(' ', '-')
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Convert copilot-instructions to Cursor rules"
@@ -93,14 +97,14 @@ globs: *.py
 alwaysApply: false
 ---
 """
-        write_rule(os.path.join(rules_dir, "python.mdc"), python_header, python_sec)
+        write_rule(os.path.join(rules_dir, header_to_filename("python") + ".mdc"), python_header, python_sec)
         # Copilot Python instructions
         copilot_python_header = """
 ---
 applyTo: "**/*.py"
 ---
 """
-        write_rule(os.path.join(copilot_dir, "python.instructions.md"), copilot_python_header, python_sec)
+        write_rule(os.path.join(copilot_dir, header_to_filename("python") + ".instructions.md"), copilot_python_header, python_sec)
 
     # React section
     react_sec = extract_section(lines, "## React")
@@ -112,14 +116,14 @@ globs: *.tsx
 alwaysApply: false
 ---
 """
-        write_rule(os.path.join(rules_dir, "react.mdc"), react_header, react_sec)
+        write_rule(os.path.join(rules_dir, header_to_filename("react") + ".mdc"), react_header, react_sec)
         # Copilot React instructions
         copilot_react_header = """
 ---
 applyTo: "**/*.tsx"
 ---
 """
-        write_rule(os.path.join(copilot_dir, "react.instructions.md"), copilot_react_header, react_sec)
+        write_rule(os.path.join(copilot_dir, header_to_filename("react") + ".instructions.md"), copilot_react_header, react_sec)
 
     # Shell Scripts section
     shell_sec = extract_section(lines, "## Shell Scripts")
@@ -131,14 +135,14 @@ globs: *.sh
 alwaysApply: false
 ---
 """
-        write_rule(os.path.join(rules_dir, "shell.mdc"), shell_header, shell_sec)
+        write_rule(os.path.join(rules_dir, header_to_filename("shell scripts") + ".mdc"), shell_header, shell_sec)
         # Copilot Shell instructions
         copilot_shell_header = """
 ---
 applyTo: "**/*.sh"
 ---
 """
-        write_rule(os.path.join(copilot_dir, "shell.instructions.md"), copilot_shell_header, shell_sec)
+        write_rule(os.path.join(copilot_dir, header_to_filename("shell scripts") + ".instructions.md"), copilot_shell_header, shell_sec)
 
     # TypeScript section
     typescript_sec = extract_section(lines, "## TypeScript")
@@ -150,14 +154,14 @@ globs: *.ts
 alwaysApply: false
 ---
 """
-        write_rule(os.path.join(rules_dir, "typescript.mdc"), typescript_header, typescript_sec)
+        write_rule(os.path.join(rules_dir, header_to_filename("typescript") + ".mdc"), typescript_header, typescript_sec)
         # Copilot TypeScript instructions
         copilot_typescript_header = """
 ---
 applyTo: "**/*.ts"
 ---
 """
-        write_rule(os.path.join(copilot_dir, "typescript.instructions.md"), copilot_typescript_header, typescript_sec)
+        write_rule(os.path.join(copilot_dir, header_to_filename("typescript") + ".instructions.md"), copilot_typescript_header, typescript_sec)
 
     # FastAPI section
     fastapi_sec = extract_section(lines, "## FastAPI")
@@ -169,16 +173,16 @@ globs: app/routes/**/*.py
 alwaysApply: false
 ---
 """
-        write_rule(os.path.join(rules_dir, "fastapi.mdc"), fastapi_header, fastapi_sec)
+        write_rule(os.path.join(rules_dir, header_to_filename("fastapi") + ".mdc"), fastapi_header, fastapi_sec)
         copilot_fastapi_header = """
 ---
 applyTo: "app/routes/**/*.py"
 ---
 """
-        write_rule(os.path.join(copilot_dir, "fastapi.instructions.md"), copilot_fastapi_header, fastapi_sec)
+        write_rule(os.path.join(copilot_dir, header_to_filename("fastapi") + ".instructions.md"), copilot_fastapi_header, fastapi_sec)
 
     # ReactRouter section
-    reactrouter_sec = extract_section(lines, "## ReactRouter")
+    reactrouter_sec = extract_section(lines, "## React Router")
     if any(line.strip() for line in reactrouter_sec):
         reactrouter_header = """
 ---
@@ -187,13 +191,13 @@ globs: web/app/routes/**/*.tsx
 alwaysApply: false
 ---
 """
-        write_rule(os.path.join(rules_dir, "reactrouter.mdc"), reactrouter_header, reactrouter_sec)
+        write_rule(os.path.join(rules_dir, header_to_filename("react router") + ".mdc"), reactrouter_header, reactrouter_sec)
         copilot_reactrouter_header = """
 ---
 applyTo: "web/app/routes/**/*.tsx"
 ---
 """
-        write_rule(os.path.join(copilot_dir, "reactrouter.instructions.md"), copilot_reactrouter_header, reactrouter_sec)
+        write_rule(os.path.join(copilot_dir, header_to_filename("react router") + ".instructions.md"), copilot_reactrouter_header, reactrouter_sec)
 
     print("Created Cursor rules in .cursor/rules/ and Copilot instructions in .github/instructions/")
 

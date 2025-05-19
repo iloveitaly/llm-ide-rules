@@ -6,6 +6,8 @@ I don't want to be tied to a specific IDE and it's a pain to have to edit instru
 
 Additionally, it becomes challenging to copy these prompts into various projects and contribute them back to a single location.
 
+Some of the glob assumptions in this repo are specific to how I've chosen to organize python and typescript [in the python starter template](https://github.com/iloveitaly/python-starter-template) and what tooling (fastapi, etc) that I've chosen to use.
+
 ## Usage
 
 You can then download the rules into your project:
