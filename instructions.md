@@ -13,6 +13,10 @@ Coding instructions for all programming languages:
 
 **DO NOT FORGET**: keep your responses short, dense, and without fluff. I am a senior, well-educated software engineer, and do not need long explanations.
 
+## Fastapi
+
+- When generating a HTTPException, do not add a `detail=` and use a named status code (`status.HTTP_400_BAD_REQUEST`)
+
 ## Python
 
 When writing Python:
@@ -37,11 +41,10 @@ When writing database models:
 * Use single double-quote docstrings (a string below the field definition) instead of comments to describe a field's purpose.
 * Use `ModelName.foreign_key()` when generating a foreign key field
 
-## TypeScript
+## React Router
 
-- Use `pnpm`, not `npm`
-- Node libraries are not available
-- Use `lib/` for generic code, `utils/` for project utilities, `hooks/` for React hooks, and `helpers/` for page-specific helpers.
+- The primary export in a routes file should specify loaderData like `export default function PageName({ loaderData }: Route.ComponentProps)`
+- When using an import from `~/configuration/client` (1) use `body:` for request params and (2) always `const { data, error } = await theCall()`
 
 ## React
 
@@ -53,7 +56,7 @@ When writing database models:
 - Store components for each major page or workflow in `src/components/$WORKFLOW_OR_PAGE_NAME`.
 - Use lowercase dash separated words for file names.
 - Use React 19, TypeScript, Tailwind CSS, and ShadCN components.
-- Prefer functional components, hooks over classes.
+- Prefer function components, hooks over classes.
 - Break up large components into smaller components, but keep them in the same file unless they can be generalized.
 - Put any "magic" strings like API keys, hosts, etc into a "constants.ts" file.
 - Only use a separate interface for component props if there are more than 4 props.
@@ -66,9 +69,10 @@ When writing database models:
 
 Follow this structure when generating a form.
 
-```react
+```tsx
 const formSchema = z.object({
   field_name: z.string(),
+  // additional schema definition
 })
 
 const form = useForm<z.infer<typeof formSchema>>({
@@ -79,11 +83,10 @@ async function onSubmit(values: z.infer<typeof formSchema>) {
   // ...
 }
 
-
 return (
   <Form {...form}>
     <form onSubmit={form.handleSubmit(onSubmit)}>
-      {/* ... */}
+      {/* form fields */}
     </form>
   </Form>
 )
@@ -92,4 +95,10 @@ return (
 ## Shell
 
 - Assume zsh for any shell scripts. The latest version of modern utilities like ripgrep (rg), fdfind (fd), bat, httpie (http), zq (zed), jq, procs, rsync are installed and you can request I install additional utilities.
+
+## Typescript
+
+- Use `pnpm`, not `npm`
+- Node libraries are not available
+- Use `lib/` for generic code, `utils/` for project utilities, `hooks/` for React hooks, and `helpers/` for page-specific helpers.
 
