@@ -9,16 +9,21 @@ import argparse
 from pathlib import Path
 
 def bundle_cursor_rules(rules_dir, output_file):
-    rule_files = sorted(Path(rules_dir).glob("*.mdc"), key=lambda p: p.name)
+    rule_files = list(Path(rules_dir).glob("*.mdc"))
+    general = [f for f in rule_files if f.stem == "general"]
+    others = sorted([f for f in rule_files if f.stem != "general"], key=lambda p: p.name)
+    ordered = general + others
     with open(output_file, "w") as out:
-        for rule_file in rule_files:
+        for rule_file in ordered:
             with open(rule_file, "r") as f:
                 content = f.read().strip()
                 if not content:
                     continue
                 content = strip_yaml_frontmatter(content)
+                # Convert dash-separated names to title case with spaces
+                header = rule_file.stem.replace('-', ' ').title()
                 if rule_file.stem != "general":
-                    out.write(f"## {rule_file.stem.capitalize()}\n\n")
+                    out.write(f"## {header}\n\n")
                 out.write(content)
                 out.write("\n\n")
 
@@ -33,6 +38,8 @@ def strip_yaml_frontmatter(text):
 
 def bundle_github_instructions(instructions_dir, output_file):
     copilot_general = Path(".github/copilot-instructions.md")
+    instr_files = list(Path(instructions_dir).glob("*.instructions.md"))
+    others = sorted(instr_files, key=lambda p: p.name)
     with open(output_file, "w") as out:
         # Write general copilot instructions if present
         if copilot_general.exists():
@@ -40,14 +47,14 @@ def bundle_github_instructions(instructions_dir, output_file):
             if content:
                 out.write(content)
                 out.write("\n\n")
-        instr_files = sorted(Path(instructions_dir).glob("*.instructions.md"), key=lambda p: p.name)
-        for instr_file in instr_files:
+        for instr_file in others:
             with open(instr_file, "r") as f:
                 content = f.read().strip()
                 if not content:
                     continue
                 content = strip_yaml_frontmatter(content)
-                out.write(f"## {instr_file.stem.replace('.instructions','').capitalize()}\n\n")
+                header = instr_file.stem.replace('.instructions','').replace('-', ' ').title()
+                out.write(f"## {header}\n\n")
                 out.write(content)
                 out.write("\n\n")
 

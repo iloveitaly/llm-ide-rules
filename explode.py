@@ -159,6 +159,42 @@ applyTo: "**/*.ts"
 """
         write_rule(os.path.join(copilot_dir, "typescript.instructions.md"), copilot_typescript_header, typescript_sec)
 
+    # FastAPI section
+    fastapi_sec = extract_section(lines, "## FastAPI")
+    if any(line.strip() for line in fastapi_sec):
+        fastapi_header = """
+---
+description:
+globs: app/routes/**/*.py
+alwaysApply: false
+---
+"""
+        write_rule(os.path.join(rules_dir, "fastapi.mdc"), fastapi_header, fastapi_sec)
+        copilot_fastapi_header = """
+---
+applyTo: "app/routes/**/*.py"
+---
+"""
+        write_rule(os.path.join(copilot_dir, "fastapi.instructions.md"), copilot_fastapi_header, fastapi_sec)
+
+    # ReactRouter section
+    reactrouter_sec = extract_section(lines, "## ReactRouter")
+    if any(line.strip() for line in reactrouter_sec):
+        reactrouter_header = """
+---
+description:
+globs: web/app/routes/**/*.tsx
+alwaysApply: false
+---
+"""
+        write_rule(os.path.join(rules_dir, "reactrouter.mdc"), reactrouter_header, reactrouter_sec)
+        copilot_reactrouter_header = """
+---
+applyTo: "web/app/routes/**/*.tsx"
+---
+"""
+        write_rule(os.path.join(copilot_dir, "reactrouter.instructions.md"), copilot_reactrouter_header, reactrouter_sec)
+
     print("Created Cursor rules in .cursor/rules/ and Copilot instructions in .github/instructions/")
 
 
