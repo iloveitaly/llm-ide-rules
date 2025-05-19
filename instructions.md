@@ -65,7 +65,7 @@ When writing database models:
 - When building forms use React Hook Form.
 - Include a two line breaks between any `useHook()` calls and any `useState()` definitions for a component.
 
-## React Hook Form
+### React Hook Form
 
 Follow this structure when generating a form.
 
