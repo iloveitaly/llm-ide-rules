@@ -1,7 +1,5 @@
 ---
-description:
-globs: web/app/routes/**/*.tsx
-alwaysApply: false
+applyTo: "web/app/routes/**/*.tsx"
 ---
 
 - The primary export in a routes file should specify loaderData like `export default function PageName({ loaderData }: Route.ComponentProps)`
