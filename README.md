@@ -48,3 +48,4 @@ pbpaste | gpatch -p1
 
 * https://cursor.directory/rules
 * https://github.com/PatrickJS/awesome-cursorrules
+* https://www.cursorprompts.org
