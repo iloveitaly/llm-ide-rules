@@ -1,0 +1,8 @@
+---
+mode: 'agent'
+description: 'Add a docstring to a TypeScript file'
+---
+
+
+Add a file-level docstring with a simple description of what this file does.
+
