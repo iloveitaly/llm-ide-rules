@@ -1,6 +1,6 @@
 ---
 description:
-globs: *.tsx
+globs: **/*.tsx
 alwaysApply: false
 ---
 
@@ -48,3 +48,4 @@ return (
   </Form>
 )
 ```
+

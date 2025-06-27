@@ -14,7 +14,7 @@ When writing Python:
 * Use `log.info("the message", the_variable=the_variable)` instead of `log.info("The message: %s", the_variable)` or `print` for logging. This object can be found at `from app import log`.
   * Log messages should be lowercase with no leading or trailing whitespace.
   * No variable interpolation in log messages.
-  * Do not coerce database IDs or dates to strings in log messages.
+  * Do not coerce database IDs or dates to strings
 * Do not worry about import ordering or other formatting issues.
 
 ### Date & DateTime
@@ -32,7 +32,7 @@ When accessing database records:
 
 When writing database models:
 
-* Don't use `Field(...)` unless required (i.e. when specifying a JSON type for a `dict` or pydantic model using `Field(sa_type=JSONB)`). For instance, use `= None` instead of `= Field(default=None)`.
+¨* Don't use `Field(...)` unless required (i.e. when specifying a JSON type for a `dict` or pydantic model using `Field(sa_type=JSONB)`). For instance, use `= None` instead of `= Field(default=None)`.
 * Add enum classes close to where they are used, unless they are used across multiple classes (then put them at the top of the file)
 * Use single double-quote docstrings (a string below the field definition) instead of comments to describe a field's purpose.
 * Use `ModelName.foreign_key()` when generating a foreign key field

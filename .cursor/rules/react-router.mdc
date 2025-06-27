@@ -3,6 +3,7 @@ description:
 globs: web/app/routes/**/*.tsx
 alwaysApply: false
 ---
+
 - The primary export in a routes file should specify `loaderData` like `export default function RouteNamePage({ loaderData }: Route.ComponentProps)`. `loaderData` is the return value from `clientLoader`.
 - When using an import from `~/configuration/client` (1) use `body:` for request params and (2) always `const { data, error } = await theCall()` (3) add `invariant(data, "error loading $xyz")`
 - Use `href("/products/:id", { id: "abc123" })` to generate a url path for a route managed by the application.
@@ -28,3 +29,4 @@ export const meta: MetaFunction = () => {
 
 * `~/configuration/client` re-exports all types and functions from `client/*`. Import from `~/configuration/client` instead of anything you find in the `client/` folder/package.
 * For each API endpoint, there's a fully typed async function that can be used to call it. Never attempt to call an API endpoint directly.
+

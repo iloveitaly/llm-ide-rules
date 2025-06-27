@@ -14,6 +14,7 @@ applyTo: "**/*.tsx"
 - Break up large components into smaller components, but keep them in the same file unless they can be generalized.
 - Put any "magic" strings like API keys, hosts, etc into a "constants.ts" file.
 - Only use a separate interface for component props if there are more than 4 props.
+  - Put the interface definition right above the related function
 - Internally, store all currency values as integers and convert them to floats when rendering visually
 - Never edit the `components/ui/*.tsx` files
 - When building forms use React Hook Form.
