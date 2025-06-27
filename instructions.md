@@ -109,7 +109,7 @@ export const meta: MetaFunction = () => {
 * `~/configuration/client` re-exports all types and functions from `client/*`. Import from `~/configuration/client` instead of anything you find in the `client/` folder/package.
 * For each API endpoint, there's a fully typed async function that can be used to call it. Never attempt to call an API endpoint directly.
 
-### React Router Client Loader
+## React Router Client Loader
 
 Move logic into a client loader
 
@@ -181,6 +181,8 @@ Add a docstring to a TypeScript file
 Add a file-level docstring with a simple description of what this file does.
 
 ## Secrets
+
+Add or mutate system secrets
 
 Here's how environment variables are managed in this application:
 
