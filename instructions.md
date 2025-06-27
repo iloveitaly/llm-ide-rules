@@ -109,6 +109,12 @@ export const meta: MetaFunction = () => {
 * `~/configuration/client` re-exports all types and functions from `client/*`. Import from `~/configuration/client` instead of anything you find in the `client/` folder/package.
 * For each API endpoint, there's a fully typed async function that can be used to call it. Never attempt to call an API endpoint directly.
 
+### React Router Client Loader
+
+Move logic into a client loader
+
+Do this in a `clientLoader` and use `loaderData` to render the component. DO NOT create mock data, new interfaces, or mock data loader functions. Instead, assume `loaderData` has all of the data you need to render the component.
+
 ## React
 
 - Do not write any backend code. Just frontend logic.
