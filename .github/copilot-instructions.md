@@ -14,3 +14,7 @@ Coding instructions for all programming languages:
 
 **DO NOT FORGET**: keep your responses short, dense, and without fluff. I am a senior, well-educated software engineer, and do not need long explanations.
 
+## Agent instructions
+
+- When running python tests, use an already open terminal and the `pytest` binary.
+- If you added models, generate a migration with `just migration {add,delete,update}_model_other_description`
