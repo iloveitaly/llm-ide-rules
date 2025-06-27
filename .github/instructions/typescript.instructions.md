@@ -7,3 +7,4 @@ applyTo: "**/*.ts,**/*.tsx"
 - Use `lib/` for generic code, `utils/` for project utilities, `hooks/` for React hooks, and `helpers/` for page-specific helpers.
 - Prefer `function theName() {` over `const theName = () =>`
 - Use `import { invariant } from @epic-web/invariant` instead of another invariant library
+

@@ -2,7 +2,6 @@
 applyTo: "**/*.py"
 ---
 
-
 When writing Python:
 
 * Assume the latest python, version 3.13.
@@ -32,7 +31,7 @@ When accessing database records:
 
 When writing database models:
 
-¨* Don't use `Field(...)` unless required (i.e. when specifying a JSON type for a `dict` or pydantic model using `Field(sa_type=JSONB)`). For instance, use `= None` instead of `= Field(default=None)`.
+* Don't use `Field(...)` unless required (i.e. when specifying a JSON type for a `dict` or pydantic model using `Field(sa_type=JSONB)`). For instance, use `= None` instead of `= Field(default=None)`.
 * Add enum classes close to where they are used, unless they are used across multiple classes (then put them at the top of the file)
 * Use single double-quote docstrings (a string below the field definition) instead of comments to describe a field's purpose.
 * Use `ModelName.foreign_key()` when generating a foreign key field
