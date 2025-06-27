@@ -7,6 +7,32 @@ import os
 import sys
 import argparse
 
+# Mapping of section headers to their file globs
+SECTION_GLOBS = {
+    "Python": "**/*.py",
+    "React": "**/*.tsx", 
+    "Shell": "**/*.sh",
+    "TypeScript": "**/*.ts,**/*.tsx",
+    "FastAPI": "app/routes/**/*.py",
+    "React Router": "web/app/routes/**/*.tsx",
+}
+
+def generate_cursor_frontmatter(glob):
+    """Generate Cursor rule frontmatter for a given glob pattern."""
+    return f"""---
+description:
+globs: {glob}
+alwaysApply: false
+---
+"""
+
+def generate_copilot_frontmatter(glob):
+    """Generate Copilot instruction frontmatter for a given glob pattern."""
+    return f"""---
+applyTo: "{glob}"
+---
+"""
+
 
 def extract_general(lines):
     """
@@ -87,117 +113,27 @@ alwaysApply: true
         # Copilot general instructions (no frontmatter)
         write_rule(os.path.join(".github", "copilot-instructions.md"), "", general)
 
-    # Python section
-    python_sec = extract_section(lines, "## Python")
-    if any(line.strip() for line in python_sec):
-        python_header = """
----
-description:
-globs: *.py
-alwaysApply: false
----
-"""
-        write_rule(os.path.join(rules_dir, header_to_filename("python") + ".mdc"), python_header, python_sec)
-        # Copilot Python instructions
-        copilot_python_header = """
----
-applyTo: "**/*.py"
----
-"""
-        write_rule(os.path.join(copilot_dir, header_to_filename("python") + ".instructions.md"), copilot_python_header, python_sec)
+    # Process each section dynamically
+    for section_name, glob in SECTION_GLOBS.items():
+        section_content = extract_section(lines, f"## {section_name}")
+        if any(line.strip() for line in section_content):
+            filename = header_to_filename(section_name)
+            
+            # Write cursor rule
+            cursor_header = generate_cursor_frontmatter(glob)
+            write_rule(os.path.join(rules_dir, filename + ".mdc"), cursor_header, section_content)
+            
+            # Write copilot instruction
+            copilot_header = generate_copilot_frontmatter(glob)
+            write_rule(os.path.join(copilot_dir, filename + ".instructions.md"), copilot_header, section_content)
 
-    # React section
-    react_sec = extract_section(lines, "## React")
-    if any(line.strip() for line in react_sec):
-        react_header = """
----
-description:
-globs: *.tsx
-alwaysApply: false
----
-"""
-        write_rule(os.path.join(rules_dir, header_to_filename("react") + ".mdc"), react_header, react_sec)
-        # Copilot React instructions
-        copilot_react_header = """
----
-applyTo: "**/*.tsx"
----
-"""
-        write_rule(os.path.join(copilot_dir, header_to_filename("react") + ".instructions.md"), copilot_react_header, react_sec)
-
-    # Shell Scripts section
-    shell_sec = extract_section(lines, "## Shell Scripts")
-    if any(line.strip() for line in shell_sec):
-        shell_header = """
----
-description:
-globs: *.sh
-alwaysApply: false
----
-"""
-        write_rule(os.path.join(rules_dir, header_to_filename("shell scripts") + ".mdc"), shell_header, shell_sec)
-        # Copilot Shell instructions
-        copilot_shell_header = """
----
-applyTo: "**/*.sh"
----
-"""
-        write_rule(os.path.join(copilot_dir, header_to_filename("shell scripts") + ".instructions.md"), copilot_shell_header, shell_sec)
-
-    # TypeScript section
-    typescript_sec = extract_section(lines, "## TypeScript")
-    if any(line.strip() for line in typescript_sec):
-        typescript_header = """
----
-description:
-globs: *.ts
-alwaysApply: false
----
-"""
-        write_rule(os.path.join(rules_dir, header_to_filename("typescript") + ".mdc"), typescript_header, typescript_sec)
-        # Copilot TypeScript instructions
-        copilot_typescript_header = """
----
-applyTo: "**/*.ts"
----
-"""
-        write_rule(os.path.join(copilot_dir, header_to_filename("typescript") + ".instructions.md"), copilot_typescript_header, typescript_sec)
-
-    # FastAPI section
-    fastapi_sec = extract_section(lines, "## FastAPI")
-    if any(line.strip() for line in fastapi_sec):
-        fastapi_header = """
----
-description:
-globs: app/routes/**/*.py
-alwaysApply: false
----
-"""
-        write_rule(os.path.join(rules_dir, header_to_filename("fastapi") + ".mdc"), fastapi_header, fastapi_sec)
-        copilot_fastapi_header = """
----
-applyTo: "app/routes/**/*.py"
----
-"""
-        write_rule(os.path.join(copilot_dir, header_to_filename("fastapi") + ".instructions.md"), copilot_fastapi_header, fastapi_sec)
-
-    # ReactRouter section
-    reactrouter_sec = extract_section(lines, "## React Router")
-    if any(line.strip() for line in reactrouter_sec):
-        reactrouter_header = """
----
-description:
-globs: web/app/routes/**/*.tsx
-alwaysApply: false
----
-"""
-        write_rule(os.path.join(rules_dir, header_to_filename("react router") + ".mdc"), reactrouter_header, reactrouter_sec)
-        copilot_reactrouter_header = """
----
-applyTo: "web/app/routes/**/*.tsx"
----
-"""
-        write_rule(os.path.join(copilot_dir, header_to_filename("react router") + ".instructions.md"), copilot_reactrouter_header, reactrouter_sec)
+    # Check for unmapped sections
+    for line in lines:
+        if line.startswith("## "):
+            section_header = line.strip()
+            section_name = section_header[3:]  # Remove "## "
+            if section_name not in SECTION_GLOBS:
+                print(f"Warning: Found unmapped section '{section_name}' - add to SECTION_GLOBS to process it")
 
     print("Created Cursor rules in .cursor/rules/ and Copilot instructions in .github/instructions/")
 
