@@ -17,7 +17,7 @@ if [[ $1 == "all" ]]; then
   TMP_DIR=$(mktemp -d)
   curl -L "$ZIP_URL" -o "$TMP_ZIP"
   unzip -o "$TMP_ZIP" "llm-ide-prompts-$BRANCH/.cursor/*" -d "$TMP_DIR"
-  unzip -o "$TMP_ZIP" "llm-ide-prompts-$BRANCH/.github/*" -d "$TMP_DIR"
+  unzip -o "$TMP_ZIP" "llm-ide-prompts-$BRANCH/.github/*" -x "llm-ide-prompts-$BRANCH/.github/workflows/*" -d "$TMP_DIR"
   mkdir -p .cursor .github
   cp -R "$TMP_DIR/llm-ide-prompts-$BRANCH/.cursor/." .cursor/
   cp -R "$TMP_DIR/llm-ide-prompts-$BRANCH/.github/." .github/
@@ -33,6 +33,7 @@ case $1 in
   github)
     SUBDIR="llm-ide-prompts-$BRANCH/.github"
     TARGET=".github"
+    EXCLUDE_WORKFLOWS=true
     ;;
   *)
     echo "Unknown option: $1 (must be 'cursor', 'github', or 'all')"
@@ -44,7 +45,7 @@ TMP_ZIP=$(mktemp)
 TMP_DIR=$(mktemp -d)
 
 curl -L "$ZIP_URL" -o "$TMP_ZIP"
-unzip -o "$TMP_ZIP" "$SUBDIR/*" -d "$TMP_DIR"
+unzip -o "$TMP_ZIP" "$SUBDIR/*" -x "$SUBDIR/workflows/*" -d "$TMP_DIR"
 
 mkdir -p "$TARGET"
 cp -R "$TMP_DIR/$SUBDIR/." "$TARGET/"
