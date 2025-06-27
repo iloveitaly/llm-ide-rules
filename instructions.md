@@ -24,7 +24,6 @@ Coding instructions for all programming languages:
 
 ## Python
 
-
 When writing Python:
 
 * Assume the latest python, version 3.13.
@@ -54,10 +53,33 @@ When accessing database records:
 
 When writing database models:
 
-¨* Don't use `Field(...)` unless required (i.e. when specifying a JSON type for a `dict` or pydantic model using `Field(sa_type=JSONB)`). For instance, use `= None` instead of `= Field(default=None)`.
+* Don't use `Field(...)` unless required (i.e. when specifying a JSON type for a `dict` or pydantic model using `Field(sa_type=JSONB)`). For instance, use `= None` instead of `= Field(default=None)`.
 * Add enum classes close to where they are used, unless they are used across multiple classes (then put them at the top of the file)
 * Use single double-quote docstrings (a string below the field definition) instead of comments to describe a field's purpose.
 * Use `ModelName.foreign_key()` when generating a foreign key field
+
+## Python App
+
+* Files within `app/commands/` should have:
+  * Are not designed for CLI execution, but instead are interactor-style internal commands.
+  * Should not be used on the queuing system
+  * A `perform` function that is the main entry point for the command.
+  * Look at existing commands for examples of how to structure the command.
+  * Use `TypeIDType` for any parameters that are IDs of models.
+* Files within `app/jobs/` should have:
+  * Are designed for use on the queuing system.
+  * A `perform` function that is the main entry point for the job.
+  * Look at existing jobs for examples of how to structure the job.
+  * Use `TypeIDType | str` for any parameters that are IDs of models.
+* When referencing a command, use the full-qualified name, e.g. `app.commands.transcript_deletion.perform`.
+* When queuing a job or `perform`ing it in a test, use the full-qualified name, e.g. `app.jobs.transcript_deletion.perform`.
+
+## Pytest Integration Tests
+
+- Look to tests/factories.py to generate any required database state
+  - Here's an example of how to create + persist a factory `DistributionFactory.build(domain=PYTHON_TEST_SERVER_HOST).save()`
+- Add the `server` factory to each test
+- Use the `faker` factory to generate emails, etc.
 
 ## React Router
 
