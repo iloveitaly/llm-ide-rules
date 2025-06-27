@@ -1,7 +1,6 @@
 ---
 applyTo: "**/*.tsx"
 ---
-
 - Do not write any backend code. Just frontend logic.
 - For any backend requirements, create mock responses. Use a function to return mock data so I can easily swap it out later.
 - When creating mock data, always specify it in a dedicated `mock.ts` file
@@ -46,4 +45,3 @@ return (
   </Form>
 )
 ```
-

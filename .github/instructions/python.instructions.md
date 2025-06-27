@@ -1,7 +1,6 @@
 ---
 applyTo: "**/*.py"
 ---
-
 When writing Python:
 
 * Assume the latest python, version 3.13.
@@ -35,4 +34,3 @@ When writing database models:
 * Add enum classes close to where they are used, unless they are used across multiple classes (then put them at the top of the file)
 * Use single double-quote docstrings (a string below the field definition) instead of comments to describe a field's purpose.
 * Use `ModelName.foreign_key()` when generating a foreign key field
-

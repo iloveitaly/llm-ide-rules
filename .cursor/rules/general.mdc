@@ -21,4 +21,3 @@ Coding instructions for all programming languages:
 
 - When running python tests, use an already open terminal and the `pytest` binary.
 - If you added models, generate a migration with `just migration {add,delete,update}_model_other_description`
-

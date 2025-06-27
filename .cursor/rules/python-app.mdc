@@ -1,5 +1,7 @@
 ---
-applyTo: "**/*.py"
+description:
+globs: **/*.py
+alwaysApply: false
 ---
 * Files within `app/commands/` should have:
   * Are not designed for CLI execution, but instead are interactor-style internal commands.
