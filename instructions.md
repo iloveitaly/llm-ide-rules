@@ -174,6 +174,12 @@ return (
 - Prefer `function theName() {` over `const theName = () =>`
 - Use `import { invariant } from @epic-web/invariant` instead of another invariant library
 
+## TypeScript DocString
+
+Add a docstring to a TypeScript file
+
+Add a file-level docstring with a simple description of what this file does.
+
 ## Secrets
 
 Here's how environment variables are managed in this application:
