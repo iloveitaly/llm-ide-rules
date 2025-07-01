@@ -1,6 +1,8 @@
 ---
 applyTo: "web/app/routes/**/*.tsx"
 ---
+## React Router
+
 - The primary export in a routes file should specify `loaderData` like `export default function RouteNamePage({ loaderData }: Route.ComponentProps)`. `loaderData` is the return value from `clientLoader`.
 - When using an import from `~/configuration/client` (1) use `body:` for request params and (2) always `const { data, error } = await theCall()` (3) add `invariant(data, "error loading $xyz")`
 - Use `href("/products/:id", { id: "abc123" })` to generate a url path for a route managed by the application.

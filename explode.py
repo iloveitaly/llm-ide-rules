@@ -58,6 +58,7 @@ def extract_general(lines):
 def extract_section(lines, header):
     """
     Extract lines under a given section header until the next header or EOF.
+    Includes the header itself in the output.
     """
     content = []
     in_section = False
@@ -68,6 +69,7 @@ def extract_section(lines, header):
             content.append(line)
         elif line.strip() == header:
             in_section = True
+            content.append(line)  # Include the header itself
     return content
 
 
@@ -117,7 +119,7 @@ def extract_description_and_filter_content(content_lines, default_description):
     # Find the first non-empty, non-header line as description
     for i, line in enumerate(trimmed_content):
         stripped_line = line.strip()
-        if stripped_line and not stripped_line.startswith('#'):
+        if stripped_line and not stripped_line.startswith('#') and not stripped_line.startswith('##'):
             description = stripped_line
             description_line = i
             break

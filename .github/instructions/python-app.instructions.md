@@ -1,6 +1,8 @@
 ---
 applyTo: "**/*.py"
 ---
+## Python App
+
 * Files within `app/commands/` should have:
   * Are not designed for CLI execution, but instead are interactor-style internal commands.
   * Should not be used on the queuing system
