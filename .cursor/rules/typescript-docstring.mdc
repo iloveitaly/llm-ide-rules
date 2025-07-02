@@ -1,5 +1,7 @@
 ---
-description: Add a docstring to a TypeScript file
+description:
+globs:
+alwaysApply: false
 ---
 ## TypeScript DocString
 
