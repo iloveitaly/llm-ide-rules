@@ -8,7 +8,6 @@ Shared constants for explode and implode scripts.
 SECTION_GLOBS = {
     "Python": "**/*.py",
     "Python App": "**/*.py",
-    "Pytest Integration": "tests/integration/**/*.py",
     "Pytest Integration Tests": "tests/integration/**/*.py",
     "FastAPI": "app/routes/**/*.py",
 

@@ -52,7 +52,7 @@ def extract_section(lines, header):
             if line.startswith("## "):
                 break
             content.append(line)
-        elif line.strip() == header:
+        elif line.strip().lower() == header.lower():
             in_section = True
             content.append(line)  # Include the header itself
     return content
@@ -91,19 +91,38 @@ def trim_content(content_lines):
     return content_lines[start:end]
 
 
+def replace_header_with_proper_casing(content_lines, proper_header):
+    """Replace the first header in content with the properly cased version."""
+    if not content_lines:
+        return content_lines
+    
+    # Find and replace the first header line
+    for i, line in enumerate(content_lines):
+        if line.startswith("## "):
+            content_lines[i] = f"## {proper_header}\n"
+            break
+    
+    return content_lines
+
+
 def extract_description_and_filter_content(content_lines, default_description):
-    """Extract description from first non-empty line and return filtered content."""
+    """Extract description from first non-empty line that starts with 'Description:' and return filtered content."""
     trimmed_content = trim_content(content_lines)
     description = ""
     description_line = None
     
-    # Find the first non-empty, non-header line as description
+    # Find the first non-empty, non-header line that starts with "Description:"
     for i, line in enumerate(trimmed_content):
         stripped_line = line.strip()
         if stripped_line and not stripped_line.startswith('#') and not stripped_line.startswith('##'):
-            description = stripped_line
-            description_line = i
-            break
+            if stripped_line.startswith('Description:'):
+                # Extract the description text after "Description:"
+                description = stripped_line[len('Description:'):].strip()
+                description_line = i
+                break
+            else:
+                # Found a non-header line that doesn't start with Description:, stop looking
+                break
     
     # If no description found, use default
     if not description or description_line is None:
@@ -118,11 +137,12 @@ def extract_description_and_filter_content(content_lines, default_description):
     return description, filtered_content
 
 
-def write_cursor_prompt(content_lines, filename, prompts_dir):
+def write_cursor_prompt(content_lines, filename, prompts_dir, section_name=None):
     """Write a Cursor prompt file with frontmatter including description."""
     filepath = os.path.join(prompts_dir, filename + ".mdc")
     
-    default_description = f"Prompt for {filename.replace('-', ' ')}"
+    # Don't generate a default description, leave empty if none found
+    default_description = ""
     description, filtered_content = extract_description_and_filter_content(content_lines, default_description)
     
     frontmatter = f"""---
@@ -136,11 +156,12 @@ description: {description}
             f.write(line)
 
 
-def write_github_prompt(content_lines, filename, prompts_dir):
+def write_github_prompt(content_lines, filename, prompts_dir, section_name=None):
     """Write a GitHub prompt file with proper frontmatter."""
     filepath = os.path.join(prompts_dir, filename + ".prompt.md")
     
-    default_description = f"Generate a new {filename.replace('-', ' ')}"
+    # Don't generate a default description, leave empty if none found
+    default_description = ""
     description, filtered_content = extract_description_and_filter_content(content_lines, default_description)
     
     frontmatter = f"""---
@@ -202,6 +223,9 @@ alwaysApply: true
             found_sections.add(section_name)
             filename = header_to_filename(section_name)
             
+            # Replace header with proper casing from SECTION_GLOBS
+            section_content = replace_header_with_proper_casing(section_content, section_name)
+            
             if glob_or_description is not None:
                 # It's a glob pattern - create instruction files
                 cursor_header = generate_cursor_frontmatter(glob_or_description)
@@ -210,9 +234,9 @@ alwaysApply: true
                 copilot_header = generate_copilot_frontmatter(glob_or_description)
                 write_rule(os.path.join(copilot_dir, filename + ".instructions.md"), copilot_header, section_content)
             else:
-                # It's a prompt - create prompt files
-                write_cursor_prompt(section_content, filename, rules_dir)
-                write_github_prompt(section_content, filename, github_prompts_dir)
+                # It's a prompt - create prompt files using the original section name for header
+                write_cursor_prompt(section_content, filename, rules_dir, section_name)
+                write_github_prompt(section_content, filename, github_prompts_dir, section_name)
 
     # Check for sections in mapping that don't exist in the file
     for section_name in SECTION_GLOBS:
@@ -224,7 +248,8 @@ alwaysApply: true
         if line.startswith("## "):
             section_header = line.strip()
             section_name = section_header[3:]  # Remove "## "
-            if section_name not in SECTION_GLOBS:
+            # Case insensitive check
+            if not any(section_name.lower() == mapped_section.lower() for mapped_section in SECTION_GLOBS):
                 print(f"Warning: Found unmapped section '{section_name}' - add to SECTION_GLOBS to process it")
 
     print("Created Cursor rules in .cursor/rules/, Copilot instructions in .github/instructions/, and prompts in respective directories")
