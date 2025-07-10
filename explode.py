@@ -7,24 +7,9 @@ import os
 import sys
 import argparse
 
-# Mapping of section headers to their file globs or None for prompts
-SECTION_GLOBS = {
-    "Python": "**/*.py",
-    "Python App": "**/*.py",
-    "Pytest Integration Tests": "tests/integration/**/*.py",
-    "FastAPI": "app/routes/**/*.py",
-
-    "React": "**/*.tsx", 
-    "React Router": "web/app/routes/**/*.tsx",
-    "React Router Client Loader": None,
-
-    "Shell": "**/*.sh",
-    "TypeScript": "**/*.ts,**/*.tsx",
-    "TypeScript DocString": None,
-
-    # prompts (None indicates it's a prompt, not an instruction)
-    "Secrets": None,
-}
+# Add current directory to path for constants import
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from constants import SECTION_GLOBS, header_to_filename
 
 def generate_cursor_frontmatter(glob):
     """Generate Cursor rule frontmatter for a given glob pattern."""
@@ -82,10 +67,6 @@ def write_rule(path, header_yaml, content_lines):
         f.write(header_yaml.strip() + "\n")
         for line in trimmed_content:
             f.write(line)
-
-
-def header_to_filename(header):
-    return header.lower().replace(' ', '-')
 
 
 def trim_content(content_lines):
