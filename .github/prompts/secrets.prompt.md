@@ -1,9 +1,8 @@
 ---
 mode: 'agent'
-description: 'Add or mutate system secrets'
+description: ''
 ---
 ## Secrets
-
 
 Here's how environment variables are managed in this application:
 

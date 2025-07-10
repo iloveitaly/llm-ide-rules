@@ -1,9 +1,6 @@
 ---
-description:
-globs:
-alwaysApply: false
+description: 
 ---
 ## TypeScript DocString
-
 
 Add a file-level docstring with a simple description of what this file does.

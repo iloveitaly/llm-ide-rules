@@ -17,9 +17,11 @@ applyTo: "**/*.tsx"
 - Only use a separate interface for component props if there are more than 4 props.
   - Put the interface definition right above the related function
 - Internally, store all currency values as integers and convert them to floats when rendering visually
-- Never edit the `components/ui/*.tsx` files
+- Never edit (or add) `components/ui/*.tsx` files
 - When building forms use React Hook Form.
 - Include a two line breaks between any `useHook()` calls and any `useState()` definitions for a component.
+- Use `href("/products/:id", { id: "abc123" })` to generate a url path for a route managed by the application.
+  - Look at @routes.ts to determine what routes and path parameters exist.
 
 ### React Hook Form
 
