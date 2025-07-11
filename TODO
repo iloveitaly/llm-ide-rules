@@ -1,0 +1,3 @@
+- [ ] https://github.com/microsoft/vscode-copilot-release/issues/7145 need to implement the allowlist in some way for automatic agent execution
+- [ ] no headers on manually included instructions
+- [ ] support auto-added instructions?
