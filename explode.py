@@ -145,13 +145,15 @@ def write_cursor_prompt(content_lines, filename, prompts_dir, section_name=None)
     default_description = ""
     description, filtered_content = extract_description_and_filter_content(content_lines, default_description)
     
-    frontmatter = f"""---
+    with open(filepath, "w") as f:
+        # Only add frontmatter if description is not empty
+        if description:
+            frontmatter = f"""---
 description: {description}
 ---
 """
-    
-    with open(filepath, "w") as f:
-        f.write(frontmatter)
+            f.write(frontmatter)
+        
         for line in filtered_content:
             f.write(line)
 
