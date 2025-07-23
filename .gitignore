@@ -1,0 +1,12 @@
+# Generated MCP configuration files (created by mcp.cli)
+.vscode/settings.json
+.cursor/mcp.json
+
+# Test files
+test-*.json
+*-test.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class

@@ -1,0 +1,297 @@
+#!/usr/bin/env python3
+"""
+MCP CLI tool for converting between different MCP JSON formats.
+Usage: python3 mcp_cli.py explode|implode [options]
+"""
+import json
+import os
+import re
+from pathlib import Path
+from typing import Dict, Any, Optional
+
+import typer
+from rich.console import Console
+from rich.table import Table
+
+app = typer.Typer(help="MCP JSON format conversion tool")
+console = Console()
+
+
+def strip_json_comments(content: str) -> str:
+    """Remove JavaScript-style comments from JSON content."""
+    lines = content.split('\n')
+    cleaned_lines = []
+    
+    for line in lines:
+        # Find // that's not inside a string
+        in_string = False
+        escape_next = False
+        comment_pos = None
+        
+        for i, char in enumerate(line):
+            if escape_next:
+                escape_next = False
+                continue
+            
+            if char == '\\':
+                escape_next = True
+                continue
+            
+            if char == '"' and not escape_next:
+                in_string = not in_string
+                continue
+            
+            if not in_string and char == '/' and i + 1 < len(line) and line[i + 1] == '/':
+                comment_pos = i
+                break
+        
+        if comment_pos is not None:
+            line = line[:comment_pos].rstrip()
+        
+        cleaned_lines.append(line)
+    
+    return '\n'.join(cleaned_lines)
+
+
+def load_json(file_path: str) -> Dict[str, Any]:
+    """Load and parse a JSON file (supports JSONC with comments)."""
+    try:
+        with open(file_path, 'r') as f:
+            content = f.read()
+        # Strip comments and parse
+        clean_content = strip_json_comments(content)
+        return json.loads(clean_content)
+    except FileNotFoundError:
+        console.print(f"[red]Error: File '{file_path}' not found[/red]")
+        raise typer.Exit(1)
+    except json.JSONDecodeError as e:
+        console.print(f"[red]Error: Invalid JSON in '{file_path}': {e}[/red]")
+        raise typer.Exit(1)
+
+
+def save_json(data: Dict[str, Any], file_path: str, create_dirs: bool = True) -> None:
+    """Save data to a JSON file."""
+    path = Path(file_path)
+    if create_dirs:
+        path.parent.mkdir(parents=True, exist_ok=True)
+    
+    with open(file_path, 'w') as f:
+        json.dump(data, f, indent=2)
+    
+    console.print(f"[green]Created: {file_path}[/green]")
+
+
+def generic_to_vscode(mcp_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert generic MCP format to VS Code settings.json format."""
+    # VS Code stores MCP configuration under "mcp.servers" in settings.json
+    return {
+        "mcp.servers": mcp_data.get("servers", {})
+    }
+
+
+def generic_to_cursor(mcp_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert generic MCP format to Cursor format."""
+    # Cursor uses a similar format but may have different structure
+    # Based on research, Cursor's MCP format is similar to the generic format
+    # but might be stored in a different location or have additional fields
+    cursor_format = {
+        "servers": {}
+    }
+    
+    servers = mcp_data.get("servers", {})
+    for name, config in servers.items():
+        cursor_format["servers"][name] = config.copy()
+    
+    return cursor_format
+
+
+def vscode_to_generic(vscode_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert VS Code settings.json format to generic MCP format."""
+    mcp_servers = vscode_data.get("mcp.servers", {})
+    return {
+        "servers": mcp_servers
+    }
+
+
+def cursor_to_generic(cursor_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert Cursor format to generic MCP format."""
+    return {
+        "servers": cursor_data.get("servers", {})
+    }
+
+
+@app.command()
+def explode(
+    input_file: str = typer.Argument("mcp.json", help="Input MCP JSON file"),
+    output_dir: str = typer.Option(".", help="Output directory for generated files"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Show what would be generated without creating files")
+):
+    """
+    Explode a generic MCP JSON file into VS Code and Cursor specific formats.
+    
+    Takes a generic mcp.json file and creates:
+    - .vscode/settings.json (VS Code format)
+    - .cursor/mcp.json (Cursor format)
+    """
+    console.print(f"[blue]Exploding {input_file} into VS Code and Cursor formats...[/blue]")
+    
+    # Load the generic MCP file
+    mcp_data = load_json(input_file)
+    
+    # Validate the input format
+    if "servers" not in mcp_data:
+        console.print(f"[red]Error: Invalid MCP format in '{input_file}'. Expected 'servers' key.[/red]")
+        raise typer.Exit(1)
+    
+    servers = mcp_data["servers"]
+    if not isinstance(servers, dict):
+        console.print(f"[red]Error: 'servers' must be an object in '{input_file}'.[/red]")
+        raise typer.Exit(1)
+    
+    # Convert to VS Code format
+    vscode_data = generic_to_vscode(mcp_data)
+    vscode_path = os.path.join(output_dir, ".vscode", "settings.json")
+    
+    # If VS Code settings.json already exists, merge with existing settings
+    if os.path.exists(vscode_path) and not dry_run:
+        existing_settings = load_json(vscode_path)
+        existing_settings.update(vscode_data)
+        vscode_data = existing_settings
+    
+    # Convert to Cursor format
+    cursor_data = generic_to_cursor(mcp_data)
+    cursor_path = os.path.join(output_dir, ".cursor", "mcp.json")
+    
+    if dry_run:
+        console.print("[yellow]Dry run mode - no files will be created[/yellow]")
+        console.print(f"[cyan]Would create VS Code config at: {vscode_path}[/cyan]")
+        console.print(f"[cyan]Would create Cursor config at: {cursor_path}[/cyan]")
+    else:
+        save_json(vscode_data, vscode_path)
+        save_json(cursor_data, cursor_path)
+    
+    # Display summary
+    table = Table(title="Exploded MCP Configuration")
+    table.add_column("Format", style="cyan")
+    table.add_column("File", style="green")
+    table.add_column("Servers", style="yellow")
+    
+    table.add_row("Generic", input_file, str(len(mcp_data.get("servers", {}))))
+    table.add_row("VS Code", vscode_path, str(len(vscode_data.get("mcp.servers", {}))))
+    table.add_row("Cursor", cursor_path, str(len(cursor_data.get("servers", {}))))
+    
+    console.print(table)
+
+
+@app.command()
+def implode(
+    source: str = typer.Argument(..., help="Source type: 'vscode' or 'cursor'"),
+    input_file: Optional[str] = typer.Option(None, help="Input file (auto-detected if not specified)"),
+    output_file: str = typer.Option("mcp.json", help="Output generic MCP JSON file"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Show what would be generated without creating files")
+):
+    """
+    Implode a VS Code or Cursor specific MCP configuration into a generic format.
+    
+    Takes either:
+    - VS Code settings.json (extracts mcp.servers)
+    - Cursor mcp.json
+    
+    And converts it to a generic mcp.json format.
+    """
+    if source not in ["vscode", "cursor"]:
+        console.print("[red]Error: Source must be 'vscode' or 'cursor'[/red]")
+        raise typer.Exit(1)
+    
+    # Auto-detect input file if not specified
+    if input_file is None:
+        if source == "vscode":
+            input_file = ".vscode/settings.json"
+        else:  # cursor
+            input_file = ".cursor/mcp.json"
+    
+    console.print(f"[blue]Imploding {source} format from {input_file} to {output_file}...[/blue]")
+    
+    # Load the source file
+    source_data = load_json(input_file)
+    
+    # Convert to generic format and validate
+    if source == "vscode":
+        if "mcp.servers" not in source_data:
+            console.print(f"[red]Error: No 'mcp.servers' found in VS Code settings file '{input_file}'[/red]")
+            raise typer.Exit(1)
+        generic_data = vscode_to_generic(source_data)
+    else:  # cursor
+        if "servers" not in source_data:
+            console.print(f"[red]Error: No 'servers' found in Cursor MCP file '{input_file}'[/red]")
+            raise typer.Exit(1)
+        generic_data = cursor_to_generic(source_data)
+    
+    if dry_run:
+        console.print("[yellow]Dry run mode - no files will be created[/yellow]")
+        console.print(f"[cyan]Would create generic MCP config at: {output_file}[/cyan]")
+        console.print("[cyan]Generic format preview:[/cyan]")
+        console.print(json.dumps(generic_data, indent=2))
+    else:
+        # Save the generic format
+        save_json(generic_data, output_file)
+    
+    # Display summary
+    servers_count = len(generic_data.get("servers", {}))
+    console.print(f"[green]Successfully converted {servers_count} servers from {source} format to generic format[/green]")
+
+
+@app.command()
+def info(
+    file_path: str = typer.Argument("mcp.json", help="MCP JSON file to analyze")
+):
+    """
+    Display information about an MCP JSON file.
+    """
+    console.print(f"[blue]Analyzing {file_path}...[/blue]")
+    
+    data = load_json(file_path)
+    
+    # Determine format
+    if "mcp.servers" in data:
+        format_type = "VS Code settings.json"
+        servers = data.get("mcp.servers", {})
+    elif "servers" in data:
+        format_type = "Generic/Cursor MCP"
+        servers = data.get("servers", {})
+    else:
+        format_type = "Unknown"
+        servers = {}
+    
+    console.print(f"[cyan]Format: {format_type}[/cyan]")
+    console.print(f"[cyan]Servers: {len(servers)}[/cyan]")
+    
+    if servers:
+        table = Table(title="MCP Servers")
+        table.add_column("Name", style="cyan")
+        table.add_column("Type", style="green")
+        table.add_column("Configuration", style="yellow")
+        
+        for name, config in servers.items():
+            if "command" in config:
+                server_type = "Command"
+                details = f"Command: {config['command']}"
+                if "args" in config:
+                    details += f", Args: {len(config['args'])}"
+            elif "url" in config:
+                server_type = "HTTP"
+                details = f"URL: {config['url']}"
+            elif "type" in config:
+                server_type = config["type"]
+                details = str(config)
+            else:
+                server_type = "Unknown"
+                details = str(config)
+            
+            table.add_row(name, server_type, details)
+        
+        console.print(table)
+
+
+if __name__ == "__main__":
+    app()
