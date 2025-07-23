@@ -293,6 +293,17 @@ Here's how environment variables are managed in this application:
 - `*.local` files have a `-example` variant which is committed to version control. These document helpful environment variables for local development.
 - When writing TypeScript/JavaScript/React, use `requireEnv("THE_ENV_VAR_NAME")` to read an environment variable. `import {requireEnv} from '~/utils/environment'`
 
+## Implement Fastapi Routes
+
+The file docstring contains a description of the FastAPI routes we need to implement. Implement these routes.
+
+Avoid implementing any Stripe logic right now. I will do that later. Leave TODOs for this and other areas where you are very unsure of what to do.
+
+## Python Route Tests
+
+- Polyfactory is the [factory](tests/factories.py) library in use. `ModelNameFactory.build()` is how you generate factories.
+- Use `assert_status(response)` to check the response of a client
+
 ## Refactor On Instructions
 
 Refactor this code following all the established coding rules. Carefully review each rule.

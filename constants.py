@@ -9,6 +9,7 @@ SECTION_GLOBS = {
     "Python": "**/*.py",
     "Python App": "**/*.py",
     "Pytest Integration Tests": "tests/integration/**/*.py",
+    "Python Route Tests": "tests/routes/**/*.py",
     "FastAPI": "app/routes/**/*.py",
 
     "React": "**/*.tsx", 
