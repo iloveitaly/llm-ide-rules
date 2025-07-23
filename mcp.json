@@ -1,0 +1,19 @@
+{
+  "servers": {
+    "deepwiki": {
+      "url": "https://mcp.deepwiki.com/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      // vision optimizes this for visual testing, which is mostly what I want
+      "args": ["@playwright/mcp@latest", "--vision"]
+    },
+    "chrome-mcp-server": {
+      "type": "streamableHttp",
+      "url": "http://127.0.0.1:12306/mcp"
+    },
+    "context7": {
+      "url": "https://mcp.context7.com/mcp"
+    }
+  }
+}
