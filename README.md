@@ -20,6 +20,26 @@ curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/do
 curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/download.sh | sh -s github
 ```
 
+## MCP Configuration Management
+
+This repo includes `mcp.cli`, a tool for managing MCP (Model Context Protocol) configurations across different IDEs:
+
+```sh
+# Convert generic mcp.json to VS Code and Cursor formats
+python3 mcp.cli explode mcp.json
+
+# Convert VS Code format back to generic
+python3 mcp.cli implode vscode
+
+# Convert Cursor format back to generic  
+python3 mcp.cli implode cursor
+
+# Analyze any MCP configuration file
+python3 mcp.cli info mcp.json
+```
+
+See [MCP_CLI_README.md](MCP_CLI_README.md) for detailed usage and examples.
+
 ## Development
 
 All instructions in [instructions.md](instructions.md) are exploded out into the various files with default rules applied.
