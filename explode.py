@@ -245,14 +245,24 @@ alwaysApply: true
         if section_name not in found_sections:
             print(f"Warning: Section '{section_name}' specified in SECTION_GLOBS but not found in instructions file")
 
-    # Check for unmapped sections
+    # Process unmapped sections as manually applied rules (prompts)
     for line in lines:
         if line.startswith("## "):
             section_header = line.strip()
             section_name = section_header[3:]  # Remove "## "
             # Case insensitive check
             if not any(section_name.lower() == mapped_section.lower() for mapped_section in SECTION_GLOBS):
-                print(f"Warning: Found unmapped section '{section_name}' - add to SECTION_GLOBS to process it")
+                # Process as manually applied rule (prompt)
+                section_content = extract_section(lines, f"## {section_name}")
+                if any(line.strip() for line in section_content):
+                    filename = header_to_filename(section_name)
+                    
+                    # Replace header with proper casing
+                    section_content = replace_header_with_proper_casing(section_content, section_name)
+                    
+                    # Create prompt files (same as None case in SECTION_GLOBS)
+                    write_cursor_prompt(section_content, filename, rules_dir, section_name)
+                    write_github_prompt(section_content, filename, github_prompts_dir, section_name)
 
     print("Created Cursor rules in .cursor/rules/, Copilot instructions in .github/instructions/, and prompts in respective directories")
 
