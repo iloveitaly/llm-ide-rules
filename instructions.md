@@ -10,6 +10,24 @@ Coding instructions for all programming languages:
 - When I ask you to write code, prioritize simplicity and legibility over covering all edge cases, handling all errors, etc.
 - When a particular need can be met with a mature, reasonably adopted and maintained package, I would prefer to use that package rather than engineering my own solution.
 - Never add error handling to recover gracefully from an error without being asked to do so. Fail hard and early with assertions and allowing exceptions to propagate whenever possible
+- When naming variables or functions, use names that describe the effect. For example, instead of `function handleClaimFreeTicket` (a function which opens a dialog box) use `function openClaimFreeTicketDialog`.
+
+Use line breaks to organize code into logical groups. Instead of:
+
+```python
+if not client_secret_id:
+    raise HTTPException(status.HTTP_400_BAD_REQUEST)
+session_id = client_secret_id.split("_secret")[0]
+```
+
+Prefer:
+
+```python
+if not client_secret_id:
+    raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
+session_id = client_secret_id.split("_secret")[0]
+```
 
 **DO NOT FORGET**: keep your responses short, dense, and without fluff. I am a senior, well-educated software engineer, and do not need long explanations.
 
@@ -32,7 +50,7 @@ When writing Python:
   * Log messages should be lowercase with no leading or trailing whitespace.
   * No variable interpolation in log messages.
   * Do not coerce database IDs or dates to strings
-* Do not worry about import ordering or other formatting issues.
+* Do not fix import ordering or other formatting issues.
 
 ### Date & DateTime
 
@@ -43,6 +61,7 @@ When writing Python:
 When accessing database records:
 
 * SQLModel (wrapping SQLAlchemy) is used
+* `Model.one(primary_key)` or `Model.get(primary_key)` should be used to retrieve a single record
 * Do not manage database sessions, these are managed by a custom tool
   * Use `TheModel(...).save()` to persist a record
   * Use `TheModel.where(...).order_by(...)` to query records. `.where()` returns a SQLAlchemy select object that you can further customize the query.
@@ -51,8 +70,35 @@ When writing database models:
 
 * Don't use `Field(...)` unless required (i.e. when specifying a JSON type for a `dict` or pydantic model using `Field(sa_type=JSONB)`). For instance, use `= None` instead of `= Field(default=None)`.
 * Add enum classes close to where they are used, unless they are used across multiple classes (then put them at the top of the file)
-* Use single double-quote docstrings (a string below the field definition) instead of comments to describe a field's purpose.
 * Use `ModelName.foreign_key()` when generating a foreign key field
+* Store currency as an integer, e.g. $1 = 100.
+
+Example:
+
+```python
+class Distribution(
+    BaseModel, TimestampsMixin, SoftDeletionMixin, TypeIDMixin("dst"), table=True
+):
+    """Triple-quoted strings for multi-line class docstring"""
+
+    date_field_with_comment: datetime | None = None
+    "use a string under the field to add a comment about the field"
+
+    # no need to add a comment about an obvious field; no need for line breaks if there are no field-level docstrings
+    title: str = Field(unique=True)
+    state: str
+
+    optional_field: str | None = None
+
+    # here's how relationships are constructed
+    doctor_id: TypeIDType = Doctor.foreign_key()
+    doctor: Doctor = Relationship()
+
+    @computed_field
+    @property
+    def order_count(self) -> int:
+        return self.where(Order.distribution_id == self.id).count()
+```
 
 ## Python App
 
@@ -79,35 +125,56 @@ When writing database models:
 
 ## Fastapi
 
-- When generating a HTTPException, do not add a `detail=` and use a named status code (`status.HTTP_400_BAD_REQUEST`)
+- When throwing a `HTTPException`, do not add a `detail=` and use a named status code (`status.HTTP_400_BAD_REQUEST`)
+- Do not return a `dict`, instead create a `class RouteNameResponse`
 
 ## React
 
+- You are using the latest version of React (v19)
 - Do not write any backend code. Just frontend logic.
-- For any backend requirements, create mock responses. Use a function to return mock data so I can easily swap it out later.
-- When creating mock data, always specify it in a dedicated `mock.ts` file
-- Load mock data using a react router `clientLoader`. Use the Skeleton component to present a loading state.
 - If a complex skeleton is needed, create a component function `LoadingSkeleton` in the same file.
-- Store components for each major page or workflow in `src/components/$WORKFLOW_OR_PAGE_NAME`.
+- Store components for each major page or workflow in `app/components/$WORKFLOW/$COMPONENT.tsx`.
+  - If a single page has more than two dedicated components, create a subfolder `app/components/$WORKFLOW/$PAGE/$COMPONENT.tsx`
 - Use lowercase dash separated words for file names.
 - Use React 19, TypeScript, Tailwind CSS, and ShadCN components.
 - Prefer function components, hooks over classes.
+- Use ShadCN components in `web/app/components/ui` as your component library. If you need new components, ask for them.
+  - Never edit the `web/components/ui/*.tsx` files.
+  - You can find a list of components here https://ui.shadcn.com/docs/components
 - Break up large components into smaller components, but keep them in the same file unless they can be generalized.
 - Put any "magic" strings like API keys, hosts, etc into a "constants.ts" file.
-- Only use a separate interface for component props if there are more than 4 props.
-  - Put the interface definition right above the related function
+- For React functional components with three or fewer props, always inline the prop types as an object literal directly in the function signature after the destructured parameters (e.g., `function Component({ prop1, prop2 }: { prop1: string; prop2?: number }) { ... })`. Include default values in destructuring and mark optional props with ? in the type object. Do not use separate interfaces or type aliases; keep types inline. For complex types, add inline comments if needed.
+- Put the interface definition right above the related function
 - Internally, store all currency values as integers and convert them to floats when rendering visually
-- Never edit (or add) `components/ui/*.tsx` files
 - When building forms use React Hook Form.
 - Include a two line breaks between any `useHook()` calls and any `useState()` definitions for a component.
-- Use `href("/products/:id", { id: "abc123" })` to generate a url path for a route managed by the application.
-  - Look at @routes.ts to determine what routes and path parameters exist.
+- When using a function prop inside a `useEffect`, please use a pattern that avoids including the function in the dependency array, like the `useRef` trick.s
+- Use the following pattern to reference query string values (i.e. `?theQueryStringParam=value`):
+
+```typescript
+const [searchParams, _setSearchParams] = useSearchParams();
+// searchParams contains the value of all query string parameters
+const queryStringValue = searchParams.get("theQueryStringParam")
+```
+
+### Mock Data
+
+- For any backend communication, create mock responses. Use a async function to return mock data that I will swap out later for a async call to an API.
+- When creating mock data, always specify it in a dedicated `web/app/mock.ts` file
+- Load mock data using a react router `clientLoader`. Use the Skeleton component to present a loading state.
 
 ### React Hook Form
 
 Follow this structure when generating a form.
 
 ```tsx
+
+// add a mock function simulating server communication
+async function descriptiveServerSendFunction(values: any) {
+  const mockData = getMockReturnData(/* ... */)
+  return new Promise(resolve => setTimeout(() => resolve(mockData), 500));
+}
+
 const formSchema = z.object({
   field_name: z.string(),
   // additional schema definition
@@ -118,6 +185,8 @@ const form = useForm<z.infer<typeof formSchema>>({
 })
 
 async function onSubmit(values: z.infer<typeof formSchema>) {
+  // ...
+  await descriptiveSendFunction(values)
   // ...
 }
 
@@ -132,29 +201,62 @@ return (
 
 ## React Router
 
+- You are using the latest version of React Router (v7).
 - The primary export in a routes file should specify `loaderData` like `export default function RouteNamePage({ loaderData }: Route.ComponentProps)`. `loaderData` is the return value from `clientLoader`.
-- When using an import from `~/configuration/client` (1) use `body:` for request params and (2) always `const { data, error } = await theCall()` (3) add `invariant(data, "error loading $xyz")`
-- Use `export async function clientLoader(loaderArgs: Route.ClientLoaderArgs)` to define a clientLoader on a route.
-  - Use `loaderArgs.params.$THE_KEY` to use a query string parameter.
+- Use `href("/products/:id", { id: "abc123" })` to generate a url path for a route managed by the application.
+  - Look at [routes.ts](mdc:web/app/routes.ts) to determine what routes and path parameters exist.
+- Use `export async function clientLoader(loaderArgs: Route.ClientLoaderArgs)` to define a `clientLoader` on a route.
 - Do not define `Route.*` types, these are autogenerated and can be imported from `import type { Route } from "./+types/routeFileName"`
-- Each non-layout route should define a meta function:
+- If URL parameters or query string values need to be checked before rendering the page, do this in a `clientLoader` and not in a `useEffect`
+- Never worry about generating types using `pnpm`
+- Use [`<AllMeta />`](web/app/components/shared/AllMeta.tsx) instead of MetaFunction or individual `<meta />` tags
+- Use the following pattern to reference query string values (i.e. `?theQueryStringParam=value`)
 
 ```typescript
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Page Title" },
-    {
-      name: "description",
-      content: "Page Description",
-    },
-  ]
+const [searchParams, _setSearchParams] = useSearchParams();
+// searchParams contains the value of all query string parameters
+const queryStringValue = searchParams.get("theQueryStringParam")
+```
+
+### Loading Mock Data
+
+Don't load mock data in the component function with `useEffect`. Instead, load data in a `clientLoader`:
+
+```typescript
+
+// in mock.ts
+export async function getServerData(options: any) {
+  // ...
+}
+
+// in web/app/routes/**/*.ts
+export async function clientLoader(loaderArgs: Route.ClientLoaderArgs) {
+  // no error reporting is needed, this will be handled by the `getServerData`
+  // mock loading functions should return result in a `data` key
+  const { data } = await getServerData({ /* ... */ })
+
+  // the return result here is available in `loaderData`
+  return data
 }
 ```
 
+### How to use clientLoader
+
+- `export async function clientLoader(loaderArgs: Route.ClientLoaderArgs) {`
+- Load any server data required for page load here, not in the component function.
+- Use `return redirect(href("/the/url"))` to redirect users
+- Use [getQueryParam](web/app/lib/utils.ts) to get query string variables
+- `throw new Response` if you need to mimic a 400, 500, etc error
+- `loaderArgs` and all sub-objects are all fully typed
+- `loaderArgs.params.id` to get URL parameters
+
 ### Using API Data
 
-* `~/configuration/client` re-exports all types and functions from `client/*`. Import from `~/configuration/client` instead of anything you find in the `client/` folder/package.
-* For each API endpoint, there's a fully typed async function that can be used to call it. Never attempt to call an API endpoint directly.
+- `~/configuration/client` re-exports all types and functions from `client/*`. Import from `~/configuration/client` instead of anything you find in the `client/` folder/package.
+- For each API endpoint, there's a fully typed async function that can be used to call it. Never attempt to call an API endpoint directly.
+- When using an import from `~/configuration/client`:
+  - use `body:` for request params
+  - always `const { data, error } = await theCall()`
 
 ## React Router Client Loader
 
@@ -174,7 +276,7 @@ Do this in a `clientLoader` and use `loaderData` to render the component. DO NOT
 
 ## Typescript Docstring
 
-Add a file-level docstring with a simple description of what this file does.
+Add a file-level docstring with a simple description of what this file does and where this is used.
 
 ## Secrets
 
@@ -190,4 +292,8 @@ Here's how environment variables are managed in this application:
 - `.env.production.{backend,frontend}` for most medium-sized projects you'll have separate frontend and backend systems (even if your frontend is SPA, which I'm a fan of). These two files enable you to document the variables required to build (in the case of a SPA frontend) or run (in the case of a python backend) your system in production.
 - `*.local` files have a `-example` variant which is committed to version control. These document helpful environment variables for local development.
 - When writing TypeScript/JavaScript/React, use `requireEnv("THE_ENV_VAR_NAME")` to read an environment variable. `import {requireEnv} from '~/utils/environment'`
+
+## Refactor On Instructions
+
+Refactor this code following all the established coding rules. Carefully review each rule.
 
