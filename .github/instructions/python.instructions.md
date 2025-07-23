@@ -15,7 +15,7 @@ When writing Python:
   * Log messages should be lowercase with no leading or trailing whitespace.
   * No variable interpolation in log messages.
   * Do not coerce database IDs or dates to strings
-* Do not worry about import ordering or other formatting issues.
+* Do not fix import ordering or other formatting issues.
 
 ### Date & DateTime
 
@@ -26,6 +26,7 @@ When writing Python:
 When accessing database records:
 
 * SQLModel (wrapping SQLAlchemy) is used
+* `Model.one(primary_key)` or `Model.get(primary_key)` should be used to retrieve a single record
 * Do not manage database sessions, these are managed by a custom tool
   * Use `TheModel(...).save()` to persist a record
   * Use `TheModel.where(...).order_by(...)` to query records. `.where()` returns a SQLAlchemy select object that you can further customize the query.
@@ -34,5 +35,32 @@ When writing database models:
 
 * Don't use `Field(...)` unless required (i.e. when specifying a JSON type for a `dict` or pydantic model using `Field(sa_type=JSONB)`). For instance, use `= None` instead of `= Field(default=None)`.
 * Add enum classes close to where they are used, unless they are used across multiple classes (then put them at the top of the file)
-* Use single double-quote docstrings (a string below the field definition) instead of comments to describe a field's purpose.
 * Use `ModelName.foreign_key()` when generating a foreign key field
+* Store currency as an integer, e.g. $1 = 100.
+
+Example:
+
+```python
+class Distribution(
+    BaseModel, TimestampsMixin, SoftDeletionMixin, TypeIDMixin("dst"), table=True
+):
+    """Triple-quoted strings for multi-line class docstring"""
+
+    date_field_with_comment: datetime | None = None
+    "use a string under the field to add a comment about the field"
+
+    # no need to add a comment about an obvious field; no need for line breaks if there are no field-level docstrings
+    title: str = Field(unique=True)
+    state: str
+
+    optional_field: str | None = None
+
+    # here's how relationships are constructed
+    doctor_id: TypeIDType = Doctor.foreign_key()
+    doctor: Doctor = Relationship()
+
+    @computed_field
+    @property
+    def order_count(self) -> int:
+        return self.where(Order.distribution_id == self.id).count()
+```

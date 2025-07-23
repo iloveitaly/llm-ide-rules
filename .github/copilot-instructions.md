@@ -11,6 +11,24 @@ Coding instructions for all programming languages:
 - When I ask you to write code, prioritize simplicity and legibility over covering all edge cases, handling all errors, etc.
 - When a particular need can be met with a mature, reasonably adopted and maintained package, I would prefer to use that package rather than engineering my own solution.
 - Never add error handling to recover gracefully from an error without being asked to do so. Fail hard and early with assertions and allowing exceptions to propagate whenever possible
+- When naming variables or functions, use names that describe the effect. For example, instead of `function handleClaimFreeTicket` (a function which opens a dialog box) use `function openClaimFreeTicketDialog`.
+
+Use line breaks to organize code into logical groups. Instead of:
+
+```python
+if not client_secret_id:
+    raise HTTPException(status.HTTP_400_BAD_REQUEST)
+session_id = client_secret_id.split("_secret")[0]
+```
+
+Prefer:
+
+```python
+if not client_secret_id:
+    raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
+session_id = client_secret_id.split("_secret")[0]
+```
 
 **DO NOT FORGET**: keep your responses short, dense, and without fluff. I am a senior, well-educated software engineer, and do not need long explanations.
 
