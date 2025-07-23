@@ -3,12 +3,19 @@
 MCP CLI tool for converting between different MCP JSON formats.
 Usage: python3 mcp_cli.py explode|implode [options]
 """
+# /// script
+# dependencies = [
+#     "typer",
+#     "rich", 
+#     "json5",
+# ]
+# ///
 import json
 import os
-import re
 from pathlib import Path
 from typing import Dict, Any, Optional
 
+import json5
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -17,55 +24,18 @@ app = typer.Typer(help="MCP JSON format conversion tool")
 console = Console()
 
 
-def strip_json_comments(content: str) -> str:
-    """Remove JavaScript-style comments from JSON content."""
-    lines = content.split('\n')
-    cleaned_lines = []
-    
-    for line in lines:
-        # Find // that's not inside a string
-        in_string = False
-        escape_next = False
-        comment_pos = None
-        
-        for i, char in enumerate(line):
-            if escape_next:
-                escape_next = False
-                continue
-            
-            if char == '\\':
-                escape_next = True
-                continue
-            
-            if char == '"' and not escape_next:
-                in_string = not in_string
-                continue
-            
-            if not in_string and char == '/' and i + 1 < len(line) and line[i + 1] == '/':
-                comment_pos = i
-                break
-        
-        if comment_pos is not None:
-            line = line[:comment_pos].rstrip()
-        
-        cleaned_lines.append(line)
-    
-    return '\n'.join(cleaned_lines)
-
-
 def load_json(file_path: str) -> Dict[str, Any]:
-    """Load and parse a JSON file (supports JSONC with comments)."""
+    """Load and parse a JSON file (supports JSON5 with comments)."""
     try:
         with open(file_path, 'r') as f:
             content = f.read()
-        # Strip comments and parse
-        clean_content = strip_json_comments(content)
-        return json.loads(clean_content)
+        # Parse using json5 which handles comments automatically
+        return json5.loads(content)
     except FileNotFoundError:
         console.print(f"[red]Error: File '{file_path}' not found[/red]")
         raise typer.Exit(1)
-    except json.JSONDecodeError as e:
-        console.print(f"[red]Error: Invalid JSON in '{file_path}': {e}[/red]")
+    except json5.Json5DecoderError as e:
+        console.print(f"[red]Error: Invalid JSON5 in '{file_path}': {e}[/red]")
         raise typer.Exit(1)
 
 
