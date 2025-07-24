@@ -7,3 +7,4 @@ applyTo: "tests/integration/**/*.py"
   - Here's an example of how to create + persist a factory `DistributionFactory.build(domain=PYTHON_TEST_SERVER_HOST).save()`
 - Add the `server` factory to each test
 - Use the `faker` factory to generate emails, etc.
+- Don't add obvious `assert` descriptions
