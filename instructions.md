@@ -148,7 +148,7 @@ class Distribution(
 - Use the following pattern to reference query string values (i.e. `?theQueryStringParam=value`)
 
 ```typescript
-const [searchParams, _setSearchParams] = useSearchParams();
+const [searchParams, _setSearchParams] = useSearchParams()
 // searchParams contains the value of all query string parameters
 const queryStringValue = searchParams.get("theQueryStringParam")
 ```
@@ -158,7 +158,6 @@ const queryStringValue = searchParams.get("theQueryStringParam")
 Don't load mock data in the component function with `useEffect`. Instead, load data in a `clientLoader`:
 
 ```typescript
-
 // in mock.ts
 export async function getServerData(options: any) {
   // ...
@@ -168,10 +167,12 @@ export async function getServerData(options: any) {
 export async function clientLoader(loaderArgs: Route.ClientLoaderArgs) {
   // no error reporting is needed, this will be handled by the `getServerData`
   // mock loading functions should return result in a `data` key
-  const { data } = await getServerData({ /* ... */ })
+  const { data } = await getServerData({
+    /* ... */
+  });
 
   // the return result here is available in `loaderData`
-  return data
+  return data;
 }
 ```
 
@@ -213,7 +214,9 @@ export async function clientLoader(loaderArgs: Route.ClientLoaderArgs) {
 - Internally, store all currency values as integers and convert them to floats when rendering visually
 - When building forms use React Hook Form.
 - Include a two line breaks between any `useHook()` calls and any `useState()` definitions for a component.
-- When using a function prop inside a `useEffect`, please use a pattern that avoids including the function in the dependency array, like the `useRef` trick.s
+- When using a function prop inside a `useEffect`, please use a pattern that avoids including the function in the dependency array, like the `useRef` trick.
+- When writing React components, always hoist complex conditional expressions into descriptively named constants at the top of the component function for better readability and maintainability.
+- Refactor ternary to &&: `{condition ? <A/> : <B/>}` → `{condition && <A/>}{!condition && <B/>}`
 - Use the following pattern to reference query string values (i.e. `?theQueryStringParam=value`):
 
 ```typescript
@@ -249,9 +252,23 @@ const form = useForm<z.infer<typeof formSchema>>({
   resolver: zodResolver(formSchema),
 })
 
+const {
+  formState: { isSubmitting, errors },
+  setError,
+  clearErrors,
+} = form
+
+
 async function onSubmit(values: z.infer<typeof formSchema>) {
+  clearErrors("root")
+
   // ...
-  await descriptiveSendFunction(values)
+  const { data, error } = await descriptiveSendFunction(values)
+
+  if (error) {
+    setError("root.serverError", { message: error.detail?.[0]?.msg })
+    return
+  }
   // ...
 }
 
@@ -259,6 +276,15 @@ return (
   <Form {...form}>
     <form onSubmit={form.handleSubmit(onSubmit)}>
       {/* form fields */}
+
+      <ServerErrorAlert error={errors.root?.serverError} />
+
+      <Button
+        type="submit"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? "Submitting..." : "Submit"}
+      </Button>
     </form>
   </Form>
 )

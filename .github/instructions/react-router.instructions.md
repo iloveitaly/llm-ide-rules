@@ -1,7 +1,6 @@
 ---
 applyTo: "web/app/routes/**/*.tsx"
 ---
-
 ## React Router
 
 - You are using the latest version of React Router (v7).
