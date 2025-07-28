@@ -1,6 +1,7 @@
 ---
 applyTo: "web/app/routes/**/*.tsx"
 ---
+
 ## React Router
 
 - You are using the latest version of React Router (v7).
@@ -15,7 +16,7 @@ applyTo: "web/app/routes/**/*.tsx"
 - Use the following pattern to reference query string values (i.e. `?theQueryStringParam=value`)
 
 ```typescript
-const [searchParams, _setSearchParams] = useSearchParams();
+const [searchParams, _setSearchParams] = useSearchParams()
 // searchParams contains the value of all query string parameters
 const queryStringValue = searchParams.get("theQueryStringParam")
 ```
@@ -25,7 +26,6 @@ const queryStringValue = searchParams.get("theQueryStringParam")
 Don't load mock data in the component function with `useEffect`. Instead, load data in a `clientLoader`:
 
 ```typescript
-
 // in mock.ts
 export async function getServerData(options: any) {
   // ...
@@ -35,10 +35,12 @@ export async function getServerData(options: any) {
 export async function clientLoader(loaderArgs: Route.ClientLoaderArgs) {
   // no error reporting is needed, this will be handled by the `getServerData`
   // mock loading functions should return result in a `data` key
-  const { data } = await getServerData({ /* ... */ })
+  const { data } = await getServerData({
+    /* ... */
+  });
 
   // the return result here is available in `loaderData`
-  return data
+  return data;
 }
 ```
 
