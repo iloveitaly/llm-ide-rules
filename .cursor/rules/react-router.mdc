@@ -6,6 +6,7 @@ alwaysApply: false
 ## React Router
 
 - You are using the latest version of React Router (v7).
+- Always include the suffix `Page` when naming the default export of a route.
 - The primary export in a routes file should specify `loaderData` like `export default function RouteNamePage({ loaderData }: Route.ComponentProps)`. `loaderData` is the return value from `clientLoader`.
 - Use `href("/products/:id", { id: "abc123" })` to generate a url path for a route managed by the application.
   - Look at [routes.ts](mdc:web/app/routes.ts) to determine what routes and path parameters exist.
@@ -45,7 +46,7 @@ export async function clientLoader(loaderArgs: Route.ClientLoaderArgs) {
 }
 ```
 
-### How to use clientLoader
+### How to Use `clientLoader`
 
 - `export async function clientLoader(loaderArgs: Route.ClientLoaderArgs) {`
 - Load any server data required for page load here, not in the component function.
@@ -55,10 +56,34 @@ export async function clientLoader(loaderArgs: Route.ClientLoaderArgs) {
 - `loaderArgs` and all sub-objects are all fully typed
 - `loaderArgs.params.id` to get URL parameters
 
-### Using API Data
+### Loading Backend Data
 
 - `~/configuration/client` re-exports all types and functions from `client/*`. Import from `~/configuration/client` instead of anything you find in the `client/` folder/package.
 - For each API endpoint, there's a fully typed async function that can be used to call it. Never attempt to call an API endpoint directly.
 - When using an import from `~/configuration/client`:
   - use `body:` for request params
   - always `const { data, error } = await theCall()`
+
+`clientLoader` can only be used on initial page load. If you need to load additional server data based on a user's interaction with a component, you
+
+```tsx
+import { useQuery } from "@tanstack/react-query"
+import {
+  // these options correspond to the server route
+  createCheckoutSessionOptions,
+  publicClient,
+} from "~/configuration/client"
+
+function TheComponent() {
+  const { data, error } = useQuery({
+    enabled: open,
+    ...createCheckoutSessionOptions({
+      // or `client` if authenticated
+      client: publicClient,
+      body: { /* API parameters here */ },
+    }),
+  })
+
+  // remember to display errors by checking `error`
+}
+```
