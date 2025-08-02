@@ -30,6 +30,30 @@ def get_ordered_files(file_list, section_globs_keys):
     
     return ordered_files
 
+def get_ordered_files_github(file_list, section_globs_keys):
+    """Order GitHub instruction files based on SECTION_GLOBS key order, with unmapped files at the end.
+    Handles .instructions suffix by stripping it for ordering purposes."""
+    # Create dict mapping base filename (without .instructions) to the actual file
+    file_dict = {}
+    for f in file_list:
+        base_stem = f.stem.replace('.instructions', '')
+        file_dict[base_stem] = f
+    
+    ordered_files = []
+    
+    # Add files in SECTION_GLOBS order
+    for section_name in section_globs_keys:
+        filename = header_to_filename(section_name)
+        if filename in file_dict:
+            ordered_files.append(file_dict[filename])
+            del file_dict[filename]
+    
+    # Add any remaining files (not in SECTION_GLOBS) sorted alphabetically
+    remaining_files = sorted(file_dict.values(), key=lambda p: p.name)
+    ordered_files.extend(remaining_files)
+    
+    return ordered_files
+
 def bundle_cursor_rules(rules_dir, output_file):
     rule_files = list(Path(rules_dir).glob("*.mdc"))
     general = [f for f in rule_files if f.stem == "general"]
@@ -79,7 +103,8 @@ def bundle_github_instructions(instructions_dir, output_file):
     instr_files = list(Path(instructions_dir).glob("*.instructions.md"))
     
     # Order the instruction files based on SECTION_GLOBS
-    ordered_files = get_ordered_files(instr_files, SECTION_GLOBS.keys())
+    # We need to create a modified version that strips .instructions from stems for ordering
+    ordered_files = get_ordered_files_github(instr_files, SECTION_GLOBS.keys())
     
     with open(output_file, "w") as out:
         # Write general copilot instructions if present
