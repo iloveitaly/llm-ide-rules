@@ -20,7 +20,7 @@ curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/do
 curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/download.sh | sh -s github
 
 # Download AGENT.md (for Amp)
-curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/download.sh > AGENT.mdde
+curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/AGENT.md > AGENT.md
 ```
 
 ## Development
