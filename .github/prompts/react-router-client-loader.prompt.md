@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: ''
+description: 'Do this in a `clientLoader` and use `loaderData` to render the component.'
 ---
 ## React Router Client Loader
 

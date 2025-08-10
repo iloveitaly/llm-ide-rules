@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: ''
+description: 'Here's how environment variables are managed in this application:'
 ---
 ## Secrets
 

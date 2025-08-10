@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: ''
+description: 'Refactor this code following all the established coding rules.'
 ---
 ## Refactor On Instructions
 

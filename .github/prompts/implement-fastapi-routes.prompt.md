@@ -1,6 +1,6 @@
 ---
 mode: 'agent'
-description: ''
+description: 'The file docstring contains a description of the FastAPI routes we need to implement.'
 ---
 ## Implement Fastapi Routes
 

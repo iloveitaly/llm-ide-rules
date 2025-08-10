@@ -124,9 +124,24 @@ def extract_description_and_filter_content(content_lines, default_description):
                 # Found a non-header line that doesn't start with Description:, stop looking
                 break
     
-    # If no description found, use default
+    # If no description found, try to extract from first meaningful line
     if not description or description_line is None:
-        description = default_description
+        # Look for first meaningful content line (skip headers)
+        for line in trimmed_content:
+            stripped_line = line.strip()
+            if stripped_line and not stripped_line.startswith('#'):
+                # Use first sentence or first 100 chars as description
+                if '.' in stripped_line:
+                    description = stripped_line.split('.')[0].strip() + '.'
+                else:
+                    description = stripped_line[:100].strip()
+                    if len(stripped_line) > 100:
+                        description += '...'
+                break
+        
+        # Fall back to default if still empty
+        if not description:
+            description = default_description
         filtered_content = trimmed_content
     else:
         # Remove the description line from content
@@ -176,6 +191,22 @@ description: '{description}'
         f.write(frontmatter)
         for line in filtered_content:
             f.write(line)
+
+
+def process_unmapped_section(lines, section_name, rules_dir, github_prompts_dir):
+    """Process an unmapped section as a manually applied rule (prompt)."""
+    section_content = extract_section(lines, f"## {section_name}")
+    if any(line.strip() for line in section_content):
+        filename = header_to_filename(section_name)
+        
+        # Replace header with proper casing
+        section_content = replace_header_with_proper_casing(section_content, section_name)
+        
+        # Create prompt files (same as None case in SECTION_GLOBS)
+        write_cursor_prompt(section_content, filename, rules_dir, section_name)
+        write_github_prompt(section_content, filename, github_prompts_dir, section_name)
+        return True
+    return False
 
 
 def main():
@@ -246,23 +277,16 @@ alwaysApply: true
             print(f"Warning: Section '{section_name}' specified in SECTION_GLOBS but not found in instructions file")
 
     # Process unmapped sections as manually applied rules (prompts)
+    processed_unmapped = set()
     for line in lines:
         if line.startswith("## "):
             section_header = line.strip()
             section_name = section_header[3:]  # Remove "## "
-            # Case insensitive check
-            if not any(section_name.lower() == mapped_section.lower() for mapped_section in SECTION_GLOBS):
-                # Process as manually applied rule (prompt)
-                section_content = extract_section(lines, f"## {section_name}")
-                if any(line.strip() for line in section_content):
-                    filename = header_to_filename(section_name)
-                    
-                    # Replace header with proper casing
-                    section_content = replace_header_with_proper_casing(section_content, section_name)
-                    
-                    # Create prompt files (same as None case in SECTION_GLOBS)
-                    write_cursor_prompt(section_content, filename, rules_dir, section_name)
-                    write_github_prompt(section_content, filename, github_prompts_dir, section_name)
+            # Case insensitive check and avoid duplicate processing
+            if (not any(section_name.lower() == mapped_section.lower() for mapped_section in SECTION_GLOBS) 
+                and section_name not in processed_unmapped):
+                if process_unmapped_section(lines, section_name, rules_dir, github_prompts_dir):
+                    processed_unmapped.add(section_name)
 
     print("Created Cursor rules in .cursor/rules/, Copilot instructions in .github/instructions/, and prompts in respective directories")
 
