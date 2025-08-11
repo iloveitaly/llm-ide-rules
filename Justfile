@@ -5,6 +5,8 @@ build:
   cp instructions.md AGENT.md
   # for gemini... lol
   cp instructions.md GEMINI.md
+  # for claude
+  cp instructions.md CLAUDE.md
 
 clean:
-  rm -rf .github .cursor AGENT.md GEMINI.md
+  rm -rf .github .cursor AGENT.md GEMINI.md CLAUDE.md
