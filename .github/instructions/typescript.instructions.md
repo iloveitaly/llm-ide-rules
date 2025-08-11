@@ -8,6 +8,7 @@ applyTo: "**/*.ts,**/*.tsx"
 - Use `lib/` for generic code, `utils/` for project utilities, `hooks/` for React hooks, and `helpers/` for page-specific helpers.
 - Prefer `function theName() {` over `const theName = () =>`
 - Use `import { invariant } from @epic-web/invariant` instead of another invariant library
+- Use `requireEnv("VITE_THE_ENV_VAR")` instead of `process.env.THE_ENV_VAR`
 
 Here's how frontend code is organized in `web/app/`:
 

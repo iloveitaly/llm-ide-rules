@@ -34,5 +34,5 @@ session_id = client_secret_id.split("_secret")[0]
 
 ### Agent instructions
 
-- When running python tests, use an already open terminal and the `pytest` binary.
+- Run python tests with `pytest` only. If tests fail because of a configuration or system error, do not attempt to fix and let me know. I will fix it.
 - If you added models, generate a migration with `just migration {add,delete,update}_model_other_description`
