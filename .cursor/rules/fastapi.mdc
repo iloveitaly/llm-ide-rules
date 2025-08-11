@@ -1,5 +1,7 @@
 ---
-applyTo: "app/routes/**/*.py"
+description:
+globs: app/routes/**/*.py
+alwaysApply: false
 ---
 ## FastAPI
 

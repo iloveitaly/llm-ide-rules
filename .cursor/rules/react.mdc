@@ -1,5 +1,7 @@
 ---
-applyTo: "**/*.tsx"
+description:
+globs: **/*.tsx
+alwaysApply: false
 ---
 ## React
 
