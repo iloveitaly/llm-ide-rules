@@ -124,30 +124,15 @@ def extract_description_and_filter_content(content_lines, default_description):
                 # Found a non-header line that doesn't start with Description:, stop looking
                 break
     
-    # If no description found, try to extract from first meaningful line
-    if not description or description_line is None:
-        # Look for first meaningful content line (skip headers)
-        for line in trimmed_content:
-            stripped_line = line.strip()
-            if stripped_line and not stripped_line.startswith('#'):
-                # Use first sentence or first 100 chars as description
-                if '.' in stripped_line:
-                    description = stripped_line.split('.')[0].strip() + '.'
-                else:
-                    description = stripped_line[:100].strip()
-                    if len(stripped_line) > 100:
-                        description += '...'
-                break
-        
-        # Fall back to default if still empty
-        if not description:
-            description = default_description
-        filtered_content = trimmed_content
-    else:
+    # Only use explicit descriptions - no fallback extraction
+    if description and description_line is not None:
         # Remove the description line from content
         filtered_content = trimmed_content[:description_line] + trimmed_content[description_line + 1:]
         # Trim again after removing description line
         filtered_content = trim_content(filtered_content)
+    else:
+        # No description found, keep all content
+        filtered_content = trimmed_content
     
     return description, filtered_content
 
