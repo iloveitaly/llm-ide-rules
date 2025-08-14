@@ -33,7 +33,7 @@ session_id = client_secret_id.split("_secret")[0]
 
 ### Agent instructions
 
-- Run python tests with `pytest` only. If tests fail because of a configuration or system error, do not attempt to fix and let me know. I will fix it.
+- Run python tests with `pytest` only. Do not `cat` the output and do not use `-q`. If tests fail because of a configuration or system error, do not attempt to fix and let me know. I will fix it.
 - If you added models, generate a migration with `just migration {add,delete,update}_model_other_description`
 
 ## Python
@@ -134,6 +134,7 @@ class Distribution(
 
 - When throwing a `HTTPException`, do not add a `detail=` and use a named status code (`status.HTTP_400_BAD_REQUEST`)
 - Do not return a `dict`, instead create a `class RouteNameResponse`
+  - Locate these classes right above the `def route_name():` function which uses them.
 
 ## React
 
@@ -407,10 +408,23 @@ The file docstring contains a description of the FastAPI routes we need to imple
 
 Avoid implementing any Stripe logic right now. I will do that later. Leave TODOs for this and other areas where you are very unsure of what to do.
 
+## Plan Only
+
+As this point, I only want to talk about the plan. How would you do this? What would you refactor to make this design clean? You are an expert software engineer and I want you to think hard about how to plan this project out.
+
+Do not worry about writing database migrations. You make any changes directly to app/models/ files.
+
+Let's separate this into key sections:
+
+1. Refactor
+2. Data model
+3. Utilities/helpers/lib
+4. Routes
+
 ## Pytest Tests
 
 - Look to tests/factories.py to generate any required database state
-  - Here's an example of how to create + persist a factory `DistributionFactory.build().save()`
+  - Here's an example of how to create + persist a factory `DistributionFactory.save()`
 - Use the `faker` factory to generate emails, etc.
 - Do not mock or patch unless I instruct you to. Test as much of the application stack as possible in each test.
 
