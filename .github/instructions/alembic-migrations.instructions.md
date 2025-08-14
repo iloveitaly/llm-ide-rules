@@ -1,7 +1,5 @@
 ---
-description:
-globs: migrations/versions/*.py
-alwaysApply: false
+applyTo: "migrations/versions/*.py"
 ---
 ## Alembic Migrations
 
