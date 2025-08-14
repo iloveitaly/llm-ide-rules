@@ -6,7 +6,7 @@
     "playwright": {
       "command": "npx",
       // vision optimizes this for visual testing, which is mostly what I want
-      "args": ["@playwright/mcp@latest", "--vision"]
+      "args": ["@playwright/mcp@latest", "--isolated", "--cap", "visual"]
     },
     "chrome-mcp-server": {
       "type": "streamableHttp",
