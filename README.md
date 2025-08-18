@@ -10,10 +10,10 @@ Some of the glob assumptions in this repo are specific to how I've chosen to org
 
 ## Installation
 
-You can install the `airules` CLI tool using pip:
+You can run the `airules` CLI tool using uvx:
 
 ```sh
-pip install airules
+uvx airules
 ```
 
 Or install from the repository:
@@ -37,42 +37,42 @@ The `airules` CLI provides commands to manage LLM IDE prompts and rules:
 
 ```sh
 # Convert instruction file to separate rule files
-airules explode [input_file]
+uvx airules explode [input_file]
 
 # Bundle rule files back into a single instruction file
-airules implode cursor [output_file]     # Bundle Cursor rules
-airules implode github [output_file]    # Bundle GitHub/Copilot instructions
+uvx airules implode cursor [output_file]     # Bundle Cursor rules
+uvx airules implode github [output_file]    # Bundle GitHub/Copilot instructions
 
 # Download instruction files from repositories
-airules download [instruction_types]    # Download everything by default
-airules download cursor github          # Download specific types
-airules download --repo other/repo      # Download from different repo
+uvx airules download [instruction_types]    # Download everything by default
+uvx airules download cursor github          # Download specific types
+uvx airules download --repo other/repo      # Download from different repo
 
 # MCP (Model Context Protocol) commands (coming soon)
-airules mcp status
-airules mcp configure
+uvx airules mcp status
+uvx airules mcp configure
 ```
 
 ### Examples
 
 ```sh
 # Explode instructions.md into .cursor/rules/ and .github/instructions/
-airules explode instructions.md
+uvx airules explode instructions.md
 
 # Bundle Cursor rules back into a single file
-airules implode cursor bundled-instructions.md
+uvx airules implode cursor bundled-instructions.md
 
 # Bundle GitHub instructions with verbose logging
-airules implode github --verbose instructions.md
+uvx airules implode github --verbose instructions.md
 
 # Download everything from default repository
-airules download
+uvx airules download
 
 # Download only specific instruction types
-airules download cursor github
+uvx airules download cursor github
 
 # Download from a different repository
-airules download --repo other-user/other-repo --target ./my-project
+uvx airules download --repo other-user/other-repo --target ./my-project
 ```
 
 ## Development
@@ -86,10 +86,10 @@ The CLI replaces the old standalone scripts. Use the CLI commands in your develo
 uv sync
 
 # Explode instructions into separate rule files
-airules explode
+uvx airules explode
 
 # Bundle rules back into instructions
-airules implode cursor instructions.md
+uvx airules implode cursor instructions.md
 ```
 
 ### Building and Testing
