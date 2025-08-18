@@ -8,3 +8,4 @@ applyTo: "tests/integration/**/*.py"
 - Add the `server` factory to each test
 - Use the `faker` factory to generate emails, etc.
 - Don't add obvious `assert` descriptions
+- Do not use the `db_session` fixture here. Instead, use `with test_session():` if you need to setup complex database state

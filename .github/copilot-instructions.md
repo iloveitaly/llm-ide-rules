@@ -34,5 +34,9 @@ session_id = client_secret_id.split("_secret")[0]
 
 ### Agent instructions
 
+Page careful attention to these instructions when running tests, generating database migrations, or otherwise figuring out how to navigate project development scripts.
+
 - Run python tests with `pytest` only. Do not `cat` the output and do not use `-q`. If tests fail because of a configuration or system error, do not attempt to fix and let me know. I will fix it.
-- If you added models, generate a migration with `just migration {add,delete,update}_model_other_description`
+  - Start with running non-integration tests with `pytest --ignore=tests/integration` then just run the integration tests `pytest tests/integration`
+  - When debugging integration tests look at `$PLAYWRIGHT_RESULT_DIRECTORY`. There's a directory for each test failure. In that directory you fill find a `failure.html` containing the rendered DOM of the page on failure and a screenshot of the contents. Use these to debug why it failed.
+- Do not attempt to create or run database migrations. Pause your work and let me know you need a migration run.
