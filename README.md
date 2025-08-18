@@ -48,9 +48,7 @@ uvx airules download [instruction_types]    # Download everything by default
 uvx airules download cursor github          # Download specific types
 uvx airules download --repo other/repo      # Download from different repo
 
-# MCP (Model Context Protocol) commands (coming soon)
-uvx airules mcp status
-uvx airules mcp configure
+
 ```
 
 ### Examples
@@ -102,9 +100,7 @@ uv build
 pytest
 ```
 
-### Legacy Scripts (Deprecated)
 
-The old `explode.py` and `implode.py` scripts are now deprecated in favor of the `airules` CLI.
 
 
 ## Extracting Changes

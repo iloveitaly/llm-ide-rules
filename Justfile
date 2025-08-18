@@ -10,23 +10,12 @@ setup:
 build:
     uv build
 
-# Explode instructions into rule files
-explode:
-    airules explode
 
-# Bundle cursor rules into instructions
-implode-cursor:
-    airules implode cursor
-
-implode-github:
-    airules implode github
 
 test:
     pytest
 
-# Start docker services
-up:
-    docker compose up -d --wait
+
 
 # Clean build artifacts and cache
 clean:
