@@ -12,17 +12,15 @@ build:
 
 # Explode instructions into rule files
 explode:
-    llm-rules explode
+    airules explode
 
 # Bundle cursor rules into instructions
 implode-cursor:
-    llm-rules implode cursor
+    airules implode cursor
 
-# Bundle github instructions
 implode-github:
-    llm-rules implode github
+    airules implode github
 
-# Run tests
 test:
     pytest
 

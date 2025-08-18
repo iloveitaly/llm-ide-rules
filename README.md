@@ -10,13 +10,17 @@ Some of the glob assumptions in this repo are specific to how I've chosen to org
 
 ## Installation
 
-You can install the `llm-rules` CLI tool using uv:
+You can install the `airules` CLI tool using pip:
+
+```sh
+pip install airules
+```
+
+Or install from the repository:
 
 ```sh
 uv tool install git+https://github.com/iloveitaly/llm-ide-prompts.git
 ```
-
-Or install directly from the repository:
 
 ```sh
 git clone https://github.com/iloveitaly/llm-ide-prompts.git
@@ -29,47 +33,46 @@ source .venv/bin/activate
 
 ### CLI Commands
 
-The `llm-rules` CLI provides commands to manage LLM IDE prompts and rules:
+The `airules` CLI provides commands to manage LLM IDE prompts and rules:
 
 ```sh
 # Convert instruction file to separate rule files
-llm-rules explode [input_file]
+airules explode [input_file]
 
 # Bundle rule files back into a single instruction file
-llm-rules implode cursor [output_file]     # Bundle Cursor rules
-llm-rules implode github [output_file]    # Bundle GitHub/Copilot instructions
+airules implode cursor [output_file]     # Bundle Cursor rules
+airules implode github [output_file]    # Bundle GitHub/Copilot instructions
+
+# Download instruction files from repositories
+airules download [instruction_types]    # Download everything by default
+airules download cursor github          # Download specific types
+airules download --repo other/repo      # Download from different repo
 
 # MCP (Model Context Protocol) commands (coming soon)
-llm-rules mcp status
-llm-rules mcp configure
+airules mcp status
+airules mcp configure
 ```
 
 ### Examples
 
 ```sh
 # Explode instructions.md into .cursor/rules/ and .github/instructions/
-llm-rules explode instructions.md
+airules explode instructions.md
 
 # Bundle Cursor rules back into a single file
-llm-rules implode cursor bundled-instructions.md
+airules implode cursor bundled-instructions.md
 
 # Bundle GitHub instructions with verbose logging
-llm-rules implode github --verbose instructions.md
-```
+airules implode github --verbose instructions.md
 
-### Direct Download (Legacy)
+# Download everything from default repository
+airules download
 
-You can also download the rules directly into your project:
+# Download only specific instruction types
+airules download cursor github
 
-```sh
-# Download .cursor rules
-curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/download.sh | sh -s cursor
-
-# Download .github rules
-curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/download.sh | sh -s github
-
-# Download AGENT.md (for Amp)
-curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/AGENT.md > AGENT.md
+# Download from a different repository
+airules download --repo other-user/other-repo --target ./my-project
 ```
 
 ## Development
@@ -83,10 +86,10 @@ The CLI replaces the old standalone scripts. Use the CLI commands in your develo
 uv sync
 
 # Explode instructions into separate rule files
-llm-rules explode
+airules explode
 
 # Bundle rules back into instructions
-llm-rules implode cursor instructions.md
+airules implode cursor instructions.md
 ```
 
 ### Building and Testing
@@ -101,7 +104,7 @@ pytest
 
 ### Legacy Scripts (Deprecated)
 
-The old `explode.py` and `implode.py` scripts are now deprecated in favor of the `llm-rules` CLI.
+The old `explode.py` and `implode.py` scripts are now deprecated in favor of the `airules` CLI.
 
 
 ## Extracting Changes

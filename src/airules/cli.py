@@ -6,15 +6,17 @@ from typing_extensions import Annotated
 from airules.commands.explode import explode_main
 from airules.commands.implode import cursor, github, implode_main
 from airules.commands.mcp import status, configure
+from airules.commands.download import download_main
 
 app = typer.Typer(
-    name="llm-rules",
+    name="airules",
     help="CLI tool for managing LLM IDE prompts and rules",
     no_args_is_help=True,
 )
 
 # Add commands directly
 app.command("explode", help="Convert instruction file to separate rule files")(explode_main)
+app.command("download", help="Download LLM instruction files from GitHub repositories")(download_main)
 
 # Create implode sub-typer
 implode_app = typer.Typer(help="Bundle rule files into a single instruction file")
