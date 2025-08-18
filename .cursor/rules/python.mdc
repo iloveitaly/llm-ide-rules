@@ -18,6 +18,7 @@ When writing Python:
   * Do not coerce database IDs or dates to `str`
 * Do not fix import ordering or other linting issues.
 * Never edit or create any files in `migrations/versions/`
+* Place all comments on dedicated lines immediately above the code statements they describe, using the '#' symbol. Avoid inline comments appended to the end of code lines.
 
 ### Typing
 
