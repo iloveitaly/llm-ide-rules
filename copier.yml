@@ -1,0 +1,93 @@
+# NOTE some limitations of copier:
+#
+#   - any extensions must be installed manually
+#   - you cannot use dst_path as default answers
+
+_min_copier_version: 9.4.1
+
+_answers_file: .copier/.copier-answers.yml
+
+_jinja_extensions:
+  - jinja2_shell_extension.ShellExtension
+
+_message_after_copy: |
+  Next steps:
+
+    1. Customize secrets in .envrc, remove the database stuff if you don't need it.
+    2. Run `direnv allow`
+    3. Set PYPI_API_TOKEN on GH actions
+    4. Set GH_TOKEN on GH actions
+    5. Remove docker-compose.yml if you don't need it. You'll also have to update the github workflows that depend on it.
+
+project_name:
+  type: str
+  help: Dash separated project slug
+  default: "{{ \"basename $(pwd)\" | shell() | trim | regex_replace(' ', '-') | regex_replace('_', '-') }}"
+  validator: >-
+    {% if not (project_name | regex_search('^[a-z][a-z0-9-_]+$')) %}
+    project_name must start with a letter, followed one or more letters, digits or dashes all lowercase.
+    {% endif %}
+
+# https://github.com/superlinear-ai/substrate/blob/main/copier.yml
+project_name_snake_case:
+  when: false
+  default: "{{ project_name | lower | replace('-', '_') }}"
+
+full_name:
+  type: str
+  help: Full name of the project owner (for pypi)
+  default: "{{ \"git config --global user.name\" | shell() | trim }}"
+
+email:
+  type: str
+  help: Email of the project owner (for pypi)
+  default: "{{ \"git config --global user.email\" | shell() | trim }}"
+
+github_username:
+  type: str
+  help: GitHub username of the project owner (for pypi)
+  default: "{{ \"gh api user --jq '.login'\" | shell() | trim }}"
+
+build_workflow:
+  type: str
+  help: |
+    Choose the GitHub Actions workflow for building and publishing.
+    - release_please: Release Please (automated releases, single OS)
+    - release_please_matrix: Release Please with Test Matrix (automated releases, cross-platform testing)
+    - manual_matrix: Manual Releases with Test Matrix (manual releases, cross-platform testing)
+  choices:
+    - release_please
+    - release_please_matrix
+    - manual_matrix
+  default: release_please
+
+_exclude:
+  - TODO
+  - /.git
+  - /README.md
+  - /CHANGELOG.md
+  - /LICENSE
+  - /uv.lock
+  - /metadata.json
+
+_tasks:
+  - '[ ! -d .git ] && git init'
+  - touch README.md
+  - |
+    # Remove unused workflow files based on build_workflow choice
+    if [ "{{ build_workflow }}" = "release_please" ]; then
+      rm -f .github/workflows/build_and_publish_release_please_test_matrix.yml
+      rm -f .github/workflows/build_and_publish_test_matrix.yml
+    elif [ "{{ build_workflow }}" = "release_please_matrix" ]; then
+      rm -f .github/workflows/build_and_publish_release_please.yml
+      rm -f .github/workflows/build_and_publish_test_matrix.yml
+    elif [ "{{ build_workflow }}" = "manual_matrix" ]; then
+      rm -f .github/workflows/build_and_publish_release_please.yml
+      rm -f .github/workflows/build_and_publish_release_please_test_matrix.yml
+    fi
+  - uv sync
+  - git add -A
+  - git commit -m "🎉 Initial commit"
+
+# although it's annoying to have the .copier-answers.yml file in the root, it allows `copier update`
+# to work properly

@@ -11,6 +11,6 @@ jobs:
       - name: Fetching Local Repository
         uses: actions/checkout@v4
       - name: Repository Metadata Sync
-        uses: iloveitaly/github-actions-metadata-sync@v1
+        uses: iloveitaly/github-actions-metadata-sync@main
         with:
           TOKEN: ${{ secrets.GH_PERSONAL_TOKEN }}
