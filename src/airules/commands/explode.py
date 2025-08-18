@@ -9,7 +9,7 @@ import typer
 import structlog
 import logging
 
-from llm_rules.constants import SECTION_GLOBS, header_to_filename
+from airules.constants import SECTION_GLOBS, header_to_filename
 
 logger = structlog.get_logger()
 

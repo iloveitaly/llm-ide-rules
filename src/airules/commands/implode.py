@@ -8,7 +8,7 @@ import logging
 import typer
 import structlog
 
-from llm_rules.constants import SECTION_GLOBS, header_to_filename, filename_to_header
+from airules.constants import SECTION_GLOBS, header_to_filename, filename_to_header
 
 logger = structlog.get_logger()
 

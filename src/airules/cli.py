@@ -3,9 +3,9 @@
 import typer
 from typing_extensions import Annotated
 
-from llm_rules.commands.explode import explode_main
-from llm_rules.commands.implode import cursor, github, implode_main
-from llm_rules.commands.mcp import status, configure
+from airules.commands.explode import explode_main
+from airules.commands.implode import cursor, github, implode_main
+from airules.commands.mcp import status, configure
 
 app = typer.Typer(
     name="llm-rules",
