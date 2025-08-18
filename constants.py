@@ -9,10 +9,12 @@ SECTION_GLOBS = {
     "Python": "**/*.py",
     "Python App": "**/*.py",
     "Pytest Integration Tests": "tests/integration/**/*.py",
+    "Pytest Tests": "tests/**/*.py",
     "Python Route Tests": "tests/routes/**/*.py",
+    "Alembic Migrations": "migrations/versions/*.py",
     "FastAPI": "app/routes/**/*.py",
 
-    "React": "**/*.tsx", 
+    "React": "**/*.tsx",
     "React Router": "web/app/routes/**/*.tsx",
     "React Router Client Loader": None,
 

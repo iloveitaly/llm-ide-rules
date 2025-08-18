@@ -16,6 +16,7 @@ When writing Python:
   * No variable interpolation in log messages.
   * Do not coerce database IDs or dates to strings
 * Do not fix import ordering or other formatting issues.
+* Do not ever edit any files in `migrations/versions/`
 
 ### Date & DateTime
 
