@@ -33,8 +33,12 @@ session_id = client_secret_id.split("_secret")[0]
 
 ### Agent instructions
 
+Page careful attention to these instructions when running tests, generating database migrations, or otherwise figuring out how to navigate project development scripts.
+
 - Run python tests with `pytest` only. Do not `cat` the output and do not use `-q`. If tests fail because of a configuration or system error, do not attempt to fix and let me know. I will fix it.
-- If you added models, generate a migration with `just migration {add,delete,update}_model_other_description`
+  - Start with running non-integration tests with `pytest --ignore=tests/integration` then just run the integration tests `pytest tests/integration`
+  - When debugging integration tests look at `$PLAYWRIGHT_RESULT_DIRECTORY`. There's a directory for each test failure. In that directory you fill find a `failure.html` containing the rendered DOM of the page on failure and a screenshot of the contents. Use these to debug why it failed.
+- Do not attempt to create or run database migrations. Pause your work and let me know you need a migration run.
 
 ## Python
 
@@ -42,16 +46,24 @@ When writing Python:
 
 * Assume the latest python, version 3.13.
 * Prefer Pathlib methods (including read and write methods, like `read_text`) over `os.path`, `open`, `write`, etc.
-* Prefer modern typing: `list[str]` over `List[str]`, `dict[str, int]` over `Dict[str, int]`, etc.
 * Use Pydantic models over dataclass or a typed dict.
 * Use SQLAlchemy for generating any SQL queries.
 * Use `click` for command line argument parsing.
 * Use `log.info("the message", the_variable=the_variable)` instead of `log.info("The message: %s", the_variable)` or `print` for logging. This object can be found at `from app import log`.
   * Log messages should be lowercase with no leading or trailing whitespace.
   * No variable interpolation in log messages.
-  * Do not coerce database IDs or dates to strings
-* Do not fix import ordering or other formatting issues.
-* Do not ever edit any files in `migrations/versions/`
+  * Do not coerce database IDs or dates to `str`
+* Do not fix import ordering or other linting issues.
+* Never edit or create any files in `migrations/versions/`
+
+### Typing
+
+* Assume the latest pyright version
+* Prefer modern typing: `list[str]` over `List[str]`, `dict[str, int]` over `Dict[str, int]`, etc.
+* Prefer to keep typing errors in place than eliminate type specificity:
+  * Do not add ignore comments such as `# type: ignore`
+  * Never add an `Any` type.
+  * Do not `cast(object, ...)`
 
 ### Date & DateTime
 
@@ -124,11 +136,48 @@ class Distribution(
 - Add the `server` factory to each test
 - Use the `faker` factory to generate emails, etc.
 - Don't add obvious `assert` descriptions
+- Do not use the `db_session` fixture here. Instead, use `with test_session():` if you need to setup complex database state
+
+## Pytest Tests
+
+- Look to tests/factories.py to generate any required database state
+  - Here's an example of how to create + persist a factory `DistributionFactory.save()`
+- Use the `faker` factory to generate emails, etc.
+- Do not mock or patch unless I instruct you to. Test as much of the application stack as possible in each test.
+- If you get lazy attribute errors, use the `db_session` fixture
+- If we are testing Stripe interactions, assume we want to hit the live sandbox API. Don't mock out Stripe interactions unless I explicitly instruct you to.
 
 ## Python Route Tests
 
 - Polyfactory is the [factory](tests/factories.py) library in use. `ModelNameFactory.build()` is how you generate factories.
 - Use `assert_status(response)` to check the response of a client
+
+## Alembic Migrations
+
+### Data Migrations
+
+For migrations that include data mutation, and not only schema modifications, use this pattern to setup a session:
+
+```python
+from alembic import op
+from sqlmodel import Session
+from activemodel.session_manager import global_session
+from app import log
+
+def run_migration_helper():
+  pass
+
+def upgrade() -> None:
+  session = Session(bind=op.get_bind())
+
+  with global_session(session):
+      run_migration_helper()
+      flip_point_coordinates()
+      backfill_screening_host_data()
+
+  # flush before running any other operations, otherwise not all changes will persist to the transaction
+  session.flush()
+```
 
 ## FastAPI
 
@@ -369,33 +418,6 @@ Here's how environment variables are managed in this application:
 - `*.local` files have a `-example` variant which is committed to version control. These document helpful environment variables for local development.
 - When writing TypeScript/JavaScript/React, use `requireEnv("THE_ENV_VAR_NAME")` to read an environment variable. `import {requireEnv} from '~/utils/environment'`
 
-## Alembic Migrations
-
-### Data Migrations
-
-For migrations that include data mutation, and not only schema modifications, use this pattern to setup a session:
-
-```python
-from alembic import op
-from sqlmodel import Session
-from activemodel.session_manager import global_session
-from app import log
-
-def run_migration_helper():
-  pass
-
-def upgrade() -> None:
-  session = Session(bind=op.get_bind())
-
-  with global_session(session):
-      run_migration_helper()
-      flip_point_coordinates()
-      backfill_screening_host_data()
-
-  # flush before running any other operations, otherwise not all changes will persist to the transaction
-  session.flush()
-```
-
 ## Fix Tests
 
 Focus on all unit + command tests. Make sure they pass and fix errors. If you run into anything very odd stop, and let me know. Mutate test code first and let me know if you think you should update application code.
@@ -421,12 +443,9 @@ Let's separate this into key sections:
 3. Utilities/helpers/lib
 4. Routes
 
-## Pytest Tests
+## Python Command
 
-- Look to tests/factories.py to generate any required database state
-  - Here's an example of how to create + persist a factory `DistributionFactory.save()`
-- Use the `faker` factory to generate emails, etc.
-- Do not mock or patch unless I instruct you to. Test as much of the application stack as possible in each test.
+- we don't have to put everything in a single perform. You can use helper functions. Can you modularize the code a bit and use helper functions so it's easier to read?
 
 ## Refactor On Instructions
 
