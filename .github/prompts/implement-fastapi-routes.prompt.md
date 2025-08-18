@@ -1,3 +1,7 @@
+---
+mode: 'agent'
+description: ''
+---
 ## Implement Fastapi Routes
 
 The file docstring contains a description of the FastAPI routes we need to implement. Implement these routes.
