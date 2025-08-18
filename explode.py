@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 """
+DEPRECATED: Use `llm-rules explode` instead.
+
 Convert copilot-instructions sections into Cursor rule files.
 Usage: python3 explode.py [input_markdown]
 """
 import os
 import sys
 import argparse
+
+print("WARNING: This script is deprecated. Please use 'llm-rules explode' instead.")
+print("Install llm-rules with: uv tool install git+https://github.com/iloveitaly/llm-ide-prompts.git")
+print("Usage: llm-rules explode [input_file]")
+print("")
 
 # Add current directory to path for constants import
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

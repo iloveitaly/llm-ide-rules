@@ -8,9 +8,58 @@ Additionally, it becomes challenging to copy these prompts into various projects
 
 Some of the glob assumptions in this repo are specific to how I've chosen to organize python and typescript [in the python starter template](https://github.com/iloveitaly/python-starter-template) and what tooling (fastapi, etc) that I've chosen to use.
 
+## Installation
+
+You can install the `llm-rules` CLI tool using uv:
+
+```sh
+uv tool install git+https://github.com/iloveitaly/llm-ide-prompts.git
+```
+
+Or install directly from the repository:
+
+```sh
+git clone https://github.com/iloveitaly/llm-ide-prompts.git
+cd llm-ide-prompts
+uv sync
+source .venv/bin/activate
+```
+
 ## Usage
 
-You can then download the rules into your project:
+### CLI Commands
+
+The `llm-rules` CLI provides commands to manage LLM IDE prompts and rules:
+
+```sh
+# Convert instruction file to separate rule files
+llm-rules explode [input_file]
+
+# Bundle rule files back into a single instruction file
+llm-rules implode cursor [output_file]     # Bundle Cursor rules
+llm-rules implode github [output_file]    # Bundle GitHub/Copilot instructions
+
+# MCP (Model Context Protocol) commands (coming soon)
+llm-rules mcp status
+llm-rules mcp configure
+```
+
+### Examples
+
+```sh
+# Explode instructions.md into .cursor/rules/ and .github/instructions/
+llm-rules explode instructions.md
+
+# Bundle Cursor rules back into a single file
+llm-rules implode cursor bundled-instructions.md
+
+# Bundle GitHub instructions with verbose logging
+llm-rules implode github --verbose instructions.md
+```
+
+### Direct Download (Legacy)
+
+You can also download the rules directly into your project:
 
 ```sh
 # Download .cursor rules
@@ -25,13 +74,34 @@ curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/AG
 
 ## Development
 
-All instructions in [instructions.md](instructions.md) are exploded out into the various files with default rules applied.
+### Using the CLI for Development
+
+The CLI replaces the old standalone scripts. Use the CLI commands in your development workflow:
 
 ```shell
-just build
+# Setup the environment
+uv sync
+
+# Explode instructions into separate rule files
+llm-rules explode
+
+# Bundle rules back into instructions
+llm-rules implode cursor instructions.md
 ```
 
-Executes this explosion process.
+### Building and Testing
+
+```shell
+# Build the package
+uv build
+
+# Run tests
+pytest
+```
+
+### Legacy Scripts (Deprecated)
+
+The old `explode.py` and `implode.py` scripts are now deprecated in favor of the `llm-rules` CLI.
 
 
 ## Extracting Changes

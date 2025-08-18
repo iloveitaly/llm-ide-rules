@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+DEPRECATED: Use `llm-rules implode` instead.
+
 Bundle Cursor or Copilot instruction component files into a single instruction file.
 Usage: python3 implode.py [cursor|github] [output_file]
 """
@@ -8,6 +10,12 @@ import os
 import sys
 import argparse
 from pathlib import Path
+
+print("WARNING: This script is deprecated. Please use 'llm-rules implode' instead.")
+print("Install llm-rules with: uv tool install git+https://github.com/iloveitaly/llm-ide-prompts.git")
+print("Usage: llm-rules implode cursor [output_file]")
+print("       llm-rules implode github [output_file]")
+print("")
 
 # Add current directory to path for constants import
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

@@ -3,8 +3,28 @@
 
 # Set up the Python environment
 setup:
-    uv venv && uv sync
+    uv sync
     @echo "activate: source ./.venv/bin/activate"
+
+# Build the package
+build:
+    uv build
+
+# Explode instructions into rule files
+explode:
+    llm-rules explode
+
+# Bundle cursor rules into instructions
+implode-cursor:
+    llm-rules implode cursor
+
+# Bundle github instructions
+implode-github:
+    llm-rules implode github
+
+# Run tests
+test:
+    pytest
 
 # Start docker services
 up:
@@ -12,7 +32,7 @@ up:
 
 # Clean build artifacts and cache
 clean:
-    rm -rf *.egg-info .venv
+    rm -rf *.egg-info .venv dist/
     find . -type d -name "__pycache__" -prune -exec rm -rf {} \; 2>/dev/null || true
 
 # Update copier template
