@@ -17,7 +17,7 @@ def load_section_globs(custom_config_path: str = None) -> dict:
         config_path = Path(custom_config_path)
     else:
         # Load default bundled config
-        config_path = Path(__file__).parent / "section_globs.json"
+        config_path = Path(__file__).parent / "sections.json"
     
     with open(config_path, 'r') as f:
         config = json.load(f)

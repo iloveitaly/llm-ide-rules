@@ -6,7 +6,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 from unittest.mock import patch, Mock
 
-from airules.cli import app
+from airules import app
 
 
 def test_download_help():
