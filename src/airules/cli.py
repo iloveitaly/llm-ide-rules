@@ -4,7 +4,7 @@ import typer
 from typing_extensions import Annotated
 
 from airules.commands.explode import explode_main
-from airules.commands.implode import cursor, github, implode_main
+from airules.commands.implode import cursor, github
 from airules.commands.download import download_main
 
 app = typer.Typer(
@@ -21,7 +21,6 @@ app.command("download", help="Download LLM instruction files from GitHub reposit
 implode_app = typer.Typer(help="Bundle rule files into a single instruction file")
 implode_app.command("cursor", help="Bundle Cursor rules into a single file")(cursor)
 implode_app.command("github", help="Bundle GitHub/Copilot instructions into a single file")(github)
-implode_app.callback(invoke_without_command=True)(implode_main)
 app.add_typer(implode_app, name="implode")
 
 def main():

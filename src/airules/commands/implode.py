@@ -216,30 +216,3 @@ def github(
     logger.info("GitHub instructions bundled successfully", output_file=output_path)
     typer.echo(f"Bundled github instructions into {output}")
 
-
-# Set the default subcommand
-def implode_main(
-    ctx: typer.Context,
-    mode: Annotated[str, typer.Argument(help="Which rules to bundle")] = None,
-    output: Annotated[str, typer.Argument(help="Output file")] = "instructions.md",
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
-    config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
-):
-    """Bundle rule files into a single instruction file."""
-    if ctx.invoked_subcommand is not None:
-        return
-    
-    if mode is None:
-        typer.echo("Usage: llm-rules implode [cursor|github] [output_file]")
-        typer.echo("\nOr use subcommands:")
-        typer.echo("  llm-rules implode cursor [output_file]")
-        typer.echo("  llm-rules implode github [output_file]")
-        raise typer.Exit(1)
-    
-    if mode == "cursor":
-        ctx.invoke(cursor, output=output, verbose=verbose, config=config)
-    elif mode == "github":
-        ctx.invoke(github, output=output, verbose=verbose, config=config)
-    else:
-        typer.echo(f"Unknown mode: {mode}. Use 'cursor' or 'github'")
-        raise typer.Exit(1)
