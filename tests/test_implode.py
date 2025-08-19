@@ -216,7 +216,7 @@ def test_implode_main_no_args():
     
     # Should show usage information (exit code 2 for missing command)
     assert result.exit_code == 2
-    assert "Usage:" in result.stdout or "Missing command" in result.stdout
+    assert "Usage:" in result.stderr or "Missing command" in result.stderr
 
 
 def test_implode_verbose_option():
