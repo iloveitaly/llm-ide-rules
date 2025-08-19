@@ -19,12 +19,12 @@ uvx airules
 Or install from the repository:
 
 ```sh
-uv tool install git+https://github.com/iloveitaly/llm-ide-prompts.git
+uv tool install git+https://github.com/iloveitaly/airules.git
 ```
 
 ```sh
-git clone https://github.com/iloveitaly/llm-ide-prompts.git
-cd llm-ide-prompts
+git clone https://github.com/iloveitaly/airules.git
+cd airules
 uv sync
 source .venv/bin/activate
 ```

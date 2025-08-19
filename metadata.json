@@ -1,6 +1,6 @@
 {
   "description": "Centralized LLM prompt instructions for Copilot and Cursor, including scripts to convert and sync rules for Python, React, Shell, and TypeScript. Designed for rapid reuse and contribution across projects.",
-  "homepage": "https://github.com/iloveitaly/llm-ide-prompts",
+  "homepage": "https://github.com/iloveitaly/airules",
   "keywords": [
     "llm",
     "copilot",
