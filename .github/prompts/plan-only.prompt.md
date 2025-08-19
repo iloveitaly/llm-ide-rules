@@ -1,3 +1,7 @@
+---
+mode: 'agent'
+description: ''
+---
 ## Plan Only
 
 As this point, I only want to talk about the plan. How would you do this? What would you refactor to make this design clean? You are an expert software engineer and I want you to think hard about how to plan this project out.

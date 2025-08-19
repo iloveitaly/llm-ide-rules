@@ -1,3 +1,7 @@
+---
+mode: 'agent'
+description: ''
+---
 ## Fix Tests
 
 Focus on all unit + command tests. Make sure they pass and fix errors. If you run into anything very odd stop, and let me know. Mutate test code first and let me know if you think you should update application code.
