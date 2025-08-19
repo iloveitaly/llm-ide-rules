@@ -9,7 +9,7 @@ import typer
 import structlog
 import logging
 
-from airules.constants import SECTION_GLOBS, header_to_filename
+from airules.constants import load_section_globs, header_to_filename
 
 logger = structlog.get_logger()
 
@@ -199,6 +199,7 @@ def process_unmapped_section(lines, section_name, rules_dir, github_prompts_dir)
 def explode_main(
     input_file: Annotated[str, typer.Argument(help="Input markdown file")] = "instructions.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
+    config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
     """Convert instruction file to separate rule files."""
     if verbose:
@@ -207,7 +208,10 @@ def explode_main(
             wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
         )
     
-    logger.info("Starting explode operation", input_file=input_file)
+    # Load section globs (with optional custom config)
+    SECTION_GLOBS = load_section_globs(config)
+    
+    logger.info("Starting explode operation", input_file=input_file, config=config)
     
     # Work in current directory ($PWD)
     rules_dir = os.path.join(os.getcwd(), ".cursor", "rules")
@@ -284,4 +288,4 @@ alwaysApply: true
                 cursor_rules=rules_dir, 
                 copilot_instructions=copilot_dir,
                 github_prompts=github_prompts_dir)
-    print("Created Cursor rules in .cursor/rules/, Copilot instructions in .github/instructions/, and prompts in respective directories")
+    typer.echo("Created Cursor rules in .cursor/rules/, Copilot instructions in .github/instructions/, and prompts in respective directories")

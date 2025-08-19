@@ -43,7 +43,7 @@ INSTRUCTION_TYPES = {
 }
 
 # Default types to download when no specific types are specified
-DEFAULT_TYPES = ["cursor", "github", "gemini", "claude", "agent"]
+DEFAULT_TYPES = list(INSTRUCTION_TYPES.keys())
 
 
 def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
@@ -221,12 +221,12 @@ def download_main(
         
         if copied_items:
             logger.info("Download completed successfully", copied_items=copied_items)
-            print(f"Downloaded {len(copied_items)} items to {target_path}:")
+            typer.echo(f"Downloaded {len(copied_items)} items to {target_path}:")
             for item in copied_items:
-                print(f"  - {item}")
+                typer.echo(f"  - {item}")
         else:
             logger.warning("No files were copied")
-            print("No matching instruction files found in the repository.")
+            typer.echo("No matching instruction files found in the repository.")
     
     finally:
         # Clean up temporary directory

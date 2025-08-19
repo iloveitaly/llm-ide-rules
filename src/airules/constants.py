@@ -1,27 +1,31 @@
 """Shared constants for explode and implode functionality."""
 
-# Mapping of section headers to their file globs or None for prompts
-# The order of keys determines the order in imploded files
-SECTION_GLOBS = {
-    "Python": "**/*.py",
-    "Python App": "**/*.py",
-    "Pytest Integration Tests": "tests/integration/**/*.py",
-    "Pytest Tests": "tests/**/*.py",
-    "Python Route Tests": "tests/routes/**/*.py",
-    "Alembic Migrations": "migrations/versions/*.py",
-    "FastAPI": "app/routes/**/*.py",
+import json
+import os
+from pathlib import Path
 
-    "React": "**/*.tsx",
-    "React Router": "web/app/routes/**/*.tsx",
-    "React Router Client Loader": None,
+def load_section_globs(custom_config_path: str = None) -> dict:
+    """Load section globs from JSON config file.
+    
+    Args:
+        custom_config_path: Path to custom configuration file to override defaults
+    
+    Returns:
+        Dictionary mapping section headers to their file globs or None for prompts
+    """
+    if custom_config_path and os.path.exists(custom_config_path):
+        config_path = Path(custom_config_path)
+    else:
+        # Load default bundled config
+        config_path = Path(__file__).parent / "section_globs.json"
+    
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+    
+    return config["section_globs"]
 
-    "Shell": "**/*.sh",
-    "TypeScript": "**/*.ts,**/*.tsx",
-    "TypeScript DocString": None,
-
-    # prompts (None indicates it's a prompt, not an instruction)
-    "Secrets": None,
-}
+# Default section globs - loaded from bundled JSON
+SECTION_GLOBS = load_section_globs()
 
 def header_to_filename(header):
     """Convert a section header to a filename."""

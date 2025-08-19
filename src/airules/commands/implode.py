@@ -8,7 +8,7 @@ import logging
 import typer
 import structlog
 
-from airules.constants import SECTION_GLOBS, header_to_filename, filename_to_header
+from airules.constants import load_section_globs, header_to_filename, filename_to_header
 
 logger = structlog.get_logger()
 
@@ -57,23 +57,23 @@ def get_ordered_files_github(file_list, section_globs_keys):
     return ordered_files
 
 
-def bundle_cursor_rules(rules_dir, output_file):
+def bundle_cursor_rules(rules_dir, output_file, section_globs):
     """Bundle Cursor rule files into a single file."""
     rule_files = list(Path(rules_dir).glob("*.mdc"))
     general = [f for f in rule_files if f.stem == "general"]
     others = [f for f in rule_files if f.stem != "general"]
 
-    # Order the non-general files based on SECTION_GLOBS
-    ordered_others = get_ordered_files(others, SECTION_GLOBS.keys())
+    # Order the non-general files based on section_globs
+    ordered_others = get_ordered_files(others, section_globs.keys())
     ordered = general + ordered_others
 
     def resolve_header_from_stem(stem):
         """Return the canonical header for a given filename stem.
 
-        Prefer exact header names from SECTION_GLOBS (preserves acronyms like FastAPI, TypeScript).
-        Fallback to title-casing the filename when not found in SECTION_GLOBS.
+        Prefer exact header names from section_globs (preserves acronyms like FastAPI, TypeScript).
+        Fallback to title-casing the filename when not found in section_globs.
         """
-        for section_name in SECTION_GLOBS.keys():
+        for section_name in section_globs.keys():
             if header_to_filename(section_name) == stem:
                 return section_name
         return filename_to_header(stem)
@@ -117,22 +117,22 @@ def strip_header(text):
     return text
 
 
-def bundle_github_instructions(instructions_dir, output_file):
+def bundle_github_instructions(instructions_dir, output_file, section_globs):
     """Bundle GitHub instruction files into a single file."""
     copilot_general = Path(os.getcwd()) / ".github" / "copilot-instructions.md"
     instr_files = list(Path(instructions_dir).glob("*.instructions.md"))
 
-    # Order the instruction files based on SECTION_GLOBS
+    # Order the instruction files based on section_globs
     # We need to create a modified version that strips .instructions from stems for ordering
-    ordered_files = get_ordered_files_github(instr_files, SECTION_GLOBS.keys())
+    ordered_files = get_ordered_files_github(instr_files, section_globs.keys())
 
     def resolve_header_from_stem(stem):
         """Return the canonical header for a given filename stem.
 
-        Prefer exact header names from SECTION_GLOBS (preserves acronyms like FastAPI, TypeScript).
-        Fallback to title-casing the filename when not found in SECTION_GLOBS.
+        Prefer exact header names from section_globs (preserves acronyms like FastAPI, TypeScript).
+        Fallback to title-casing the filename when not found in section_globs.
         """
-        for section_name in SECTION_GLOBS.keys():
+        for section_name in section_globs.keys():
             if header_to_filename(section_name) == stem:
                 return section_name
         return filename_to_header(stem)
@@ -162,6 +162,7 @@ def bundle_github_instructions(instructions_dir, output_file):
 def cursor(
     output: Annotated[str, typer.Argument(help="Output file")] = "instructions.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
+    config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
     """Bundle Cursor rules into a single file."""
     if verbose:
@@ -170,23 +171,27 @@ def cursor(
             wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
         )
     
+    # Load section globs (with optional custom config)
+    SECTION_GLOBS = load_section_globs(config)
+    
     rules_dir = os.path.join(os.getcwd(), ".cursor", "rules")
     output_path = os.path.join(os.getcwd(), output)
     
-    logger.info("Bundling Cursor rules", rules_dir=rules_dir, output_file=output_path)
+    logger.info("Bundling Cursor rules", rules_dir=rules_dir, output_file=output_path, config=config)
     
     if not Path(rules_dir).exists():
         logger.error("Cursor rules directory not found", rules_dir=rules_dir)
         raise typer.Exit(1)
     
-    bundle_cursor_rules(rules_dir, output_path)
+    bundle_cursor_rules(rules_dir, output_path, SECTION_GLOBS)
     logger.info("Cursor rules bundled successfully", output_file=output_path)
-    print(f"Bundled cursor rules into {output}")
+    typer.echo(f"Bundled cursor rules into {output}")
 
 
 def github(
     output: Annotated[str, typer.Argument(help="Output file")] = "instructions.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
+    config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
     """Bundle GitHub/Copilot instructions into a single file."""
     if verbose:
@@ -195,18 +200,21 @@ def github(
             wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
         )
     
+    # Load section globs (with optional custom config)
+    SECTION_GLOBS = load_section_globs(config)
+    
     instructions_dir = os.path.join(os.getcwd(), ".github", "instructions")
     output_path = os.path.join(os.getcwd(), output)
     
-    logger.info("Bundling GitHub instructions", instructions_dir=instructions_dir, output_file=output_path)
+    logger.info("Bundling GitHub instructions", instructions_dir=instructions_dir, output_file=output_path, config=config)
     
     if not Path(instructions_dir).exists():
         logger.error("GitHub instructions directory not found", instructions_dir=instructions_dir)
         raise typer.Exit(1)
     
-    bundle_github_instructions(instructions_dir, output_path)
+    bundle_github_instructions(instructions_dir, output_path, SECTION_GLOBS)
     logger.info("GitHub instructions bundled successfully", output_file=output_path)
-    print(f"Bundled github instructions into {output}")
+    typer.echo(f"Bundled github instructions into {output}")
 
 
 # Set the default subcommand
@@ -215,22 +223,23 @@ def implode_main(
     mode: Annotated[str, typer.Argument(help="Which rules to bundle")] = None,
     output: Annotated[str, typer.Argument(help="Output file")] = "instructions.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
+    config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
     """Bundle rule files into a single instruction file."""
     if ctx.invoked_subcommand is not None:
         return
     
     if mode is None:
-        print("Usage: llm-rules implode [cursor|github] [output_file]")
-        print("\nOr use subcommands:")
-        print("  llm-rules implode cursor [output_file]")
-        print("  llm-rules implode github [output_file]")
+        typer.echo("Usage: llm-rules implode [cursor|github] [output_file]")
+        typer.echo("\nOr use subcommands:")
+        typer.echo("  llm-rules implode cursor [output_file]")
+        typer.echo("  llm-rules implode github [output_file]")
         raise typer.Exit(1)
     
     if mode == "cursor":
-        ctx.invoke(cursor, output=output, verbose=verbose)
+        ctx.invoke(cursor, output=output, verbose=verbose, config=config)
     elif mode == "github":
-        ctx.invoke(github, output=output, verbose=verbose)
+        ctx.invoke(github, output=output, verbose=verbose, config=config)
     else:
-        print(f"Unknown mode: {mode}. Use 'cursor' or 'github'")
+        typer.echo(f"Unknown mode: {mode}. Use 'cursor' or 'github'")
         raise typer.Exit(1)

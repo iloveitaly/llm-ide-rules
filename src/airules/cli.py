@@ -5,7 +5,6 @@ from typing_extensions import Annotated
 
 from airules.commands.explode import explode_main
 from airules.commands.implode import cursor, github, implode_main
-from airules.commands.mcp import status, configure
 from airules.commands.download import download_main
 
 app = typer.Typer(
@@ -24,12 +23,6 @@ implode_app.command("cursor", help="Bundle Cursor rules into a single file")(cur
 implode_app.command("github", help="Bundle GitHub/Copilot instructions into a single file")(github)
 implode_app.callback(invoke_without_command=True)(implode_main)
 app.add_typer(implode_app, name="implode")
-
-# Create mcp sub-typer
-mcp_app = typer.Typer(help="MCP (Model Context Protocol) related commands")
-mcp_app.command("status")(status)
-mcp_app.command("configure")(configure)
-app.add_typer(mcp_app, name="mcp")
 
 def main():
     """Main entry point for the CLI."""
