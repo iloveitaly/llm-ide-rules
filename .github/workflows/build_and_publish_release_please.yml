@@ -21,7 +21,7 @@ jobs:
     needs: [release-please]
     if: needs.release-please.outputs.release_created
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: jdx/mise-action@v3
       - uses: iloveitaly/github-action-direnv-load-and-mask@master
       - run: uv build
@@ -44,7 +44,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: jdx/mise-action@v3
       - run: direnv allow . && direnv export gha >> "$GITHUB_ENV"
       - run: uv sync
