@@ -42,6 +42,7 @@ When accessing database records:
 * Do not manage database sessions, these are managed by a custom tool
   * Use `TheModel(...).save()` to persist a record
   * Use `TheModel.where(...).order_by(...)` to query records. `.where()` returns a SQLAlchemy select object that you can further customize the query.
+  * To iterate over the records, you'll need to end your query chain with `.all()` which returns an interator: `TheModel.where(...)...all()`
 
 When writing database models:
 
