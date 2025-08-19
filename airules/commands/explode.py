@@ -1,15 +1,17 @@
-#!/usr/bin/env python3
-"""
-Convert copilot-instructions sections into Cursor rule files.
-Usage: python3 explode.py [input_markdown]
-"""
+"""Explode command: Convert instruction file to separate rule files."""
+
 import os
 import sys
-import argparse
+from pathlib import Path
+from typing_extensions import Annotated
 
-# Add current directory to path for constants import
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from constants import SECTION_GLOBS, header_to_filename
+import typer
+import structlog
+import logging
+
+from airules.constants import load_section_globs, header_to_filename
+
+logger = structlog.get_logger()
 
 def generate_cursor_frontmatter(glob):
     """Generate Cursor rule frontmatter for a given glob pattern."""
@@ -194,31 +196,40 @@ def process_unmapped_section(lines, section_name, rules_dir, github_prompts_dir)
     return False
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Convert copilot-instructions to Cursor rules"
-    )
-    parser.add_argument(
-        "input",
-        nargs="?",
-        default="instructions.md",
-        help="Input markdown file"
-    )
-    args = parser.parse_args()
-
-    rules_dir = os.path.join(".cursor", "rules")
-    copilot_dir = os.path.join(".github", "instructions")
-    github_prompts_dir = os.path.join(".github", "prompts")
+def explode_main(
+    input_file: Annotated[str, typer.Argument(help="Input markdown file")] = "instructions.md",
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
+    config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
+):
+    """Convert instruction file to separate rule files."""
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
+        structlog.configure(
+            wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
+        )
+    
+    # Load section globs (with optional custom config)
+    SECTION_GLOBS = load_section_globs(config)
+    
+    logger.info("Starting explode operation", input_file=input_file, config=config)
+    
+    # Work in current directory ($PWD)
+    rules_dir = os.path.join(os.getcwd(), ".cursor", "rules")
+    copilot_dir = os.path.join(os.getcwd(), ".github", "instructions")
+    github_prompts_dir = os.path.join(os.getcwd(), ".github", "prompts")
+    
     os.makedirs(rules_dir, exist_ok=True)
     os.makedirs(copilot_dir, exist_ok=True)
     os.makedirs(github_prompts_dir, exist_ok=True)
-
+    
+    input_path = os.path.join(os.getcwd(), input_file)
+    
     try:
-        with open(args.input, "r") as f:
+        with open(input_path, "r") as f:
             lines = f.readlines()
     except FileNotFoundError:
-        print(f"Error: input file '{args.input}' not found.")
-        sys.exit(1)
+        logger.error("Input file not found", input_file=input_path)
+        raise typer.Exit(1)
 
     # General instructions
     general = extract_general(lines)
@@ -231,7 +242,7 @@ alwaysApply: true
 """
         write_rule(os.path.join(rules_dir, "general.mdc"), general_header, general)
         # Copilot general instructions (no frontmatter)
-        write_rule(os.path.join(".github", "copilot-instructions.md"), "", general)
+        write_rule(os.path.join(os.getcwd(), ".github", "copilot-instructions.md"), "", general)
 
     # Process each section dynamically
     found_sections = set()
@@ -259,7 +270,7 @@ alwaysApply: true
     # Check for sections in mapping that don't exist in the file
     for section_name in SECTION_GLOBS:
         if section_name not in found_sections:
-            print(f"Warning: Section '{section_name}' specified in SECTION_GLOBS but not found in instructions file")
+            logger.warning("Section not found in file", section=section_name)
 
     # Process unmapped sections as manually applied rules (prompts)
     processed_unmapped = set()
@@ -273,8 +284,8 @@ alwaysApply: true
                 if process_unmapped_section(lines, section_name, rules_dir, github_prompts_dir):
                     processed_unmapped.add(section_name)
 
-    print("Created Cursor rules in .cursor/rules/, Copilot instructions in .github/instructions/, and prompts in respective directories")
-
-
-if __name__ == "__main__":
-    main()
+    logger.info("Explode operation completed", 
+                cursor_rules=rules_dir, 
+                copilot_instructions=copilot_dir,
+                github_prompts=github_prompts_dir)
+    typer.echo("Created Cursor rules in .cursor/rules/, Copilot instructions in .github/instructions/, and prompts in respective directories")

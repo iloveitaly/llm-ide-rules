@@ -1,12 +1,33 @@
-import logging
-import os
+"""LLM Rules CLI package for managing IDE prompts and rules."""
 
-logging.basicConfig(
-    level=os.environ.get("LOG_LEVEL", "INFO").upper(),
+import typer
+from typing_extensions import Annotated
+
+from airules.commands.explode import explode_main
+from airules.commands.implode import cursor, github
+from airules.commands.download import download_main
+
+__version__ = "0.1.0"
+
+app = typer.Typer(
+    name="airules",
+    help="CLI tool for managing LLM IDE prompts and rules",
+    no_args_is_help=True,
 )
 
-logger = logging.getLogger(__name__)
+# Add commands directly
+app.command("explode", help="Convert instruction file to separate rule files")(explode_main)
+app.command("download", help="Download LLM instruction files from GitHub repositories")(download_main)
 
+# Create implode sub-typer
+implode_app = typer.Typer(help="Bundle rule files into a single instruction file")
+implode_app.command("cursor", help="Bundle Cursor rules into a single file")(cursor)
+implode_app.command("github", help="Bundle GitHub/Copilot instructions into a single file")(github)
+app.add_typer(implode_app, name="implode")
 
 def main():
-    logger.info("Hello, Logs!")
+    """Main entry point for the CLI."""
+    app()
+
+if __name__ == "__main__":
+    main()

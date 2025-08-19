@@ -8,30 +8,99 @@ Additionally, it becomes challenging to copy these prompts into various projects
 
 Some of the glob assumptions in this repo are specific to how I've chosen to organize python and typescript [in the python starter template](https://github.com/iloveitaly/python-starter-template) and what tooling (fastapi, etc) that I've chosen to use.
 
-## Usage
+## Installation
 
-You can then download the rules into your project:
+You can run the `airules` CLI tool using uvx:
 
 ```sh
-# Download .cursor rules
-curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/download.sh | sh -s cursor
+uvx airules
+```
 
-# Download .github rules
-curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/download.sh | sh -s github
+Or install from the repository:
 
-# Download AGENT.md (for Amp)
-curl -sSL https://raw.githubusercontent.com/iloveitaly/llm-ide-prompts/master/AGENT.md > AGENT.md
+```sh
+uv tool install git+https://github.com/iloveitaly/llm-ide-prompts.git
+```
+
+```sh
+git clone https://github.com/iloveitaly/llm-ide-prompts.git
+cd llm-ide-prompts
+uv sync
+source .venv/bin/activate
+```
+
+## Usage
+
+### CLI Commands
+
+The `airules` CLI provides commands to manage LLM IDE prompts and rules:
+
+```sh
+# Convert instruction file to separate rule files
+uvx airules explode [input_file]
+
+# Bundle rule files back into a single instruction file
+uvx airules implode cursor [output_file]     # Bundle Cursor rules
+uvx airules implode github [output_file]    # Bundle GitHub/Copilot instructions
+
+# Download instruction files from repositories
+uvx airules download [instruction_types]    # Download everything by default
+uvx airules download cursor github          # Download specific types
+uvx airules download --repo other/repo      # Download from different repo
+
+
+```
+
+### Examples
+
+```sh
+# Explode instructions.md into .cursor/rules/ and .github/instructions/
+uvx airules explode instructions.md
+
+# Bundle Cursor rules back into a single file
+uvx airules implode cursor bundled-instructions.md
+
+# Bundle GitHub instructions with verbose logging
+uvx airules implode github --verbose instructions.md
+
+# Download everything from default repository
+uvx airules download
+
+# Download only specific instruction types
+uvx airules download cursor github
+
+# Download from a different repository
+uvx airules download --repo other-user/other-repo --target ./my-project
 ```
 
 ## Development
 
-All instructions in [instructions.md](instructions.md) are exploded out into the various files with default rules applied.
+### Using the CLI for Development
+
+The CLI replaces the old standalone scripts. Use the CLI commands in your development workflow:
 
 ```shell
-just build
+# Setup the environment
+uv sync
+
+# Explode instructions into separate rule files
+uvx airules explode
+
+# Bundle rules back into instructions
+uvx airules implode cursor instructions.md
 ```
 
-Executes this explosion process.
+### Building and Testing
+
+```shell
+# Build the package
+uv build
+
+# Run tests
+pytest
+```
+
+
 
 
 ## Extracting Changes

@@ -3,16 +3,23 @@
 
 # Set up the Python environment
 setup:
-    uv venv && uv sync
+    uv sync
     @echo "activate: source ./.venv/bin/activate"
 
-# Start docker services
-up:
-    docker compose up -d --wait
+# Build the package
+build:
+    uv build
+
+
+
+test:
+    pytest
+
+
 
 # Clean build artifacts and cache
 clean:
-    rm -rf *.egg-info .venv
+    rm -rf *.egg-info .venv dist/
     find . -type d -name "__pycache__" -prune -exec rm -rf {} \; 2>/dev/null || true
 
 # Update copier template
