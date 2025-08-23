@@ -15,6 +15,15 @@ build:
 test:
     pytest
 
+# Generate database schema prompt (requires DATABASE_URL environment variable)
+db_prompt *ARGS:
+    #!/usr/bin/env bash
+    if [ -z "$DATABASE_URL" ]; then
+        echo "Error: DATABASE_URL environment variable must be set"
+        exit 1
+    fi
+    uvx --from . airules db-prompt "$DATABASE_URL" {{ARGS}}
+
 
 
 # Clean build artifacts and cache

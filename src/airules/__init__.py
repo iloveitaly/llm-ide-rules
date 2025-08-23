@@ -6,6 +6,7 @@ from typing_extensions import Annotated
 from airules.commands.explode import explode_main
 from airules.commands.implode import cursor, github
 from airules.commands.download import download_main
+from airules.commands.db_prompt import db_prompt_main
 
 __version__ = "0.1.0"
 
@@ -18,6 +19,7 @@ app = typer.Typer(
 # Add commands directly
 app.command("explode", help="Convert instruction file to separate rule files")(explode_main)
 app.command("download", help="Download LLM instruction files from GitHub repositories")(download_main)
+app.command("db-prompt", help="Generate database schema prompts using llm-sql-prompt")(db_prompt_main)
 
 # Create implode sub-typer
 implode_app = typer.Typer(help="Bundle rule files into a single instruction file")

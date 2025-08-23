@@ -48,6 +48,9 @@ uvx airules download [instruction_types]    # Download everything by default
 uvx airules download cursor github          # Download specific types
 uvx airules download --repo other/repo      # Download from different repo
 
+# Generate database schema prompts
+uvx airules db-prompt [DATABASE_URL]        # Generate schema prompt from database
+
 
 ```
 
@@ -71,6 +74,11 @@ uvx airules download cursor github
 
 # Download from a different repository
 uvx airules download --repo other-user/other-repo --target ./my-project
+
+# Generate database schema prompt (requires DATABASE_URL)
+uvx airules db-prompt "postgresql://user:pass@localhost/mydb" --all
+uvx airules db-prompt "postgresql://user:pass@localhost/mydb" --table users --table products
+uvx airules db-prompt "postgresql://user:pass@localhost/mydb" --include-data
 ```
 
 ## Development
@@ -88,6 +96,9 @@ uvx airules explode
 
 # Bundle rules back into instructions
 uvx airules implode cursor instructions.md
+
+# Generate database schema prompt using just
+just db_prompt --all
 ```
 
 ### Building and Testing
