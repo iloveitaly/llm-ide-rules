@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.1.0...v0.2.0) (2025-09-15)
+
+
+### Features
+
+* attempt to use trusted publishers ([0b46019](https://github.com/iloveitaly/llm-ide-rules/commit/0b460192ef1bd548d0cbc1c4a245368cbaedf5b4))
+
+
+### Documentation
+
+* **stripe-backend:** add Stripe API integration guidelines for Python backend ([fbaef48](https://github.com/iloveitaly/llm-ide-rules/commit/fbaef48f24946907c9342dc67df3b15a4a785a34))
+* update rules with python package, alembic and test guidelines ([b8a7952](https://github.com/iloveitaly/llm-ide-rules/commit/b8a79527285dbe664ba27acb213cc26ff13f3250))
+
 ## 0.1.0 (2025-08-19)
 
 
