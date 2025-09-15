@@ -13,7 +13,7 @@ from typing_extensions import Annotated
 
 logger = structlog.get_logger()
 
-DEFAULT_REPO = "iloveitaly/llm_ide_rules"
+DEFAULT_REPO = "iloveitaly/llm-ide-rules"
 DEFAULT_BRANCH = "master"
 
 # Define what files/directories each instruction type includes
