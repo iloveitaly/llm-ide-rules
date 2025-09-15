@@ -10,8 +10,6 @@ env:
   PIP_DEFAULT_TIMEOUT: 60
   PIP_RETRIES: 5
 
-  DATABASE_HOST: localhost
-
   # required otherwise github api calls are rate limited
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -20,12 +18,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: [release-please]
     if: needs.release-please.outputs.release_created
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v5
       - uses: jdx/mise-action@v3
       - uses: iloveitaly/github-action-direnv-load-and-mask@master
       - run: uv build
-      - run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}
+      - run: uv publish
 
   release-please:
     runs-on: ubuntu-latest
