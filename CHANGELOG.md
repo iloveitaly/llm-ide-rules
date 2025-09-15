@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.2.0...v0.2.1) (2025-09-15)
+
+
+### Bug Fixes
+
+* cli script name ([b30448c](https://github.com/iloveitaly/llm-ide-rules/commit/b30448c43baa13886ce5b36e47e54c5bdad2be48))
+* update default repo name to iloveitaly/llm-ide-rules ([4251ce7](https://github.com/iloveitaly/llm-ide-rules/commit/4251ce77811caa4247654bcbaaed1db904401192))
+
+
+### Documentation
+
+* fix typos and clarify Python rules in .cursor configs ([20720f2](https://github.com/iloveitaly/llm-ide-rules/commit/20720f26df1f7d219db08ee9b43232f1abc46d98))
+* update README to use llm-ide-rules CLI name and repo ([27f396b](https://github.com/iloveitaly/llm-ide-rules/commit/27f396bbc6640d2597cbfb23546b0884636836f3))
+
 ## [0.2.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.1.0...v0.2.0) (2025-09-15)
 
 
