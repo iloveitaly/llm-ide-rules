@@ -53,5 +53,5 @@ jobs:
       # `uv run` prefix is required since the venv is not activated
 
       - name: Make sure the CLI runs properly
-        run: uv run llm_ide_rules --help
+        run: uv run llm-ide-rules --help
       - run: uv run pytest
