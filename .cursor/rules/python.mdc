@@ -29,9 +29,16 @@ When writing Python:
   * Never add an `Any` type.
   * Do not `cast(object, ...)`
 
+### Data Manipulation
+
+* Prefer `funcy` utilities to complex list comprehensions or repetitive python statements.
+* `import funcy as f`
+* Some utilities to look at: `f.compact`
+
 ### Date & DateTime
 
 * Use the `whenever` library for datetime + time instead of the stdlib date library. `Instant.now().format_common_iso()`
+* DateTime mutation should explicitly opt in to a specific timezone `SystemDateTime.now().add(days=-7)`
 
 ### Database & ORM
 
@@ -43,6 +50,7 @@ When accessing database records:
   * Use `TheModel(...).save()` to persist a record
   * Use `TheModel.where(...).order_by(...)` to query records. `.where()` returns a SQLAlchemy select object that you can further customize the query.
   * To iterate over the records, you'll need to end your query chain with `.all()` which returns an interator: `TheModel.where(...)...all()`
+* Instead of repulling a record `order = HostScreeningOrder.one(order.id)` refresh it using `order.refresh()`
 
 When writing database models:
 
@@ -50,6 +58,7 @@ When writing database models:
 * Add enum classes close to where they are used, unless they are used across multiple classes (then put them at the top of the file)
 * Use `ModelName.foreign_key()` when generating a foreign key field
 * Store currency as an integer, e.g. $1 = 100.
+* `before_save`, `after_save(self):`, `after_updated(self):` are lifecycle methods (modelled after ActiveRecord) you can use.
 
 Example:
 
