@@ -37,7 +37,7 @@ session_id = client_secret_id.split("_secret")[0]
 
 ### Agent instructions
 
-Page careful attention to these instructions when running tests, generating database migrations, or otherwise figuring out how to navigate project development scripts.
+Pay careful attention to these instructions when running tests, generating database migrations, or otherwise figuring out how to navigate project development scripts.
 
 - Run python tests with `pytest` only. Do not `cat` the output and do not use `-q`. If tests fail because of a configuration or system error, do not attempt to fix and let me know. I will fix it.
   - Initially run `pytest --ignore=tests/integration` then only run `pytest tests/integration`
