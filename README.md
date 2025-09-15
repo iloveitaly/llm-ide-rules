@@ -1,4 +1,4 @@
-# Copilot & Cursor LLM Instructions
+# Copilot, Cursor, Claude, Gemini, etc LLM Instructions
 
 Going to try to centralize all my prompts in a single place and create some scripts to help convert from copilot to cursor, etc.
 
