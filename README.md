@@ -10,21 +10,21 @@ Some of the glob assumptions in this repo are specific to how I've chosen to org
 
 ## Installation
 
-You can run the `airules` CLI tool using uvx:
+You can run the `llm-ide-rules` CLI tool using uvx:
 
 ```sh
-uvx airules
+uvx llm-ide-rules
 ```
 
 Or install from the repository:
 
 ```sh
-uv tool install git+https://github.com/iloveitaly/airules.git
+uv tool install git+https://github.com/iloveitaly/llm-ide-rules.git
 ```
 
 ```sh
-git clone https://github.com/iloveitaly/airules.git
-cd airules
+git clone https://github.com/iloveitaly/llm-ide-rules.git
+cd llm-ide-rules
 uv sync
 source .venv/bin/activate
 ```
@@ -33,20 +33,20 @@ source .venv/bin/activate
 
 ### CLI Commands
 
-The `airules` CLI provides commands to manage LLM IDE prompts and rules:
+The `llm-ide-rules` CLI provides commands to manage LLM IDE prompts and rules:
 
 ```sh
 # Convert instruction file to separate rule files
-uvx airules explode [input_file]
+uvx llm-ide-rules explode [input_file]
 
 # Bundle rule files back into a single instruction file
-uvx airules implode cursor [output_file]     # Bundle Cursor rules
-uvx airules implode github [output_file]    # Bundle GitHub/Copilot instructions
+uvx llm-ide-rules implode cursor [output_file]     # Bundle Cursor rules
+uvx llm-ide-rules implode github [output_file]    # Bundle GitHub/Copilot instructions
 
 # Download instruction files from repositories
-uvx airules download [instruction_types]    # Download everything by default
-uvx airules download cursor github          # Download specific types
-uvx airules download --repo other/repo      # Download from different repo
+uvx llm-ide-rules download [instruction_types]    # Download everything by default
+uvx llm-ide-rules download cursor github          # Download specific types
+uvx llm-ide-rules download --repo other/repo      # Download from different repo
 
 
 ```
@@ -55,22 +55,22 @@ uvx airules download --repo other/repo      # Download from different repo
 
 ```sh
 # Explode instructions.md into .cursor/rules/ and .github/instructions/
-uvx airules explode instructions.md
+uvx llm-ide-rules explode instructions.md
 
 # Bundle Cursor rules back into a single file
-uvx airules implode cursor bundled-instructions.md
+uvx llm-ide-rules implode cursor bundled-instructions.md
 
 # Bundle GitHub instructions with verbose logging
-uvx airules implode github --verbose instructions.md
+uvx llm-ide-rules implode github --verbose instructions.md
 
 # Download everything from default repository
-uvx airules download
+uvx llm-ide-rules download
 
 # Download only specific instruction types
-uvx airules download cursor github
+uvx llm-ide-rules download cursor github
 
 # Download from a different repository
-uvx airules download --repo other-user/other-repo --target ./my-project
+uvx llm-ide-rules download --repo other-user/other-repo --target ./my-project
 ```
 
 ## Development
@@ -84,10 +84,10 @@ The CLI replaces the old standalone scripts. Use the CLI commands in your develo
 uv sync
 
 # Explode instructions into separate rule files
-uvx airules explode
+uvx llm-ide-rules explode
 
 # Bundle rules back into instructions
-uvx airules implode cursor instructions.md
+uvx llm-ide-rules implode cursor instructions.md
 ```
 
 ### Building and Testing
@@ -99,9 +99,6 @@ uv build
 # Run tests
 pytest
 ```
-
-
-
 
 ## Extracting Changes
 
