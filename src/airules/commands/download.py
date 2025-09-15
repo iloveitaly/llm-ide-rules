@@ -13,7 +13,7 @@ from typing_extensions import Annotated
 
 logger = structlog.get_logger()
 
-DEFAULT_REPO = "iloveitaly/airules"
+DEFAULT_REPO = "iloveitaly/llm_ide_rules"
 DEFAULT_BRANCH = "master"
 
 # Define what files/directories each instruction type includes
@@ -186,19 +186,19 @@ def download_main(
 
     \b
     # Download everything from the default repository
-    airules download
+    llm_ide_rules download
 
     \b
     # Download only Cursor and GitHub instructions
-    airules download cursor github
+    llm_ide_rules download cursor github
 
     \b
     # Download from a different repository
-    airules download --repo other-user/other-repo
+    llm_ide_rules download --repo other-user/other-repo
 
     \b
     # Download to a specific directory
-    airules download --target ./my-project
+    llm_ide_rules download --target ./my-project
     """
     if verbose:
         logging.basicConfig(level=logging.DEBUG)

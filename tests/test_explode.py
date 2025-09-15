@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from typer.testing import CliRunner
 
-from airules import app
+from llm_ide_rules import app
 
 
 def test_explode_help():

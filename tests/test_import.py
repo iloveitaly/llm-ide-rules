@@ -1,9 +1,9 @@
 """Test llm-rules CLI package."""
 
-import airules
+import llm_ide_rules
 
 
 def test_import() -> None:
     """Test that the package can be imported."""
-    assert isinstance(airules.__version__, str)
-    assert airules.__version__ == "0.1.0"
+    assert isinstance(llm_ide_rules.__version__, str)
+    assert llm_ide_rules.__version__ == "0.1.0"

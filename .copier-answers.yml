@@ -1,2 +1,2 @@
 # this exact file name is required in this exact location if updates are to work
-{"_commit": "v0.2.1-45-gc8b7694", "_src_path": "https://github.com/iloveitaly/python-package-template", "project_name": "airules", "full_name": "Michael Bianco", "email": "mike@mikebian.co", "github_username": "iloveitaly", "build_workflow": "manual_matrix"}
+{"_commit": "v0.2.1-45-gc8b7694", "_src_path": "https://github.com/iloveitaly/python-package-template", "project_name": "llm_ide_rules", "full_name": "Michael Bianco", "email": "mike@mikebian.co", "github_username": "iloveitaly", "build_workflow": "manual_matrix"}

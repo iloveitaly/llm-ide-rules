@@ -7,7 +7,7 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "airules"
+name = "llm_ide_rules"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

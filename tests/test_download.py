@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 from typer.testing import CliRunner
 
-from airules import app
+from llm_ide_rules import app
 
 
 def test_download_help():
@@ -22,8 +22,8 @@ def test_download_help():
     assert "target" in result.stdout
 
 
-@patch("airules.commands.download.requests.get")
-@patch("airules.commands.download.zipfile.ZipFile")
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
 def test_download_basic_functionality(mock_zipfile, mock_requests):
     """Test basic download functionality."""
     runner = CliRunner()
@@ -42,7 +42,7 @@ def test_download_basic_functionality(mock_zipfile, mock_requests):
         os.chdir(temp_dir)
 
         # Create a fake extracted repo structure for the mock
-        extracted_dir = Path("extracted/airules-master")
+        extracted_dir = Path("extracted/llm_ide_rules-master")
         extracted_dir.mkdir(parents=True)
 
         # Create sample files in the fake repo
@@ -141,7 +141,7 @@ def test_download_invalid_instruction_type():
         assert result.exit_code == 1
 
 
-@patch("airules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.requests.get")
 def test_download_network_error(mock_requests):
     """Test download command with network error."""
     runner = CliRunner()
@@ -161,7 +161,7 @@ def test_download_network_error(mock_requests):
 
 def test_download_instruction_types_configuration():
     """Test that instruction types are properly configured."""
-    from airules.commands.download import DEFAULT_TYPES, INSTRUCTION_TYPES
+    from llm_ide_rules.commands.download import DEFAULT_TYPES, INSTRUCTION_TYPES
 
     # Check that all expected types are present
     expected_types = ["cursor", "github", "gemini", "claude", "agent"]
@@ -180,7 +180,7 @@ def test_download_instruction_types_configuration():
 
 def test_download_exclude_patterns():
     """Test that github instruction type has exclude patterns configured."""
-    from airules.commands.download import INSTRUCTION_TYPES
+    from llm_ide_rules.commands.download import INSTRUCTION_TYPES
 
     github_config = INSTRUCTION_TYPES["github"]
     assert "exclude_patterns" in github_config

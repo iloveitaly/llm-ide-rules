@@ -1,6 +1,6 @@
-"""Entry point for running airules with python -m airules."""
+"""Entry point for running llm_ide_rules with python -m llm_ide_rules."""
 
-from airules import main
+from llm_ide_rules import main
 
 if __name__ == "__main__":
     main()

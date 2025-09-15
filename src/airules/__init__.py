@@ -3,14 +3,14 @@
 import typer
 from typing_extensions import Annotated
 
-from airules.commands.explode import explode_main
-from airules.commands.implode import cursor, github
-from airules.commands.download import download_main
+from llm_ide_rules.commands.explode import explode_main
+from llm_ide_rules.commands.implode import cursor, github
+from llm_ide_rules.commands.download import download_main
 
 __version__ = "0.1.0"
 
 app = typer.Typer(
-    name="airules",
+    name="llm_ide_rules",
     help="CLI tool for managing LLM IDE prompts and rules",
     no_args_is_help=True,
 )
