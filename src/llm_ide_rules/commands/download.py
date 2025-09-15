@@ -1,6 +1,7 @@
 """Download command: Download LLM instruction files from GitHub repositories."""
 
 import logging
+import re
 import tempfile
 import zipfile
 from pathlib import Path
@@ -15,6 +16,28 @@ logger = structlog.get_logger()
 
 DEFAULT_REPO = "iloveitaly/llm-ide-rules"
 DEFAULT_BRANCH = "master"
+
+
+def normalize_repo(repo: str) -> str:
+    """Normalize repository input to user/repo format.
+    
+    Handles both formats:
+    - user/repo (unchanged)
+    - https://github.com/user/repo/ (extracts user/repo)
+    """
+    # If it's already in user/repo format, return as-is
+    if "/" in repo and not repo.startswith("http"):
+        return repo
+    
+    # Extract user/repo from GitHub URL
+    github_pattern = r"https?://github\.com/([^/]+/[^/]+)/?.*"
+    match = re.match(github_pattern, repo)
+    
+    if match:
+        return match.group(1)
+    
+    # If no pattern matches, assume it's already in the correct format
+    return repo
 
 # Define what files/directories each instruction type includes
 INSTRUCTION_TYPES = {
@@ -35,9 +58,10 @@ DEFAULT_TYPES = list(INSTRUCTION_TYPES.keys())
 
 def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
     """Download a GitHub repository as a ZIP and extract it to a temporary directory."""
-    zip_url = f"https://github.com/{repo}/archive/{branch}.zip"
+    normalized_repo = normalize_repo(repo)
+    zip_url = f"https://github.com/{normalized_repo}/archive/{branch}.zip"
 
-    logger.info("Downloading repository", repo=repo, branch=branch, url=zip_url)
+    logger.info("Downloading repository", repo=repo, normalized_repo=normalized_repo, branch=branch, url=zip_url)
 
     try:
         response = requests.get(zip_url, timeout=30)
