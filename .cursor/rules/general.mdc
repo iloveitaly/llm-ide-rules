@@ -4,6 +4,7 @@ alwaysApply: true
 ---
 Coding instructions for all programming languages:
 
+- Never use emojis in any code, comments, or documentation unless explicitly requested by the user.
 - If no language is specified, assume the latest version of python.
 - If tokens or other secrets are needed, pull them from an environment variable
 - Prefer early returns over nested if statements.
