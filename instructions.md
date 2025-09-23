@@ -1,5 +1,6 @@
 Coding instructions for all programming languages:
 
+- Never use emojis in any code, comments, or documentation unless explicitly requested by the user.
 - If no language is specified, assume the latest version of python.
 - If tokens or other secrets are needed, pull them from an environment variable
 - Prefer early returns over nested if statements.
@@ -9,7 +10,7 @@ Coding instructions for all programming languages:
 - Do not remove existing comments.
 - When I ask you to write code, prioritize simplicity and legibility over covering all edge cases, handling all errors, etc.
 - When a particular need can be met with a mature, reasonably adopted and maintained package, I would prefer to use that package rather than engineering my own solution.
-- Never add error handling to recover gracefully from an error without being asked to do so. Fail hard and early with assertions and allowing exceptions to propagate whenever possible
+- Never add error handling to catch an error without being asked to do so. Fail hard and early with assertions and allow exceptions to propagate.
 - When naming variables or functions, use names that describe the effect. For example, instead of `function handleClaimFreeTicket` (a function which opens a dialog box) use `function openClaimFreeTicketDialog`.
 
 Use line breaks to organize code into logical groups. Instead of:
@@ -33,12 +34,13 @@ session_id = client_secret_id.split("_secret")[0]
 
 ### Agent instructions
 
-Page careful attention to these instructions when running tests, generating database migrations, or otherwise figuring out how to navigate project development scripts.
+Pay careful attention to these instructions when running tests, generating database migrations, or otherwise figuring out how to navigate project development scripts.
 
 - Run python tests with `pytest` only. Do not `cat` the output and do not use `-q`. If tests fail because of a configuration or system error, do not attempt to fix and let me know. I will fix it.
-  - Start with running non-integration tests with `pytest --ignore=tests/integration` then just run the integration tests `pytest tests/integration`
+  - Initially run `pytest --ignore=tests/integration` then only run `pytest tests/integration`
   - When debugging integration tests look at `$PLAYWRIGHT_RESULT_DIRECTORY`. There's a directory for each test failure. In that directory you fill find a `failure.html` containing the rendered DOM of the page on failure and a screenshot of the contents. Use these to debug why it failed.
 - Do not attempt to create or run database migrations. Pause your work and let me know you need a migration run.
+- Use `uv add` to add python packages. No need for `pip compile`, etc.
 
 ## Python
 
@@ -55,7 +57,7 @@ When writing Python:
   * Do not coerce database IDs or dates to `str`
 * Do not fix import ordering or other linting issues.
 * Never edit or create any files in `migrations/versions/`
-* Place all comments on dedicated lines immediately above the code statements they describe, using the '#' symbol. Avoid inline comments appended to the end of code lines.
+* Do not `try/catch` raw `Exceptions` unless explicitly told to. Prefer to let exceptions raise and cause an explicit error.
 
 ### Typing
 
@@ -66,9 +68,32 @@ When writing Python:
   * Never add an `Any` type.
   * Do not `cast(object, ...)`
 
+### Data Manipulation
+
+* Prefer `funcy` utilities to complex list comprehensions or repetitive python statements.
+* `import funcy as f` and `import funcy_pipe as fp`
+* Some utilities to look at: `f.compact`
+
+For example, instead of:
+
+```python
+params: dict[str, str] = {}
+if city:
+    params["city"] = city
+if state_code:
+    params["stateCode"] = state_code
+```
+
+Use:
+
+```python
+params = f.compact({"city": city, "stateCode": stateCode})
+```
+
 ### Date & DateTime
 
 * Use the `whenever` library for datetime + time instead of the stdlib date library. `Instant.now().format_common_iso()`
+* DateTime mutation should explicitly opt in to a specific timezone `SystemDateTime.now().add(days=-7)`
 
 ### Database & ORM
 
@@ -79,6 +104,8 @@ When accessing database records:
 * Do not manage database sessions, these are managed by a custom tool
   * Use `TheModel(...).save()` to persist a record
   * Use `TheModel.where(...).order_by(...)` to query records. `.where()` returns a SQLAlchemy select object that you can further customize the query.
+  * To iterate over the records, you'll need to end your query chain with `.all()` which returns an interator: `TheModel.where(...)...all()`
+* Instead of repulling a record `order = HostScreeningOrder.one(order.id)` refresh it using `order.refresh()`
 
 When writing database models:
 
@@ -86,6 +113,7 @@ When writing database models:
 * Add enum classes close to where they are used, unless they are used across multiple classes (then put them at the top of the file)
 * Use `ModelName.foreign_key()` when generating a foreign key field
 * Store currency as an integer, e.g. $1 = 100.
+* `before_save`, `after_save(self):`, `after_updated(self):` are lifecycle methods (modelled after ActiveRecord) you can use.
 
 Example:
 
@@ -138,6 +166,9 @@ class Distribution(
 - Use the `faker` factory to generate emails, etc.
 - Don't add obvious `assert` descriptions
 - Do not use the `db_session` fixture here. Instead, use `with test_session():` if you need to setup complex database state
+- if a UI timeout is occuring, it could be because it cannot find a element because the rendering has changed. Check the failure screenshot and see if you can correct the test assertion.
+- The integration tests can take a very long time to run. Do not abort them if they are taking a long time.
+- Use `expect(page.get_by_text("Screening is fully booked")).to_be_visible()` instead of `expect(page.get_by_role("heading")).to_contain_text("Screening is fully booked")`. It's less brittle.
 
 ## Pytest Tests
 
@@ -145,8 +176,9 @@ class Distribution(
   - Here's an example of how to create + persist a factory `DistributionFactory.save()`
 - Use the `faker` factory to generate emails, etc.
 - Do not mock or patch unless I instruct you to. Test as much of the application stack as possible in each test.
-- If you get lazy attribute errors, use the `db_session` fixture
-- If we are testing Stripe interactions, assume we want to hit the live sandbox API. Don't mock out Stripe interactions unless I explicitly instruct you to.
+- If you get lazy attribute errors, or need a database session to share across logic, use the `db_session` fixture to fix the issue.
+  - Note that when writing route tests a `db_session` is not needed for the logic inside of the route.
+- When testing Stripe, use the sandbox API. Never mock out Stripe interactions unless explicitly told to.
 
 ## Python Route Tests
 
@@ -155,7 +187,20 @@ class Distribution(
 
 ## Alembic Migrations
 
-### Data Migrations
+### Default Content for New Non-Nullable Columns
+
+To add a non-nullable column and set a specific value for all existing rows without a persistent server default:
+
+```python
+# 1. Add the column as nullable (no default needed):
+op.add_column('distribution', sa.Column('default_campaign_ending_date', sa.DateTime(timezone=True), nullable=True))
+# 2. Update existing rows with your desired value (e.g., a specific datetime)
+op.execute("UPDATE distribution SET default_campaign_ending_date = %s", [datetime.utcnow()])
+# 3. Alter the column to non-nullable:
+op.alter_column('distribution', 'default_campaign_ending_date', nullable=False)
+```
+
+### Record Backfill Operations
 
 For migrations that include data mutation, and not only schema modifications, use this pattern to setup a session:
 
@@ -178,6 +223,14 @@ def upgrade() -> None:
 
   # flush before running any other operations, otherwise not all changes will persist to the transaction
   session.flush()
+```
+
+However, if you don't need the business logic attached to the models, you can execute a query using `op.execute`:
+
+```python
+op.execute(
+  TheModel.__table__.update().values({"a_field": "a_value"}) # type: ignore
+)
 ```
 
 ## FastAPI
@@ -451,4 +504,13 @@ Let's separate this into key sections:
 ## Refactor On Instructions
 
 Refactor this code following all the established coding rules. Carefully review each rule.
+
+## Stripe Backend
+
+- `cast(object, ...)` should not be used. Can you instead cast expandable fields to PaymentIntent, or whatever their expandable type is?
+- `from stripe import Charge` can we use top-level imports instead of importing from private packages?
+- Do not `customer = getattr(session, "customer", None)` instead just access `session.customer` and assert that it is not null. Use the pattern for all stripe objects.
+- When iterating through a list that you expect to be comprehensive use `auto_paging_iter` for example `stripe_client.prices.list(params={ ... }).auto_paging_iter()`
+- Assume the new `StripeClient` is used everywhere and type it as such. When using this client, all API params should be a dictionary inside a `params=` kwarg.
+- `amount_refunded=0` when the charge is disputed. The dispute amount only exists in the `balance_transactions` of the dispute object.
 
