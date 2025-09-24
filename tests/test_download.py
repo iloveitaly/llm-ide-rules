@@ -164,7 +164,7 @@ def test_download_instruction_types_configuration():
     from llm_ide_rules.commands.download import DEFAULT_TYPES, INSTRUCTION_TYPES
 
     # Check that all expected types are present
-    expected_types = ["cursor", "github", "gemini", "claude", "agent", "agents"]
+    expected_types = ["cursor", "github", "gemini", "claude", "agent"]
     assert all(t in INSTRUCTION_TYPES for t in expected_types)
 
     # Check that DEFAULT_TYPES uses the keys from INSTRUCTION_TYPES
@@ -185,23 +185,6 @@ def test_download_exclude_patterns():
     github_config = INSTRUCTION_TYPES["github"]
     assert "exclude_patterns" in github_config
     assert "workflows/*" in github_config["exclude_patterns"]
-
-
-def test_download_agents_alias():
-    """Test that 'agents' works as an alias for 'agent'."""
-    from llm_ide_rules.commands.download import INSTRUCTION_TYPES
-
-    # Both 'agent' and 'agents' should be present
-    assert "agent" in INSTRUCTION_TYPES
-    assert "agents" in INSTRUCTION_TYPES
-    
-    # They should have the same configuration (both download AGENT.md)
-    assert INSTRUCTION_TYPES["agent"]["files"] == ["AGENT.md"]
-    assert INSTRUCTION_TYPES["agents"]["files"] == ["AGENT.md"]
-    
-    # Both should have empty directories list
-    assert INSTRUCTION_TYPES["agent"]["directories"] == []
-    assert INSTRUCTION_TYPES["agents"]["directories"] == []
 
 
 def test_normalize_repo():

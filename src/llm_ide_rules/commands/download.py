@@ -50,7 +50,6 @@ INSTRUCTION_TYPES = {
     "gemini": {"directories": [], "files": ["GEMINI.md"]},
     "claude": {"directories": [], "files": ["CLAUDE.md"]},
     "agent": {"directories": [], "files": ["AGENT.md"]},
-    "agents": {"directories": [], "files": ["AGENT.md"]},  # Alias for backward compatibility
 }
 
 # Default types to download when no specific types are specified
@@ -186,7 +185,7 @@ def download_main(
     instruction_types: Annotated[
         List[str],
         typer.Argument(
-            help="Types of instructions to download (cursor, github, gemini, claude, agent/agents). Downloads everything by default."
+            help="Types of instructions to download (cursor, github, gemini, claude, agent). Downloads everything by default."
         ),
     ] = None,
     repo: Annotated[
