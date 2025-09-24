@@ -48,12 +48,7 @@ INSTRUCTION_TYPES = {
         "include_patterns": [
             "instructions/*",
             "prompts/*",
-            "copilot-instructions.md",
-            "CODEOWNERS",
-            "ISSUE_TEMPLATE*",
-            "pull_request_template*",
-            "CODE_OF_CONDUCT.md",
-            "SECURITY.md"
+            "copilot-instructions.md"
         ],
     },
     "gemini": {"directories": [], "files": ["GEMINI.md"]},

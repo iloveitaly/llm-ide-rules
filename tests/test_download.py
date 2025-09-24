@@ -215,20 +215,26 @@ def test_download_include_instruction_files():
             ".dependabot/config.yml"
         ]
         
-        # Create files that should be included (instruction-related)
+        # Create files that should be included (instruction-related only)
         instruction_files = [
             "instructions/python.md",
             "instructions/react.md",
             "copilot-instructions.md",
             "prompts/test.md",
-            "prompts/another.md",
+            "prompts/another.md"
+        ]
+        
+        # Create files that should be excluded (including GitHub repository files)
+        excluded_files = [
             "CODEOWNERS",
             "ISSUE_TEMPLATE.md",
-            "CODE_OF_CONDUCT.md"
+            "CODE_OF_CONDUCT.md",
+            "SECURITY.md",
+            "pull_request_template.md"
         ]
         
         # Create all test files
-        for file_path in workflow_files + instruction_files:
+        for file_path in workflow_files + instruction_files + excluded_files:
             full_path = source_dir / file_path
             full_path.parent.mkdir(parents=True, exist_ok=True)
             full_path.write_text(f"Content of {file_path}")
@@ -241,7 +247,11 @@ def test_download_include_instruction_files():
         for file_path in workflow_files:
             assert not (target_dir / file_path).exists(), f"Workflow file {file_path} should have been excluded"
         
-        # Check that instruction files were included
+        # Check that GitHub repository files were excluded (not copied)
+        for file_path in excluded_files:
+            assert not (target_dir / file_path).exists(), f"GitHub repository file {file_path} should have been excluded"
+        
+        # Check that only instruction files were included
         for file_path in instruction_files:
             assert (target_dir / file_path).exists(), f"Instruction file {file_path} should have been included"
 
