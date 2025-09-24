@@ -12,6 +12,8 @@ Coding instructions for all programming languages:
 - When a particular need can be met with a mature, reasonably adopted and maintained package, I would prefer to use that package rather than engineering my own solution.
 - Never add error handling to catch an error without being asked to do so. Fail hard and early with assertions and allow exceptions to propagate.
 - When naming variables or functions, use names that describe the effect. For example, instead of `function handleClaimFreeTicket` (a function which opens a dialog box) use `function openClaimFreeTicketDialog`.
+- Do not install system packages. Instead, ask me to install them for you.
+- If terminal commands are failing because of missing variables or commands which are unrelated to your current task, stop your work and let me know.
 
 Use line breaks to organize code into logical groups. Instead of:
 
@@ -54,9 +56,10 @@ When writing Python:
 * Use `log.info("the message", the_variable=the_variable)` instead of `log.info("The message: %s", the_variable)` or `print` for logging. This object can be found at `from app import log`.
   * Log messages should be lowercase with no leading or trailing whitespace.
   * No variable interpolation in log messages.
-  * Do not coerce database IDs or dates to `str`
+  * Do not coerce database IDs, dates, or Path objects to `str`
 * Do not fix import ordering or other linting issues.
 * Never edit or create any files in `migrations/versions/`
+* Place all comments on dedicated lines immediately above the code statements they describe. Avoid inline comments appended to the end of code lines.
 * Do not `try/catch` raw `Exceptions` unless explicitly told to. Prefer to let exceptions raise and cause an explicit error.
 
 ### Typing
