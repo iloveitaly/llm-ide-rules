@@ -45,14 +45,15 @@ INSTRUCTION_TYPES = {
     "github": {
         "directories": [".github"],
         "files": [],
-        "exclude_patterns": [
-            "workflows/*",
-            "dependabot.yml",
-            "dependabot.yaml",
-            "funding.yml",
-            "release.yml",
-            "stale.yml",
-            ".dependabot/*"
+        "include_patterns": [
+            "instructions/*",
+            "prompts/*",
+            "copilot-instructions.md",
+            "CODEOWNERS",
+            "ISSUE_TEMPLATE*",
+            "pull_request_template*",
+            "CODE_OF_CONDUCT.md",
+            "SECURITY.md"
         ],
     },
     "gemini": {"directories": [], "files": ["GEMINI.md"]},
@@ -134,7 +135,7 @@ def copy_instruction_files(
 
                 # Copy all files from source to target
                 copy_directory_contents(
-                    source_dir, target_subdir, config.get("exclude_patterns", [])
+                    source_dir, target_subdir, config.get("include_patterns", [])
                 )
                 copied_items.append(f"{dir_name}/")
 
@@ -159,31 +160,39 @@ def copy_instruction_files(
 
 
 def copy_directory_contents(
-    source_dir: Path, target_dir: Path, exclude_patterns: List[str]
+    source_dir: Path, target_dir: Path, include_patterns: List[str]
 ):
-    """Recursively copy directory contents, excluding specified patterns."""
+    """Recursively copy directory contents, including only specified patterns."""
     for item in source_dir.rglob("*"):
         if item.is_file():
             relative_path = item.relative_to(source_dir)
             relative_str = str(relative_path)
 
-            # Check if file matches any exclude pattern
-            should_exclude = False
-            for pattern in exclude_patterns:
+            # Check if file matches any include pattern
+            should_include = False
+            for pattern in include_patterns:
                 if pattern.endswith("/*"):
-                    # Pattern like "workflows/*" - exclude if path starts with "workflows/"
+                    # Pattern like "instructions/*" - include if path starts with "instructions/"
                     pattern_prefix = pattern[:-1]  # Remove the "*"
                     if relative_str.startswith(pattern_prefix):
-                        should_exclude = True
+                        should_include = True
+                        break
+                elif pattern.endswith("*"):
+                    # Pattern like "ISSUE_TEMPLATE*" - include if filename starts with prefix
+                    pattern_prefix = pattern[:-1]  # Remove the "*"
+                    filename = relative_path.name
+                    if filename.startswith(pattern_prefix):
+                        should_include = True
                         break
                 elif relative_str == pattern:
-                    should_exclude = True
+                    should_include = True
                     break
 
-            if should_exclude:
-                logger.debug("Excluding file", file=relative_str, pattern=pattern)
+            if not should_include:
+                logger.debug("Skipping file", file=relative_str)
                 continue
 
+            logger.debug("Including file", file=relative_str, pattern=pattern)
             target_file = target_dir / relative_path
             target_file.parent.mkdir(parents=True, exist_ok=True)
             target_file.write_bytes(item.read_bytes())

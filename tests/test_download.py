@@ -178,22 +178,22 @@ def test_download_instruction_types_configuration():
         assert isinstance(config["files"], list)
 
 
-def test_download_exclude_patterns():
-    """Test that github instruction type has exclude patterns configured."""
+def test_download_include_patterns():
+    """Test that github instruction type has include patterns configured."""
     from llm_ide_rules.commands.download import INSTRUCTION_TYPES
 
     github_config = INSTRUCTION_TYPES["github"]
-    assert "exclude_patterns" in github_config
+    assert "include_patterns" in github_config
     
-    # Check that key workflow-related patterns are excluded
-    exclude_patterns = github_config["exclude_patterns"]
-    assert "workflows/*" in exclude_patterns
-    assert "dependabot.yml" in exclude_patterns
-    assert "dependabot.yaml" in exclude_patterns
+    # Check that key AI instruction patterns are included
+    include_patterns = github_config["include_patterns"]
+    assert "instructions/*" in include_patterns
+    assert "prompts/*" in include_patterns
+    assert "copilot-instructions.md" in include_patterns
 
 
-def test_download_exclude_workflow_files():
-    """Test that workflow-related files are properly excluded during copy."""
+def test_download_include_instruction_files():
+    """Test that only instruction-related files are included during copy."""
     import tempfile
     from llm_ide_rules.commands.download import copy_directory_contents, INSTRUCTION_TYPES
     
@@ -218,10 +218,13 @@ def test_download_exclude_workflow_files():
         # Create files that should be included (instruction-related)
         instruction_files = [
             "instructions/python.md",
+            "instructions/react.md",
             "copilot-instructions.md",
             "prompts/test.md",
+            "prompts/another.md",
             "CODEOWNERS",
-            "ISSUE_TEMPLATE.md"
+            "ISSUE_TEMPLATE.md",
+            "CODE_OF_CONDUCT.md"
         ]
         
         # Create all test files
@@ -230,11 +233,11 @@ def test_download_exclude_workflow_files():
             full_path.parent.mkdir(parents=True, exist_ok=True)
             full_path.write_text(f"Content of {file_path}")
         
-        # Copy with github exclude patterns
-        exclude_patterns = INSTRUCTION_TYPES["github"]["exclude_patterns"]
-        copy_directory_contents(source_dir, target_dir, exclude_patterns)
+        # Copy with github include patterns
+        include_patterns = INSTRUCTION_TYPES["github"]["include_patterns"]
+        copy_directory_contents(source_dir, target_dir, include_patterns)
         
-        # Check that workflow files were excluded
+        # Check that workflow files were excluded (not copied)
         for file_path in workflow_files:
             assert not (target_dir / file_path).exists(), f"Workflow file {file_path} should have been excluded"
         
