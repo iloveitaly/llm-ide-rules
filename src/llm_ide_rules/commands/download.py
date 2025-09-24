@@ -50,6 +50,7 @@ INSTRUCTION_TYPES = {
     "gemini": {"directories": [], "files": ["GEMINI.md"]},
     "claude": {"directories": [], "files": ["CLAUDE.md"]},
     "agent": {"directories": [], "files": ["AGENT.md"]},
+    "agents": {"directories": [], "files": [], "recursive_files": ["AGENTS.md"]},
 }
 
 # Default types to download when no specific types are specified
@@ -147,6 +148,60 @@ def copy_instruction_files(
                 target_file.write_bytes(source_file.read_bytes())
                 copied_items.append(file_name)
 
+        # Copy recursive files (search throughout repository)
+        for file_pattern in config.get("recursive_files", []):
+            copied_recursive = copy_recursive_files(repo_dir, target_dir, file_pattern)
+            copied_items.extend(copied_recursive)
+
+    return copied_items
+
+
+def copy_recursive_files(
+    repo_dir: Path, target_dir: Path, file_pattern: str
+) -> List[str]:
+    """Recursively copy files matching pattern, preserving directory structure.
+    
+    Only copies files to locations where the target directory already exists.
+    Warns and skips files where target directories don't exist.
+    
+    Args:
+        repo_dir: Source repository directory
+        target_dir: Target directory to copy to
+        file_pattern: File pattern to search for (e.g., "AGENTS.md")
+    
+    Returns:
+        List of copied file paths relative to target_dir
+    """
+    copied_items = []
+    
+    # Find all matching files recursively
+    matching_files = list(repo_dir.rglob(file_pattern))
+    
+    for source_file in matching_files:
+        # Calculate relative path from repo root
+        relative_path = source_file.relative_to(repo_dir)
+        target_file = target_dir / relative_path
+        
+        # Check if target directory already exists
+        target_parent = target_file.parent
+        if not target_parent.exists():
+            logger.warning(
+                "Target directory does not exist, skipping file copy",
+                target_directory=str(target_parent),
+                file=str(relative_path)
+            )
+            continue
+            
+        logger.info(
+            "Copying recursive file",
+            source=str(source_file),
+            target=str(target_file)
+        )
+        
+        # Copy file (parent directory already exists)
+        target_file.write_bytes(source_file.read_bytes())
+        copied_items.append(str(relative_path))
+    
     return copied_items
 
 
@@ -185,7 +240,7 @@ def download_main(
     instruction_types: Annotated[
         List[str],
         typer.Argument(
-            help="Types of instructions to download (cursor, github, gemini, claude, agent). Downloads everything by default."
+            help="Types of instructions to download (cursor, github, gemini, claude, agent, agents). Downloads everything by default."
         ),
     ] = None,
     repo: Annotated[

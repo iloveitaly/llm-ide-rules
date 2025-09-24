@@ -164,7 +164,7 @@ def test_download_instruction_types_configuration():
     from llm_ide_rules.commands.download import DEFAULT_TYPES, INSTRUCTION_TYPES
 
     # Check that all expected types are present
-    expected_types = ["cursor", "github", "gemini", "claude", "agent"]
+    expected_types = ["cursor", "github", "gemini", "claude", "agent", "agents"]
     assert all(t in INSTRUCTION_TYPES for t in expected_types)
 
     # Check that DEFAULT_TYPES uses the keys from INSTRUCTION_TYPES
@@ -176,6 +176,9 @@ def test_download_instruction_types_configuration():
         assert "files" in config
         assert isinstance(config["directories"], list)
         assert isinstance(config["files"], list)
+        # recursive_files is optional
+        if "recursive_files" in config:
+            assert isinstance(config["recursive_files"], list)
 
 
 def test_download_exclude_patterns():
@@ -246,3 +249,110 @@ def test_download_with_full_github_url(mock_zipfile, mock_requests):
             
             # Verify the result is the extracted directory
             assert result == extracted_dir
+
+
+def test_agents_instruction_type_configuration():
+    """Test that agents instruction type has recursive_files configured."""
+    from llm_ide_rules.commands.download import INSTRUCTION_TYPES
+
+    agents_config = INSTRUCTION_TYPES["agents"]
+    assert "recursive_files" in agents_config
+    assert "AGENTS.md" in agents_config["recursive_files"]
+    assert agents_config["directories"] == []
+    assert agents_config["files"] == []
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+def test_download_agents_with_directory_structure(mock_zipfile, mock_requests):
+    """Test downloading AGENTS.md files with preserved directory structure."""
+    from llm_ide_rules.commands.download import copy_recursive_files
+
+    runner = CliRunner()
+
+    # Mock the HTTP request
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    # Mock the zipfile extraction
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        # Create a fake extracted repo structure for the mock
+        repo_dir = Path("repo")
+        repo_dir.mkdir()
+        
+        # Create AGENTS.md files in different locations
+        (repo_dir / "AGENTS.md").write_text("Root agents file")
+        
+        subdir = repo_dir / "docs"
+        subdir.mkdir()
+        (subdir / "AGENTS.md").write_text("Docs agents file")
+        
+        nested_dir = repo_dir / "project" / "config"
+        nested_dir.mkdir(parents=True)
+        (nested_dir / "AGENTS.md").write_text("Nested agents file")
+        
+        # Create target directory with some existing structure
+        target_dir = Path("target")
+        target_dir.mkdir()
+        
+        # Create matching directory structure in target (for successful copies)
+        (target_dir / "docs").mkdir()
+        
+        # Test the recursive file copy function directly
+        copied_items = copy_recursive_files(repo_dir, target_dir, "AGENTS.md")
+        
+        # Should copy root file and docs file, but not nested file (no matching dir)
+        assert len(copied_items) == 2
+        assert "AGENTS.md" in copied_items
+        assert "docs/AGENTS.md" in copied_items
+        assert "project/config/AGENTS.md" not in copied_items
+        
+        # Verify files were actually copied
+        assert (target_dir / "AGENTS.md").exists()
+        assert (target_dir / "docs" / "AGENTS.md").exists()
+        assert not (target_dir / "project" / "config" / "AGENTS.md").exists()
+
+
+def test_copy_recursive_files_warning_for_missing_directories():
+    """Test that copy_recursive_files warns when target directories don't exist."""
+    from llm_ide_rules.commands.download import copy_recursive_files
+    import logging
+    
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        # Create a fake repo structure 
+        repo_dir = Path("repo")
+        repo_dir.mkdir()
+        
+        # Create AGENTS.md files in different locations
+        (repo_dir / "AGENTS.md").write_text("Root agents file")
+        
+        subdir = repo_dir / "missing-in-target"
+        subdir.mkdir()
+        (subdir / "AGENTS.md").write_text("Will be skipped")
+        
+        # Create target directory without the subdirectory
+        target_dir = Path("target")
+        target_dir.mkdir()
+        
+        # Capture log output
+        with patch('llm_ide_rules.commands.download.logger') as mock_logger:
+            copied_items = copy_recursive_files(repo_dir, target_dir, "AGENTS.md")
+            
+            # Should only copy root file
+            assert len(copied_items) == 1
+            assert "AGENTS.md" in copied_items
+            assert "missing-in-target/AGENTS.md" not in copied_items
+            
+            # Should have called warning for missing directory
+            mock_logger.warning.assert_called_once()
+            call_args = mock_logger.warning.call_args
+            assert "Target directory does not exist, skipping file copy" in call_args[0]
