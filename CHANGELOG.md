@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.2.1...v0.3.0) (2025-09-24)
+
+
+### Features
+
+* add support for downloading AGENTS.md files recursively with preserved directory structure ([#25](https://github.com/iloveitaly/llm-ide-rules/issues/25)) ([b92d6d2](https://github.com/iloveitaly/llm-ide-rules/commit/b92d6d22a038c804071aaa019bf8965ae84c6a62))
+
+
+### Documentation
+
+* add guideline to avoid emojis and update UI assertion advice ([645884c](https://github.com/iloveitaly/llm-ide-rules/commit/645884cb85037a7f41dc5f6e440e37cf754fcbdd))
+* clarify Python comment and system package rules in .cursor ([12d5200](https://github.com/iloveitaly/llm-ide-rules/commit/12d52000d028a15f6f743c32c9ceb485ec45e2a4))
+* refine instructions on error handling, testing, and Stripe usage ([2c5c176](https://github.com/iloveitaly/llm-ide-rules/commit/2c5c1761dd8e863b27f66ca3a16a54cf5cfa9b3b))
+* update readme to reference more LLM tools ([ff265c7](https://github.com/iloveitaly/llm-ide-rules/commit/ff265c73bcf1bac9bf3861810b269bf17465d4ef))
+
 ## [0.2.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.2.0...v0.2.1) (2025-09-15)
 
 
