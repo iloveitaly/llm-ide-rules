@@ -45,7 +45,15 @@ INSTRUCTION_TYPES = {
     "github": {
         "directories": [".github"],
         "files": [],
-        "exclude_patterns": ["workflows/*"],
+        "exclude_patterns": [
+            "workflows/*",
+            "dependabot.yml",
+            "dependabot.yaml",
+            "funding.yml",
+            "release.yml",
+            "stale.yml",
+            ".dependabot/*"
+        ],
     },
     "gemini": {"directories": [], "files": ["GEMINI.md"]},
     "claude": {"directories": [], "files": ["CLAUDE.md"]},

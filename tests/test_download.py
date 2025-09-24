@@ -184,7 +184,63 @@ def test_download_exclude_patterns():
 
     github_config = INSTRUCTION_TYPES["github"]
     assert "exclude_patterns" in github_config
-    assert "workflows/*" in github_config["exclude_patterns"]
+    
+    # Check that key workflow-related patterns are excluded
+    exclude_patterns = github_config["exclude_patterns"]
+    assert "workflows/*" in exclude_patterns
+    assert "dependabot.yml" in exclude_patterns
+    assert "dependabot.yaml" in exclude_patterns
+
+
+def test_download_exclude_workflow_files():
+    """Test that workflow-related files are properly excluded during copy."""
+    import tempfile
+    from llm_ide_rules.commands.download import copy_directory_contents, INSTRUCTION_TYPES
+    
+    with tempfile.TemporaryDirectory() as temp_dir:
+        source_dir = Path(temp_dir) / "source"
+        target_dir = Path(temp_dir) / "target"
+        
+        source_dir.mkdir()
+        target_dir.mkdir()
+        
+        # Create files that should be excluded (workflow-related)
+        workflow_files = [
+            "dependabot.yml",
+            "dependabot.yaml",
+            "funding.yml",
+            "stale.yml",
+            "workflows/ci.yml",
+            "workflows/deploy.yaml",
+            ".dependabot/config.yml"
+        ]
+        
+        # Create files that should be included (instruction-related)
+        instruction_files = [
+            "instructions/python.md",
+            "copilot-instructions.md",
+            "prompts/test.md",
+            "CODEOWNERS",
+            "ISSUE_TEMPLATE.md"
+        ]
+        
+        # Create all test files
+        for file_path in workflow_files + instruction_files:
+            full_path = source_dir / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            full_path.write_text(f"Content of {file_path}")
+        
+        # Copy with github exclude patterns
+        exclude_patterns = INSTRUCTION_TYPES["github"]["exclude_patterns"]
+        copy_directory_contents(source_dir, target_dir, exclude_patterns)
+        
+        # Check that workflow files were excluded
+        for file_path in workflow_files:
+            assert not (target_dir / file_path).exists(), f"Workflow file {file_path} should have been excluded"
+        
+        # Check that instruction files were included
+        for file_path in instruction_files:
+            assert (target_dir / file_path).exists(), f"Instruction file {file_path} should have been included"
 
 
 def test_normalize_repo():
