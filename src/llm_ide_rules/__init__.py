@@ -7,7 +7,7 @@ from llm_ide_rules.commands.explode import explode_main
 from llm_ide_rules.commands.implode import cursor, github
 from llm_ide_rules.commands.download import download_main
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 app = typer.Typer(
     name="llm_ide_rules",
