@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.3.0...v0.3.1) (2025-09-26)
+
+
+### Documentation
+
+* clarify system package installation and comments policy in instructions ([3e9a9d7](https://github.com/iloveitaly/llm-ide-rules/commit/3e9a9d7f00ab93ea982e3fc42ee5b100697176ec))
+* expand python and copilot instructions for clarity and conventions ([3be565c](https://github.com/iloveitaly/llm-ide-rules/commit/3be565c3b54b8c2baef158cfa59ca5c46e7f92f3))
+* expand test, Alembic, and agent instructions for clarity ([8ffe377](https://github.com/iloveitaly/llm-ide-rules/commit/8ffe377bd3a43af848c612e2cd0d7d4690f764b1))
+* **pytest:** update testing rules for integration and route tests ([4c66b9a](https://github.com/iloveitaly/llm-ide-rules/commit/4c66b9a252d0badd5dce076d1b4648ae33977e22))
+* update env file naming conventions in secrets.mdc ([57d75f6](https://github.com/iloveitaly/llm-ide-rules/commit/57d75f69f6dd2714577d10438a3bd33801c828cb))
+
 ## [0.3.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.2.1...v0.3.0) (2025-09-24)
 
 
