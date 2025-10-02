@@ -17,6 +17,15 @@
     },
     "stripe": {
       "url": "https://mcp.stripe.com"
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["chrome-devtools-mcp@latest"]
+    },
+    "terraform": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "hashicorp/terraform-mcp-server"]
     }
+
   }
 }
