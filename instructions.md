@@ -1,6 +1,6 @@
 Coding instructions for all programming languages:
 
-- Never use emojis in any code, comments, or documentation unless explicitly requested by the user.
+- Never use emojis anywhere unless explicitly requested.
 - If no language is specified, assume the latest version of python.
 - If tokens or other secrets are needed, pull them from an environment variable
 - Prefer early returns over nested if statements.
@@ -12,7 +12,7 @@ Coding instructions for all programming languages:
 - When a particular need can be met with a mature, reasonably adopted and maintained package, I would prefer to use that package rather than engineering my own solution.
 - Never add error handling to catch an error without being asked to do so. Fail hard and early with assertions and allow exceptions to propagate.
 - When naming variables or functions, use names that describe the effect. For example, instead of `function handleClaimFreeTicket` (a function which opens a dialog box) use `function openClaimFreeTicketDialog`.
-- Do not install system packages. Instead, ask me to install them for you.
+- Do not install missing system packages! Instead, ask me to install them for you.
 - If terminal commands are failing because of missing variables or commands which are unrelated to your current task, stop your work and let me know.
 
 Use line breaks to organize code into logical groups. Instead of:
@@ -172,6 +172,11 @@ class Distribution(
 - if a UI timeout is occuring, it could be because it cannot find a element because the rendering has changed. Check the failure screenshot and see if you can correct the test assertion.
 - The integration tests can take a very long time to run. Do not abort them if they are taking a long time.
 - Use `expect(page.get_by_text("Screening is fully booked")).to_be_visible()` instead of `expect(page.get_by_role("heading")).to_contain_text("Screening is fully booked")`. It's less brittle.
+- Do not use `client` fixtures in an integration test. Integration tests should only use the frontend of the website to interact with the application, not the API.
+- Use `with page.expect_response("https://example.com/resource") as response_info:` to assert against network activity.
+- Do not `next_button.evaluate("el => el.click()")` instead, just `locator.click()`. If this doesn't work, stop your work and let me know.
+- Only use `wait_for_loading(page)` if a `LONG_INTEGRATION_TEST_TIMEOUT` on an expectation does not work: `expect(page.get_by_text("Your Matched Doctors")).to_be_visible(timeout=LONG_INTEGRATION_TEST_TIMEOUT)`
+- Prefer fewer integration tests that cover more functionality. Unlike unit tests, where each test is designed to test a very particular piece of functionality, I want integration tests to cover entire workflows. It's preferred to add more steps to an integration test to test an entire workflow.
 
 ## Pytest Tests
 
@@ -182,11 +187,13 @@ class Distribution(
 - If you get lazy attribute errors, or need a database session to share across logic, use the `db_session` fixture to fix the issue.
   - Note that when writing route tests a `db_session` is not needed for the logic inside of the route.
 - When testing Stripe, use the sandbox API. Never mock out Stripe interactions unless explicitly told to.
+- Omit obvious docstrings and comments.
 
 ## Python Route Tests
 
 - Polyfactory is the [factory](tests/factories.py) library in use. `ModelNameFactory.build()` is how you generate factories.
-- Use `assert_status(response)` to check the response of a client
+- Use `assert_status(response)` instead of `assert response.status_code == status.HTTP_200_OK`
+- Do not reference routes by raw strings. Instead of `client.get("/the/route/path")` use `client.get(api_app.url_path_for("route_method_name"))`
 
 ## Alembic Migrations
 
@@ -241,6 +248,9 @@ op.execute(
 - When throwing a `HTTPException`, do not add a `detail=` and use a named status code (`status.HTTP_400_BAD_REQUEST`)
 - Do not return a `dict`, instead create a `class RouteNameResponse`
   - Locate these classes right above the `def route_name():` function which uses them.
+- Use `Model.one` when a record must exist in order for the business logic to succeed.
+- Do not try/except `Model.one` when using a parameter from the request to pull a record. Let this exception bubble up.
+- Use `model_id: Annotated[TypeIDType, Path()]` to represent a model ID as a URL path parameter
 
 ## React
 
@@ -264,6 +274,7 @@ op.execute(
 - Include a two line breaks between any `useHook()` calls and any `useState()` definitions for a component.
 - When using a function prop inside a `useEffect`, please use a pattern that avoids including the function in the dependency array, like the `useRef` trick.
 - When writing React components, always hoist complex conditional expressions into descriptively named constants at the top of the component function for better readability and maintainability.
+- When managing API response data, store the entire response object (or relevant subset) in a single `useState` rather than creating separate state variables for each field. Derive individual values from the response object when passing to child components using optional chaining (e.g., response?.field || defaultValue).
 - Refactor ternary to &&: `{condition ? <A/> : <B/>}` → `{condition && <A/>}{!condition && <B/>}`
 - Use the following pattern to reference query string values (i.e. `?theQueryStringParam=value`):
 
@@ -337,6 +348,10 @@ return (
   </Form>
 )
 ```
+
+### Styling
+
+* Use `text-blue-link` for styling any simple `<a>` tags
 
 ## React Router
 
@@ -443,6 +458,7 @@ Do this in a `clientLoader` and use `loaderData` to render the component. DO NOT
 - Prefer `function theName() {` over `const theName = () =>`
 - Use `import { invariant } from @epic-web/invariant` instead of another invariant library
 - Use `requireEnv("VITE_THE_ENV_VAR")` instead of `process.env.THE_ENV_VAR`
+- Don't use `console.{log,error}`. Use `from ~/configuration/logging import log` and `log.info("string", {structured: "log"})` instead.
 
 Here's how frontend code is organized in `web/app/`:
 
@@ -465,14 +481,13 @@ Add a file-level docstring with a simple description of what this file does and 
 Here's how environment variables are managed in this application:
 
 - `.envrc` entry point to load the correct env stack. Should not contain secrets and should be simple some shell logic and direnv stdlib calls.
-- `.env` common configuration for all systems. No secrets. No dotenv/custom scripts. Just `export`s to modify core configuration settings like `export TZ=UTC`.
-- `.env.local` overrides across all environments (dev and test). Useful for things like 1Password service account token and database hosts which mutate the logic followed in `.env.shared`. Not committed to source control.
-- `.env.shared` This contains the bulk of your system configuration. Shared across test, CI, dev, etc but not production.
-- `.env.shared.local` Override `.env.shared` configuration locally. Not committed to source.
-- `.env.dev.local` configuration overrides for non-test environments. `PYTHONBREAKPOINT`, `LOG_LEVEL`, etc. Most of your environment changes end up happening here.
-- `.env.test` test-only environment variables (`PYTHON_ENV=test`). This file should generally be short.
-- `.env.production.{backend,frontend}` for most medium-sized projects you'll have separate frontend and backend systems (even if your frontend is SPA, which I'm a fan of). These two files enable you to document the variables required to build (in the case of a SPA frontend) or run (in the case of a python backend) your system in production.
-- `*.local` files have a `-example` variant which is committed to version control. These document helpful environment variables for local development.
+- `env/all.sh` common configuration for all systems. No secrets. No dotenv/custom scripts. Just `export`s to modify core configuration settings like `export TZ=UTC`.
+- `env/all.local.sh` overrides across all environments (dev and test). Useful for things like 1Password service account token and database hosts which mutate the logic followed in `env/not_production.sh`. Not committed to source control.
+- `env/not_production.sh` This contains the bulk of your system configuration. Shared across test, CI, dev, etc but not production.
+- `env/dev.local.sh` configuration overrides for non-test environments. `PYTHONBREAKPOINT`, `LOG_LEVEL`, etc. Most of your environment changes end up happening here.
+- `env/test.sh` test-only environment variables (`PYTHON_ENV=test`). This file should generally be short.
+- `env/production.{backend,frontend}.sh` for most medium-sized projects you'll have separate frontend and backend systems (even if your frontend is SPA, which I'm a fan of). These two files enable you to document the variables required to build (in the case of a SPA frontend) or run (in the case of a python backend) your system in production.
+- `env/*local.*` files have a `-example` variant which is committed to version control. These document helpful environment variables for local development.
 - When writing TypeScript/JavaScript/React, use `requireEnv("THE_ENV_VAR_NAME")` to read an environment variable. `import {requireEnv} from '~/utils/environment'`
 
 ## Fix Tests
@@ -480,6 +495,8 @@ Here's how environment variables are managed in this application:
 Focus on all unit + command tests. Make sure they pass and fix errors. If you run into anything very odd stop, and let me know. Mutate test code first and let me know if you think you should update application code.
 
 Then, focus on integration tests in tests/integration. If an integration test fails, run it again just to be sure it wasn't a flakey test (integration tests are not deterministic). If it fails because of a visual error, check the 'tmp/test-results/playwright/' directory for a screenshot relating to the failing test that you can inspect.
+
+For additional debugging help, view the development version of the site at `$PYTHON_TEST_SERVER_HOST` using the chrome MCP.
 
 ## Implement Fastapi Routes
 
