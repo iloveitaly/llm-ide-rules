@@ -1,7 +1,7 @@
 
 Coding instructions for all programming languages:
 
-- Never use emojis in any code, comments, or documentation unless explicitly requested by the user.
+- Never use emojis anywhere unless explicitly requested.
 - If no language is specified, assume the latest version of python.
 - If tokens or other secrets are needed, pull them from an environment variable
 - Prefer early returns over nested if statements.
@@ -13,7 +13,7 @@ Coding instructions for all programming languages:
 - When a particular need can be met with a mature, reasonably adopted and maintained package, I would prefer to use that package rather than engineering my own solution.
 - Never add error handling to catch an error without being asked to do so. Fail hard and early with assertions and allow exceptions to propagate.
 - When naming variables or functions, use names that describe the effect. For example, instead of `function handleClaimFreeTicket` (a function which opens a dialog box) use `function openClaimFreeTicketDialog`.
-- Do not install system packages. Instead, ask me to install them for you.
+- Do not install missing system packages! Instead, ask me to install them for you.
 - If terminal commands are failing because of missing variables or commands which are unrelated to your current task, stop your work and let me know.
 
 Use line breaks to organize code into logical groups. Instead of:
