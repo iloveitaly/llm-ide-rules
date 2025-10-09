@@ -14,6 +14,7 @@ Coding instructions for all programming languages:
 - When naming variables or functions, use names that describe the effect. For example, instead of `function handleClaimFreeTicket` (a function which opens a dialog box) use `function openClaimFreeTicketDialog`.
 - Do not install missing system packages! Instead, ask me to install them for you.
 - If terminal commands are failing because of missing variables or commands which are unrelated to your current task, stop your work and let me know.
+- Don't worry about fixing lint errors or running lint scripts unless I specifically ask you to.
 
 Use line breaks to organize code into logical groups. Instead of:
 
@@ -43,6 +44,7 @@ Pay careful attention to these instructions when running tests, generating datab
   - When debugging integration tests look at `$PLAYWRIGHT_RESULT_DIRECTORY`. There's a directory for each test failure. In that directory you fill find a `failure.html` containing the rendered DOM of the page on failure and a screenshot of the contents. Use these to debug why it failed.
 - Do not attempt to create or run database migrations. Pause your work and let me know you need a migration run.
 - Use `uv add` to add python packages. No need for `pip compile`, etc.
+- Use `pnpm` and not `pnpm`. Run all `pnpm` commands in the `web/` directory.
 
 ## Python
 
@@ -496,7 +498,9 @@ Focus on all unit + command tests. Make sure they pass and fix errors. If you ru
 
 Then, focus on integration tests in tests/integration. If an integration test fails, run it again just to be sure it wasn't a flakey test (integration tests are not deterministic). If it fails because of a visual error, check the 'tmp/test-results/playwright/' directory for a screenshot relating to the failing test that you can inspect.
 
-For additional debugging help, view the development version of the site at `$PYTHON_TEST_SERVER_HOST` using the chrome MCP.
+For additional debugging help, view the development version of the site at `$PYTHON_TEST_SERVER_HOST` using a browser.
+
+If you get stuck or seem to be in a loop, give me a short summary of exactly where you are running into trouble, let me know, and stop working.
 
 ## Implement Fastapi Routes
 
