@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.3.0...v0.3.1) (2025-10-16)
+
+
+### Documentation
+
+* add standalone Python script guidelines for Cursor ([1f14442](https://github.com/iloveitaly/llm-ide-rules/commit/1f14442c04c5dfe688ad8d6ee8faef34c8c98dfa))
+* clarify linting, pnpm usage, and test troubleshooting ([26ed01f](https://github.com/iloveitaly/llm-ide-rules/commit/26ed01fba191702a8e973d72ab5829227594a1e2))
+* clarify system package installation and comments policy in instructions ([3e9a9d7](https://github.com/iloveitaly/llm-ide-rules/commit/3e9a9d7f00ab93ea982e3fc42ee5b100697176ec))
+* expand python and copilot instructions for clarity and conventions ([3be565c](https://github.com/iloveitaly/llm-ide-rules/commit/3be565c3b54b8c2baef158cfa59ca5c46e7f92f3))
+* expand test, Alembic, and agent instructions for clarity ([8ffe377](https://github.com/iloveitaly/llm-ide-rules/commit/8ffe377bd3a43af848c612e2cd0d7d4690f764b1))
+* **pytest:** update testing rules for integration and route tests ([4c66b9a](https://github.com/iloveitaly/llm-ide-rules/commit/4c66b9a252d0badd5dce076d1b4648ae33977e22))
+* update code and testing instructions and prompts for clarity ([ea7ba51](https://github.com/iloveitaly/llm-ide-rules/commit/ea7ba5196f526060a0a005a183e96c7acf5a7d0d))
+* update coding and test rules for linting, pnpm usage, debugging ([d99576c](https://github.com/iloveitaly/llm-ide-rules/commit/d99576ca2b7dbe450d64e22f3e33ee7efbc9ef5d))
+* update coding instructions and revise env var section ([e44b2cc](https://github.com/iloveitaly/llm-ide-rules/commit/e44b2ccb64aa5fc0f5755d4b529bca9ca4f06bde))
+* update coding rules and clarify testing, React, and FastAPI guidelines ([1f70e2b](https://github.com/iloveitaly/llm-ide-rules/commit/1f70e2bae10c1a67d41d569e617e42f848e8f460))
+* update date formatting and add guidelines for standalone scripts ([d49df7f](https://github.com/iloveitaly/llm-ide-rules/commit/d49df7fadaa3784b0708a117d57496b4e6dcc840))
+* update env file naming conventions in secrets.mdc ([57d75f6](https://github.com/iloveitaly/llm-ide-rules/commit/57d75f69f6dd2714577d10438a3bd33801c828cb))
+* update integration, python, and standalone script guidelines ([725fa87](https://github.com/iloveitaly/llm-ide-rules/commit/725fa87c4af74e3e68dc7732836a302bac5b562c))
+* update rules and stripe usage in prompts ([8b461f7](https://github.com/iloveitaly/llm-ide-rules/commit/8b461f75a48d4e2cc71657624d52f9611de8e888))
+
 ## [0.3.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.2.1...v0.3.0) (2025-09-24)
 
 
