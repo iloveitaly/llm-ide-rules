@@ -97,7 +97,7 @@ params = f.compact({"city": city, "stateCode": stateCode})
 
 ### Date & DateTime
 
-* Use the `whenever` library for datetime + time instead of the stdlib date library. `Instant.now().format_common_iso()`
+* Use the `whenever` library for datetime + time instead of the stdlib date library. `Instant.now().format_iso()`
 * DateTime mutation should explicitly opt in to a specific timezone `SystemDateTime.now().add(days=-7)`
 
 ### Database & ORM
@@ -179,6 +179,7 @@ class Distribution(
 - Do not `next_button.evaluate("el => el.click()")` instead, just `locator.click()`. If this doesn't work, stop your work and let me know.
 - Only use `wait_for_loading(page)` if a `LONG_INTEGRATION_TEST_TIMEOUT` on an expectation does not work: `expect(page.get_by_text("Your Matched Doctors")).to_be_visible(timeout=LONG_INTEGRATION_TEST_TIMEOUT)`
 - Prefer fewer integration tests that cover more functionality. Unlike unit tests, where each test is designed to test a very particular piece of functionality, I want integration tests to cover entire workflows. It's preferred to add more steps to an integration test to test an entire workflow.
+- Prefer simple locators. If a `filter`, `or_`, etc is required to capture a button in multiple states it indicates something is wrong in the code.
 
 ## Pytest Tests
 
@@ -528,6 +529,25 @@ Let's separate this into key sections:
 ## Refactor On Instructions
 
 Refactor this code following all the established coding rules. Carefully review each rule.
+
+## Standalone Python Scripts
+
+# Writing Standalone Python Scripts
+
+Use this header:
+
+```python
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.13"
+# dependencies = []
+# ///
+```
+
+- Specify dependencies via the `dependencies` variable in the above comment
+- Do not install packages with pip or any other package manager, assume packages will be installed when needed
+- Use `click` for CLI interfaces
+- Use `structlog_config` for logging. Read the usage guide: @https://github.com/iloveitaly/structlog-config/
 
 ## Stripe Backend
 
