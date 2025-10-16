@@ -1,3 +1,7 @@
+---
+mode: 'agent'
+description: ''
+---
 ## Standalone Python Scripts
 
 # Writing Standalone Python Scripts
