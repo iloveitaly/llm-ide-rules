@@ -6,6 +6,7 @@ Coding instructions for all programming languages:
 - Prefer early returns over nested if statements.
 - Prefer `continue` within a loop vs nested if statements.
 - Prefer smaller functions over larger functions. Break up logic into smaller chunks with well-named functions.
+- Prefer constants with separators: `10_000` is preferred to `10000` (or `10_00` over `1000` in the case of a integer representing cents).
 - Only add comments if the code is not self-explanatory. Do not add obvious code comments.
 - Do not remove existing comments.
 - When I ask you to write code, prioritize simplicity and legibility over covering all edge cases, handling all errors, etc.
@@ -45,6 +46,13 @@ Pay careful attention to these instructions when running tests, generating datab
 - Do not attempt to create or run database migrations. Pause your work and let me know you need a migration run.
 - Use `uv add` to add python packages. No need for `pip compile`, etc.
 - Use `pnpm` and not `pnpm`. Run all `pnpm` commands in the `web/` directory.
+
+## Commands
+
+### Dev In Browser
+Use your browser to view `https://verso.localhost` which is tied to livereload dev server which is already running. You can inspect that page (including taking screenshots!) to validate that your changes fixed the issue.
+
+If the site does not load, stop your work and let me know.
 
 ## Python
 
@@ -183,8 +191,10 @@ class Distribution(
 
 ## Pytest Tests
 
-- Look to tests/factories.py to generate any required database state
-  - Here's an example of how to create + persist a factory `DistributionFactory.save()`
+- Look to @tests/factories.py to generate any required database state
+  - For example, to create and persist a `Distribution` record `DistributionFactory.save()`
+  - If a factory doesn't exist for the model you are working with, create one.
+  - You can customize one or more params in a factory using `DistributionFactory.save(host="custom_host.com)`
 - Use the `faker` factory to generate emails, etc.
 - Do not mock or patch unless I instruct you to. Test as much of the application stack as possible in each test.
 - If you get lazy attribute errors, or need a database session to share across logic, use the `db_session` fixture to fix the issue.
@@ -495,13 +505,23 @@ Here's how environment variables are managed in this application:
 
 ## Fix Tests
 
-Focus on all unit + command tests. Make sure they pass and fix errors. If you run into anything very odd stop, and let me know. Mutate test code first and let me know if you think you should update application code.
+Focus on all unit + command tests (`pytest --exclude tests/integration`). Make sure they pass and fix errors. If you run into anything very odd: stop, and let me know. Mutate test code first and let me know if you think you should update application code.
 
 Then, focus on integration tests in tests/integration. If an integration test fails, run it again just to be sure it wasn't a flakey test (integration tests are not deterministic). If it fails because of a visual error, check the 'tmp/test-results/playwright/' directory for a screenshot relating to the failing test that you can inspect.
 
 For additional debugging help, view the development version of the site at `$PYTHON_TEST_SERVER_HOST` using a browser.
 
+Do not attempt to perform this task in a sandbox. Service connections require access to host networking.
+
 If you get stuck or seem to be in a loop, give me a short summary of exactly where you are running into trouble, let me know, and stop working.
+
+Do not attempt to solve these issues:
+
+* `just`, `direnv`, and `js_build` should always run or exist.
+* Chromium/Chrome/playwright not working properly.
+* Postgres, Redis, or other service connection errors.
+
+If you run into errors, stop immediately and let me know with a summary of the problem.
 
 ## Implement Fastapi Routes
 
@@ -528,7 +548,7 @@ Let's separate this into key sections:
 
 ## Refactor On Instructions
 
-Refactor this code following all the established coding rules. Carefully review each rule.
+Refactor this code following all the established coding rules. Pay very careful attention to each rule and instruction and update the referenced code.
 
 ## Standalone Python Scripts
 
