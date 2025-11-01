@@ -96,9 +96,6 @@ Different AI coding assistants use different formats for commands:
 | **Claude Code** | `.claude/commands/` | `.md` (plain markdown) | Simple, no frontmatter |
 | **GitHub Copilot** | `.github/prompts/` | `.prompt.md` (YAML + markdown) | Requires frontmatter with `mode: 'agent'` |
 | **Gemini CLI** | `.gemini/commands/` | `.toml` | Uses TOML format, supports `{{args}}` and shell commands |
-| **Gemini Code Assist** | `.gemini/` | Various | Uses `config.json`, `styleguide.md`, and other files |
-
-**Note**: This project currently supports Cursor, Claude Code, and GitHub formats for commands. Gemini CLI uses a fundamentally different TOML-based format that would require special conversion logic.
 
 ## Development
 
