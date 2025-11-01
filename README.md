@@ -48,6 +48,10 @@ uvx llm-ide-rules download [instruction_types]    # Download everything by defau
 uvx llm-ide-rules download cursor github          # Download specific types
 uvx llm-ide-rules download --repo other/repo      # Download from different repo
 
+# Delete downloaded instruction files
+uvx llm-ide-rules delete [instruction_types]      # Delete everything by default
+uvx llm-ide-rules delete cursor gemini            # Delete specific types
+uvx llm-ide-rules delete --yes                    # Skip confirmation prompt
 
 ```
 
@@ -71,7 +75,30 @@ uvx llm-ide-rules download cursor github
 
 # Download from a different repository
 uvx llm-ide-rules download --repo other-user/other-repo --target ./my-project
+
+# Delete all downloaded files (with confirmation)
+uvx llm-ide-rules delete
+
+# Delete specific instruction types
+uvx llm-ide-rules delete cursor gemini --target ./my-project
+
+# Delete without confirmation prompt
+uvx llm-ide-rules delete --yes
 ```
+
+### IDE Command Format Comparison
+
+Different AI coding assistants use different formats for commands:
+
+| IDE | Directory | Format | Notes |
+|-----|-----------|--------|-------|
+| **Cursor** | `.cursor/commands/` | `.md` (plain markdown) | Simple, no frontmatter |
+| **Claude Code** | `.claude/commands/` | `.md` (plain markdown) | Simple, no frontmatter |
+| **GitHub Copilot** | `.github/prompts/` | `.prompt.md` (YAML + markdown) | Requires frontmatter with `mode: 'agent'` |
+| **Gemini CLI** | `.gemini/commands/` | `.toml` | Uses TOML format, supports `{{args}}` and shell commands |
+| **Gemini Code Assist** | `.gemini/` | Various | Uses `config.json`, `styleguide.md`, and other files |
+
+**Note**: This project currently supports Cursor, Claude Code, and GitHub formats for commands. Gemini CLI uses a fundamentally different TOML-based format that would require special conversion logic.
 
 ## Development
 
