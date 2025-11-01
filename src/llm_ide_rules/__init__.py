@@ -6,6 +6,7 @@ from typing_extensions import Annotated
 from llm_ide_rules.commands.explode import explode_main
 from llm_ide_rules.commands.implode import cursor, github
 from llm_ide_rules.commands.download import download_main
+from llm_ide_rules.commands.delete import delete_main
 
 __version__ = "0.3.0"
 
@@ -18,6 +19,7 @@ app = typer.Typer(
 # Add commands directly
 app.command("explode", help="Convert instruction file to separate rule files")(explode_main)
 app.command("download", help="Download LLM instruction files from GitHub repositories")(download_main)
+app.command("delete", help="Remove downloaded LLM instruction files")(delete_main)
 
 # Create implode sub-typer
 implode_app = typer.Typer(help="Bundle rule files into a single instruction file")
