@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.4.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.3.0...v0.4.0) (2025-11-06)
+
+
+### Features
+
+* add delete command to remove downloaded instruction files ([cdb6b7f](https://github.com/iloveitaly/llm-ide-rules/commit/cdb6b7f7c7ba70f15f639e2164fa2b21a3016cd3))
+
+
+### Documentation
+
+* add browser usage instructions for dev server ([9de24a3](https://github.com/iloveitaly/llm-ide-rules/commit/9de24a3f77d6eb6da070a7e724070decc90609a6))
+* add standalone Python script guidelines for Cursor ([1f14442](https://github.com/iloveitaly/llm-ide-rules/commit/1f14442c04c5dfe688ad8d6ee8faef34c8c98dfa))
+* clarify instructions and expand testing/debugging guidance ([12311d7](https://github.com/iloveitaly/llm-ide-rules/commit/12311d7ccfc8438538569a46e4e67a98ac646e4d))
+* clarify linting, pnpm usage, and test troubleshooting ([26ed01f](https://github.com/iloveitaly/llm-ide-rules/commit/26ed01fba191702a8e973d72ab5829227594a1e2))
+* clarify supported AI assistant command formats in README ([a384e3d](https://github.com/iloveitaly/llm-ide-rules/commit/a384e3d87179064d0faaf965e3c91e5cb331eb54))
+* clarify system package installation and comments policy in instructions ([3e9a9d7](https://github.com/iloveitaly/llm-ide-rules/commit/3e9a9d7f00ab93ea982e3fc42ee5b100697176ec))
+* clarify test and coding instructions, add dev-in-browser prompt ([852b64c](https://github.com/iloveitaly/llm-ide-rules/commit/852b64c44869c8a0a56a5fdc6289a0c37be79d19))
+* **commands:** add instructions for writing concise README.md ([ba4823a](https://github.com/iloveitaly/llm-ide-rules/commit/ba4823a37eaf46fdc8173832ebf53242df939f4a))
+* document delete command and add command format comparison ([200742d](https://github.com/iloveitaly/llm-ide-rules/commit/200742d70300942ca1649f316fa2943687179e75))
+* expand python and copilot instructions for clarity and conventions ([3be565c](https://github.com/iloveitaly/llm-ide-rules/commit/3be565c3b54b8c2baef158cfa59ca5c46e7f92f3))
+* expand test, Alembic, and agent instructions for clarity ([8ffe377](https://github.com/iloveitaly/llm-ide-rules/commit/8ffe377bd3a43af848c612e2cd0d7d4690f764b1))
+* **pytest:** update testing rules for integration and route tests ([4c66b9a](https://github.com/iloveitaly/llm-ide-rules/commit/4c66b9a252d0badd5dce076d1b4648ae33977e22))
+* update .cursor rules, add dev-in-browser instructions ([95940c3](https://github.com/iloveitaly/llm-ide-rules/commit/95940c31288c63ab8f603a5a41d3f1726c4056b4))
+* update code and testing instructions and prompts for clarity ([ea7ba51](https://github.com/iloveitaly/llm-ide-rules/commit/ea7ba5196f526060a0a005a183e96c7acf5a7d0d))
+* update coding and test rules for linting, pnpm usage, debugging ([d99576c](https://github.com/iloveitaly/llm-ide-rules/commit/d99576ca2b7dbe450d64e22f3e33ee7efbc9ef5d))
+* update coding instructions and revise env var section ([e44b2cc](https://github.com/iloveitaly/llm-ide-rules/commit/e44b2ccb64aa5fc0f5755d4b529bca9ca4f06bde))
+* update coding rules and clarify testing, React, and FastAPI guidelines ([1f70e2b](https://github.com/iloveitaly/llm-ide-rules/commit/1f70e2bae10c1a67d41d569e617e42f848e8f460))
+* update date formatting and add guidelines for standalone scripts ([d49df7f](https://github.com/iloveitaly/llm-ide-rules/commit/d49df7fadaa3784b0708a117d57496b4e6dcc840))
+* update env file naming conventions in secrets.mdc ([57d75f6](https://github.com/iloveitaly/llm-ide-rules/commit/57d75f69f6dd2714577d10438a3bd33801c828cb))
+* update integration, python, and standalone script guidelines ([725fa87](https://github.com/iloveitaly/llm-ide-rules/commit/725fa87c4af74e3e68dc7732836a302bac5b562c))
+* Update README writing guidelines ([b27f452](https://github.com/iloveitaly/llm-ide-rules/commit/b27f45246add44493d427e0dbe16c970d07dc04d))
+* Update README writing guidelines ([b9485aa](https://github.com/iloveitaly/llm-ide-rules/commit/b9485aa6476eab578dbede9f2fc0a17cf066007a))
+* update rules and stripe usage in prompts ([8b461f7](https://github.com/iloveitaly/llm-ide-rules/commit/8b461f75a48d4e2cc71657624d52f9611de8e888))
+
 ## [0.3.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.2.1...v0.3.0) (2025-09-24)
 
 
