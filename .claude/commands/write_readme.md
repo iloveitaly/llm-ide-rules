@@ -1,6 +1,7 @@
 eWrite or update the @README.md
 
 * Be concise, do not use too many adjectives
+* don't try to be too cute: no story telling and do not be overly salesly. 
 * No emojis
 * assume uv and omit pip examples
 * Include a single line at the end `# [MIT License](LICENSE.md)`
