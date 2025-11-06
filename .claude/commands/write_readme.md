@@ -1,7 +1,8 @@
-Write or update the @README.md
+eWrite or update the @README.md
 
 * Be concise, do not use too many adjectives
 * No emojis
+* assume uv and omit pip examples
 * Include a single line at the end `# [MIT License](LICENSE.md)`
 * First, ultrathink and investigate the source code in the repository to understand what it does
 * When writing the overview and `#` header, be sure to:
