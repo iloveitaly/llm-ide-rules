@@ -181,13 +181,82 @@ def test_download_instruction_types_configuration():
             assert isinstance(config["recursive_files"], list)
 
 
-def test_download_exclude_patterns():
-    """Test that github instruction type has exclude patterns configured."""
+def test_download_include_patterns():
+    """Test that github instruction type has include patterns configured."""
     from llm_ide_rules.commands.download import INSTRUCTION_TYPES
 
     github_config = INSTRUCTION_TYPES["github"]
-    assert "exclude_patterns" in github_config
-    assert "workflows/*" in github_config["exclude_patterns"]
+    assert "include_patterns" in github_config
+    
+    # Check that key AI instruction patterns are included
+    include_patterns = github_config["include_patterns"]
+    assert "instructions/*" in include_patterns
+    assert "prompts/*" in include_patterns
+    assert "copilot-instructions.md" in include_patterns
+
+
+def test_download_include_instruction_files():
+    """Test that only instruction-related files are included during copy."""
+    import tempfile
+    from llm_ide_rules.commands.download import copy_directory_contents, INSTRUCTION_TYPES
+    
+    with tempfile.TemporaryDirectory() as temp_dir:
+        source_dir = Path(temp_dir) / "source"
+        target_dir = Path(temp_dir) / "target"
+        
+        source_dir.mkdir()
+        target_dir.mkdir()
+        
+        # Create files that should be excluded (workflow-related)
+        workflow_files = [
+            "dependabot.yml",
+            "dependabot.yaml",
+            "funding.yml",
+            "stale.yml",
+            "workflows/ci.yml",
+            "workflows/deploy.yaml",
+            ".dependabot/config.yml"
+        ]
+        
+        # Create files that should be included (instruction-related only)
+        instruction_files = [
+            "instructions/python.md",
+            "instructions/react.md",
+            "copilot-instructions.md",
+            "prompts/test.md",
+            "prompts/another.md"
+        ]
+        
+        # Create files that should be excluded (including GitHub repository files)
+        excluded_files = [
+            "CODEOWNERS",
+            "ISSUE_TEMPLATE.md",
+            "CODE_OF_CONDUCT.md",
+            "SECURITY.md",
+            "pull_request_template.md"
+        ]
+        
+        # Create all test files
+        for file_path in workflow_files + instruction_files + excluded_files:
+            full_path = source_dir / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            full_path.write_text(f"Content of {file_path}")
+        
+        # Copy with github include patterns
+        include_patterns = INSTRUCTION_TYPES["github"]["include_patterns"]
+        copy_directory_contents(source_dir, target_dir, include_patterns)
+        
+        # Check that workflow files were excluded (not copied)
+        for file_path in workflow_files:
+            assert not (target_dir / file_path).exists(), f"Workflow file {file_path} should have been excluded"
+        
+        # Check that GitHub repository files were excluded (not copied)
+        for file_path in excluded_files:
+            assert not (target_dir / file_path).exists(), f"GitHub repository file {file_path} should have been excluded"
+        
+        # Check that only instruction files were included
+        for file_path in instruction_files:
+            assert (target_dir / file_path).exists(), f"Instruction file {file_path} should have been included"
 
 
 def test_normalize_repo():
