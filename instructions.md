@@ -45,14 +45,10 @@ Pay careful attention to these instructions when running tests, generating datab
   - When debugging integration tests look at `$PLAYWRIGHT_RESULT_DIRECTORY`. There's a directory for each test failure. In that directory you fill find a `failure.html` containing the rendered DOM of the page on failure and a screenshot of the contents. Use these to debug why it failed.
 - Do not attempt to create or run database migrations. Pause your work and let me know you need a migration run.
 - Use `uv add` to add python packages. No need for `pip compile`, etc.
-- Use `pnpm` and not `pnpm`. Run all `pnpm` commands in the `web/` directory.
+- Use `pnpm` or `pnpx` and not `npm` or `npx`.
+- Run all `pnpm` commands in the `web/` directory.
 
-## Commands
-
-### Dev In Browser
-Use your browser to view `https://verso.localhost` which is tied to livereload dev server which is already running. You can inspect that page (including taking screenshots!) to validate that your changes fixed the issue.
-
-If the site does not load, stop your work and let me know.
+Look at @local.md
 
 ## Python
 
@@ -577,4 +573,10 @@ Use this header:
 - When iterating through a list that you expect to be comprehensive use `auto_paging_iter` for example `stripe_client.prices.list(params={ ... }).auto_paging_iter()`
 - Assume the new `StripeClient` is used everywhere and type it as such. When using this client, all API params should be a dictionary inside a `params=` kwarg.
 - `amount_refunded=0` when the charge is disputed. The dispute amount only exists in the `balance_transactions` of the dispute object.
+
+## Dev In Browser
+
+Use your browser to view `https://verso.localhost` which is tied to livereload dev server which is already running. You can inspect that page (including taking screenshots!) to validate that your changes fixed the issue.
+
+If the site does not load, stop your work and let me know.
 
