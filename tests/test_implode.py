@@ -21,7 +21,7 @@ def test_implode_cursor_help():
     runner = CliRunner()
     result = runner.invoke(app, ["implode", "cursor", "--help"])
     assert result.exit_code == 0
-    assert "Bundle Cursor rules into a single file" in result.stdout
+    assert "Bundle Cursor rules and commands into a single file" in result.stdout
     assert "config" in result.stdout
 
 
@@ -30,7 +30,7 @@ def test_implode_github_help():
     runner = CliRunner()
     result = runner.invoke(app, ["implode", "github", "--help"])
     assert result.exit_code == 0
-    assert "Bundle GitHub/Copilot instructions into a single file" in result.stdout
+    assert "Bundle GitHub/Copilot instructions and prompts into a single file" in result.stdout
     assert "config" in result.stdout
 
 
@@ -69,7 +69,7 @@ Here are React rules for frontend development.""")
         
         # Check command succeeds
         assert result.exit_code == 0
-        assert "Bundled cursor rules into bundled.md" in result.stdout
+        assert "Bundled cursor rules and commands into bundled.md" in result.stdout
         
         # Check that output file was created
         assert Path("bundled.md").exists()
@@ -118,7 +118,7 @@ Here are React instructions for frontend development.""")
         
         # Check command succeeds
         assert result.exit_code == 0
-        assert "Bundled github instructions into bundled-github.md" in result.stdout
+        assert "Bundled github instructions and prompts into bundled-github.md" in result.stdout
         
         # Check that output file was created
         assert Path("bundled-github.md").exists()
@@ -242,4 +242,4 @@ Python rules.""")
         
         # Check command succeeds
         assert result.exit_code == 0
-        assert "Bundled cursor rules into bundled.md" in result.stdout
+        assert "Bundled cursor rules and commands into bundled.md" in result.stdout

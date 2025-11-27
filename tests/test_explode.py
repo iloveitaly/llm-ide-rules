@@ -50,19 +50,28 @@ Here are prompt rules for secrets handling.
         
         # Check command succeeds
         assert result.exit_code == 0
-        assert "Created Cursor rules" in result.stdout
+        assert "Created rules and commands" in result.stdout
         
         # Check that directories were created
         assert Path(".cursor/rules").exists()
+        assert Path(".cursor/commands").exists()
         assert Path(".github/instructions").exists()
-        
+        assert Path(".github/prompts").exists()
+        assert Path(".claude/commands").exists()
+        assert Path(".gemini/commands").exists()
+
         # Check that rule files were created
         assert Path(".cursor/rules/python.mdc").exists()
         assert Path(".cursor/rules/react.mdc").exists()
-        assert Path(".cursor/rules/secrets.mdc").exists()
-        
+
+        # Check that command files were created (Secrets is a command, not a rule)
+        assert Path(".cursor/commands/secrets.md").exists()
+        assert Path(".claude/commands/secrets.md").exists()
+        assert Path(".gemini/commands/secrets.toml").exists()
+
         assert Path(".github/instructions/python.instructions.md").exists()
         assert Path(".github/instructions/react.instructions.md").exists()
+        assert Path(".github/prompts/secrets.prompt.md").exists()
         
         # Check content of a rule file
         with open(".cursor/rules/python.mdc", "r") as f:
@@ -152,4 +161,4 @@ Here are Python rules.
         
         # Check command succeeds
         assert result.exit_code == 0
-        assert "Created Cursor rules" in result.stdout
+        assert "Created rules and commands" in result.stdout
