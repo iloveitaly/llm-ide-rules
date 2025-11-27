@@ -13,6 +13,15 @@
     "Shell": "**/*.sh",
     "TypeScript": "**/*.ts,**/*.tsx",
     "TypeScript DocString": null,
-    "Secrets": null
+    "Secrets": null,
+    "Dev In Browser": null,
+    "Fastapi Stripe": null,
+    "Fix Tests": null,
+    "Implement Fastapi Routes": null,
+    "Plan Only": null,
+    "Python Command": null,
+    "Refactor On Instructions": null,
+    "Standalone Python Scripts": null,
+    "Stripe Backend": null
   }
 }

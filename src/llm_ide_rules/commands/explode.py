@@ -192,8 +192,87 @@ description: '{description}'
             f.write(line)
 
 
-def process_unmapped_section(lines, section_name, rules_dir, github_prompts_dir):
-    """Process an unmapped section as a manually applied rule (prompt)."""
+def write_cursor_command(content_lines, filename, commands_dir, section_name=None):
+    """Write a Cursor command file (plain markdown, no frontmatter)."""
+    filepath = os.path.join(commands_dir, filename + ".md")
+
+    trimmed = trim_content(content_lines)
+
+    # Strip the header from content (first line starting with ##)
+    filtered_content = []
+    found_header = False
+    for line in trimmed:
+        if not found_header and line.startswith("## "):
+            found_header = True
+            continue
+        filtered_content.append(line)
+
+    # Trim again after removing header
+    filtered_content = trim_content(filtered_content)
+
+    with open(filepath, "w") as f:
+        for line in filtered_content:
+            f.write(line)
+
+
+def write_claude_command(content_lines, filename, commands_dir, section_name=None):
+    """Write a Claude Code command file (plain markdown, no frontmatter)."""
+    filepath = os.path.join(commands_dir, filename + ".md")
+
+    trimmed = trim_content(content_lines)
+
+    # Strip the header from content (first line starting with ##)
+    filtered_content = []
+    found_header = False
+    for line in trimmed:
+        if not found_header and line.startswith("## "):
+            found_header = True
+            continue
+        filtered_content.append(line)
+
+    # Trim again after removing header
+    filtered_content = trim_content(filtered_content)
+
+    with open(filepath, "w") as f:
+        for line in filtered_content:
+            f.write(line)
+
+
+def write_gemini_command(content_lines, filename, commands_dir, section_name=None):
+    """Write a Gemini CLI command file (TOML format)."""
+    filepath = os.path.join(commands_dir, filename + ".toml")
+
+    description, filtered_content = extract_description_and_filter_content(
+        content_lines, ""
+    )
+
+    # Strip the header from content (first line starting with ##)
+    final_content = []
+    found_header = False
+    for line in filtered_content:
+        if not found_header and line.startswith("## "):
+            found_header = True
+            continue
+        final_content.append(line)
+
+    # Trim and convert to string
+    final_content = trim_content(final_content)
+    content_str = "".join(final_content).strip()
+
+    with open(filepath, "w") as f:
+        f.write(f'name = "{filename}"\n')
+        if description:
+            f.write(f'description = "{description}"\n')
+        else:
+            f.write(f'description = "{section_name or filename}"\n')
+        f.write('\n[command]\n')
+        f.write('shell = """\n')
+        f.write(content_str)
+        f.write('\n"""\n')
+
+
+def process_unmapped_section(lines, section_name, cursor_commands_dir, github_prompts_dir, claude_commands_dir, gemini_commands_dir):
+    """Process an unmapped section as a manually applied rule (command)."""
     section_content = extract_section(lines, f"## {section_name}")
     if any(line.strip() for line in section_content):
         filename = header_to_filename(section_name)
@@ -203,9 +282,11 @@ def process_unmapped_section(lines, section_name, rules_dir, github_prompts_dir)
             section_content, section_name
         )
 
-        # Create prompt files (same as None case in SECTION_GLOBS)
-        write_cursor_prompt(section_content, filename, rules_dir, section_name)
+        # Create command files (same as None case in SECTION_GLOBS)
+        write_cursor_command(section_content, filename, cursor_commands_dir, section_name)
         write_github_prompt(section_content, filename, github_prompts_dir, section_name)
+        write_claude_command(section_content, filename, claude_commands_dir, section_name)
+        write_gemini_command(section_content, filename, gemini_commands_dir, section_name)
         return True
     return False
 
@@ -235,12 +316,18 @@ def explode_main(
 
     # Work in current directory ($PWD)
     rules_dir = os.path.join(os.getcwd(), ".cursor", "rules")
+    cursor_commands_dir = os.path.join(os.getcwd(), ".cursor", "commands")
     copilot_dir = os.path.join(os.getcwd(), ".github", "instructions")
     github_prompts_dir = os.path.join(os.getcwd(), ".github", "prompts")
+    claude_commands_dir = os.path.join(os.getcwd(), ".claude", "commands")
+    gemini_commands_dir = os.path.join(os.getcwd(), ".gemini", "commands")
 
     os.makedirs(rules_dir, exist_ok=True)
+    os.makedirs(cursor_commands_dir, exist_ok=True)
     os.makedirs(copilot_dir, exist_ok=True)
     os.makedirs(github_prompts_dir, exist_ok=True)
+    os.makedirs(claude_commands_dir, exist_ok=True)
+    os.makedirs(gemini_commands_dir, exist_ok=True)
 
     input_path = os.path.join(os.getcwd(), input_file)
 
@@ -295,18 +382,20 @@ alwaysApply: true
                     section_content,
                 )
             else:
-                # It's a prompt - create prompt files using the original section name for header
-                write_cursor_prompt(section_content, filename, rules_dir, section_name)
+                # It's a command - create command files using the original section name for header
+                write_cursor_command(section_content, filename, cursor_commands_dir, section_name)
                 write_github_prompt(
                     section_content, filename, github_prompts_dir, section_name
                 )
+                write_claude_command(section_content, filename, claude_commands_dir, section_name)
+                write_gemini_command(section_content, filename, gemini_commands_dir, section_name)
 
     # Check for sections in mapping that don't exist in the file
     for section_name in SECTION_GLOBS:
         if section_name not in found_sections:
             logger.warning("Section not found in file", section=section_name)
 
-    # Process unmapped sections as manually applied rules (prompts)
+    # Process unmapped sections as manually applied rules (commands)
     processed_unmapped = set()
     for line in lines:
         if line.startswith("## "):
@@ -321,16 +410,19 @@ alwaysApply: true
                 and section_name not in processed_unmapped
             ):
                 if process_unmapped_section(
-                    lines, section_name, rules_dir, github_prompts_dir
+                    lines, section_name, cursor_commands_dir, github_prompts_dir, claude_commands_dir, gemini_commands_dir
                 ):
                     processed_unmapped.add(section_name)
 
     logger.info(
         "Explode operation completed",
         cursor_rules=rules_dir,
+        cursor_commands=cursor_commands_dir,
         copilot_instructions=copilot_dir,
         github_prompts=github_prompts_dir,
+        claude_commands=claude_commands_dir,
+        gemini_commands=gemini_commands_dir,
     )
     typer.echo(
-        "Created Cursor rules in .cursor/rules/, Copilot instructions in .github/instructions/, and prompts in respective directories"
+        "Created rules and commands in .cursor/, .claude/, .github/, and .gemini/ directories"
     )
