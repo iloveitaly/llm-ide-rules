@@ -8,7 +8,7 @@ from llm_ide_rules.commands.implode import cursor, github, claude, gemini
 from llm_ide_rules.commands.download import download_main
 from llm_ide_rules.commands.delete import delete_main
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 app = typer.Typer(
     name="llm_ide_rules",
