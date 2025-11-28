@@ -451,10 +451,6 @@ function TheComponent() {
 }
 ```
 
-## React Router Client Loader
-
-Do this in a `clientLoader` and use `loaderData` to render the component. DO NOT create mock data, new interfaces, or mock data loader functions. Instead, assume `loaderData` has all of the data you need to render the component.
-
 ## Shell
 
 - Assume zsh for any shell scripts. The latest version of modern utilities like ripgrep (rg), fdfind (fd), bat, httpie (http), zq (zed), jq, procs, rsync are installed and you can request I install additional utilities.
@@ -480,24 +476,6 @@ Here's how frontend code is organized in `web/app/`:
   - `ui/` reusable ShadCN UI components (buttons, forms, etc.).
   - `shared/` components shared across multiple pages.
   - create additional folders for route- or section-specific components.
-
-## TypeScript DocString
-
-Add a file-level docstring with a simple description of what this file does and where this is used.
-
-## Secrets
-
-Here's how environment variables are managed in this application:
-
-- `.envrc` entry point to load the correct env stack. Should not contain secrets and should be simple some shell logic and direnv stdlib calls.
-- `env/all.sh` common configuration for all systems. No secrets. No dotenv/custom scripts. Just `export`s to modify core configuration settings like `export TZ=UTC`.
-- `env/all.local.sh` overrides across all environments (dev and test). Useful for things like 1Password service account token and database hosts which mutate the logic followed in `env/not_production.sh`. Not committed to source control.
-- `env/not_production.sh` This contains the bulk of your system configuration. Shared across test, CI, dev, etc but not production.
-- `env/dev.local.sh` configuration overrides for non-test environments. `PYTHONBREAKPOINT`, `LOG_LEVEL`, etc. Most of your environment changes end up happening here.
-- `env/test.sh` test-only environment variables (`PYTHON_ENV=test`). This file should generally be short.
-- `env/production.{backend,frontend}.sh` for most medium-sized projects you'll have separate frontend and backend systems (even if your frontend is SPA, which I'm a fan of). These two files enable you to document the variables required to build (in the case of a SPA frontend) or run (in the case of a python backend) your system in production.
-- `env/*local.*` files have a `-example` variant which is committed to version control. These document helpful environment variables for local development.
-- When writing TypeScript/JavaScript/React, use `requireEnv("THE_ENV_VAR_NAME")` to read an environment variable. `import {requireEnv} from '~/utils/environment'`
 
 ## Fix Tests
 
@@ -542,9 +520,27 @@ Let's separate this into key sections:
 
 - we don't have to put everything in a single perform. You can use helper functions. Can you modularize the code a bit and use helper functions so it's easier to read?
 
+## React Router Client Loader
+
+Do this in a `clientLoader` and use `loaderData` to render the component. DO NOT create mock data, new interfaces, or mock data loader functions. Instead, assume `loaderData` has all of the data you need to render the component.
+
 ## Refactor On Instructions
 
 Refactor this code following all the established coding rules. Pay very careful attention to each rule and instruction and update the referenced code.
+
+## Secrets
+
+Here's how environment variables are managed in this application:
+
+- `.envrc` entry point to load the correct env stack. Should not contain secrets and should be simple some shell logic and direnv stdlib calls.
+- `env/all.sh` common configuration for all systems. No secrets. No dotenv/custom scripts. Just `export`s to modify core configuration settings like `export TZ=UTC`.
+- `env/all.local.sh` overrides across all environments (dev and test). Useful for things like 1Password service account token and database hosts which mutate the logic followed in `env/not_production.sh`. Not committed to source control.
+- `env/not_production.sh` This contains the bulk of your system configuration. Shared across test, CI, dev, etc but not production.
+- `env/dev.local.sh` configuration overrides for non-test environments. `PYTHONBREAKPOINT`, `LOG_LEVEL`, etc. Most of your environment changes end up happening here.
+- `env/test.sh` test-only environment variables (`PYTHON_ENV=test`). This file should generally be short.
+- `env/production.{backend,frontend}.sh` for most medium-sized projects you'll have separate frontend and backend systems (even if your frontend is SPA, which I'm a fan of). These two files enable you to document the variables required to build (in the case of a SPA frontend) or run (in the case of a python backend) your system in production.
+- `env/*local.*` files have a `-example` variant which is committed to version control. These document helpful environment variables for local development.
+- When writing TypeScript/JavaScript/React, use `requireEnv("THE_ENV_VAR_NAME")` to read an environment variable. `import {requireEnv} from '~/utils/environment'`
 
 ## Standalone Python Scripts
 
@@ -574,9 +570,7 @@ Use this header:
 - Assume the new `StripeClient` is used everywhere and type it as such. When using this client, all API params should be a dictionary inside a `params=` kwarg.
 - `amount_refunded=0` when the charge is disputed. The dispute amount only exists in the `balance_transactions` of the dispute object.
 
-## Dev In Browser
+## Typescript Docstring
 
-Use your browser to view `https://verso.localhost` which is tied to livereload dev server which is already running. You can inspect that page (including taking screenshots!) to validate that your changes fixed the issue.
-
-If the site does not load, stop your work and let me know.
+Add a file-level docstring with a simple description of what this file does and where this is used.
 
