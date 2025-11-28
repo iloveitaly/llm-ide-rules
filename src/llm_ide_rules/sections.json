@@ -9,19 +9,7 @@
     "FastAPI": "app/routes/**/*.py",
     "React": "**/*.tsx",
     "React Router": "web/app/routes/**/*.tsx",
-    "React Router Client Loader": null,
     "Shell": "**/*.sh",
-    "TypeScript": "**/*.ts,**/*.tsx",
-    "TypeScript DocString": null,
-    "Secrets": null,
-    "Dev In Browser": null,
-    "Fastapi Stripe": null,
-    "Fix Tests": null,
-    "Implement Fastapi Routes": null,
-    "Plan Only": null,
-    "Python Command": null,
-    "Refactor On Instructions": null,
-    "Standalone Python Scripts": null,
-    "Stripe Backend": null
+    "TypeScript": "**/*.ts,**/*.tsx"
   }
 }

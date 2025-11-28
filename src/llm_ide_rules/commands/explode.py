@@ -24,6 +24,15 @@ alwaysApply: false
 """
 
 
+def generate_cursor_always_apply_frontmatter():
+    """Generate Cursor rule frontmatter for always-apply rules."""
+    return """---
+description:
+alwaysApply: true
+---
+"""
+
+
 def generate_copilot_frontmatter(glob):
     """Generate Copilot instruction frontmatter for a given glob pattern."""
     return f"""---
@@ -60,6 +69,28 @@ def extract_section(lines, header):
             in_section = True
             content.append(line)  # Include the header itself
     return content
+
+
+def extract_all_sections(lines):
+    """Extract all sections from lines, returning dict of section_name -> content_lines."""
+    sections = {}
+    current_section = None
+    current_content = []
+
+    for line in lines:
+        if line.startswith("## "):
+            if current_section:
+                sections[current_section] = current_content
+
+            current_section = line.strip()[3:]  # Remove "## "
+            current_content = [line]
+        elif current_section:
+            current_content.append(line)
+
+    if current_section:
+        sections[current_section] = current_content
+
+    return sections
 
 
 def write_rule(path, header_yaml, content_lines):
@@ -271,24 +302,45 @@ def write_gemini_command(content_lines, filename, commands_dir, section_name=Non
         f.write('\n"""\n')
 
 
-def process_unmapped_section(lines, section_name, cursor_commands_dir, github_prompts_dir, claude_commands_dir, gemini_commands_dir):
-    """Process an unmapped section as a manually applied rule (command)."""
-    section_content = extract_section(lines, f"## {section_name}")
-    if any(line.strip() for line in section_content):
-        filename = header_to_filename(section_name)
+def process_command_section(section_name, section_content, cursor_commands_dir, github_prompts_dir, claude_commands_dir, gemini_commands_dir):
+    """Process a section as a command."""
+    if not any(line.strip() for line in section_content):
+        return False
 
-        # Replace header with proper casing
-        section_content = replace_header_with_proper_casing(
-            section_content, section_name
-        )
+    filename = header_to_filename(section_name)
+    section_content = replace_header_with_proper_casing(section_content, section_name)
 
-        # Create command files (same as None case in SECTION_GLOBS)
-        write_cursor_command(section_content, filename, cursor_commands_dir, section_name)
-        write_github_prompt(section_content, filename, github_prompts_dir, section_name)
-        write_claude_command(section_content, filename, claude_commands_dir, section_name)
-        write_gemini_command(section_content, filename, gemini_commands_dir, section_name)
-        return True
-    return False
+    write_cursor_command(section_content, filename, cursor_commands_dir, section_name)
+    write_github_prompt(section_content, filename, github_prompts_dir, section_name)
+    write_claude_command(section_content, filename, claude_commands_dir, section_name)
+    write_gemini_command(section_content, filename, gemini_commands_dir, section_name)
+    return True
+
+
+def process_unmapped_as_always_apply(section_name, section_content, rules_dir, copilot_dir):
+    """Process an unmapped section as an always-apply rule."""
+    if not any(line.strip() for line in section_content):
+        return False
+
+    filename = header_to_filename(section_name)
+    section_content = replace_header_with_proper_casing(section_content, section_name)
+
+    # Create always-apply rule files
+    cursor_header = generate_cursor_always_apply_frontmatter()
+    write_rule(
+        os.path.join(rules_dir, filename + ".mdc"),
+        cursor_header,
+        section_content,
+    )
+
+    # Copilot doesn't have alwaysApply, so we skip the glob
+    write_rule(
+        os.path.join(copilot_dir, filename + ".instructions.md"),
+        "",
+        section_content,
+    )
+
+    return True
 
 
 def explode_main(
@@ -329,16 +381,22 @@ def explode_main(
     os.makedirs(claude_commands_dir, exist_ok=True)
     os.makedirs(gemini_commands_dir, exist_ok=True)
 
-    input_path = os.path.join(os.getcwd(), input_file)
+    input_path = Path(os.getcwd()) / input_file
 
     try:
-        with open(input_path, "r") as f:
-            lines = f.readlines()
+        lines = input_path.read_text().splitlines(keepends=True)
     except FileNotFoundError:
-        logger.error("Input file not found", input_file=input_path)
+        logger.error("Input file not found", input_file=str(input_path))
         raise typer.Exit(1)
 
-    # General instructions
+    # Check for optional commands.md in same directory
+    commands_path = input_path.parent / "commands.md"
+    commands_lines = []
+    if commands_path.exists():
+        commands_lines = commands_path.read_text().splitlines(keepends=True)
+        logger.info("Found commands file", commands_file=str(commands_path))
+
+    # General instructions (content before first ## header)
     general = extract_general(lines)
     if any(line.strip() for line in general):
         general_header = """
@@ -353,66 +411,67 @@ alwaysApply: true
             os.path.join(os.getcwd(), ".github", "copilot-instructions.md"), "", general
         )
 
-    # Process each section dynamically
+    # Process mapped sections from instructions.md
     found_sections = set()
-    for section_name, glob_or_description in SECTION_GLOBS.items():
+    for section_name, glob_pattern in SECTION_GLOBS.items():
         section_content = extract_section(lines, f"## {section_name}")
         if any(line.strip() for line in section_content):
             found_sections.add(section_name)
             filename = header_to_filename(section_name)
 
-            # Replace header with proper casing from SECTION_GLOBS
             section_content = replace_header_with_proper_casing(
                 section_content, section_name
             )
 
-            if glob_or_description is not None:
-                # It's a glob pattern - create instruction files
-                cursor_header = generate_cursor_frontmatter(glob_or_description)
-                write_rule(
-                    os.path.join(rules_dir, filename + ".mdc"),
-                    cursor_header,
-                    section_content,
-                )
+            # Create rule files with glob pattern
+            cursor_header = generate_cursor_frontmatter(glob_pattern)
+            write_rule(
+                os.path.join(rules_dir, filename + ".mdc"),
+                cursor_header,
+                section_content,
+            )
 
-                copilot_header = generate_copilot_frontmatter(glob_or_description)
-                write_rule(
-                    os.path.join(copilot_dir, filename + ".instructions.md"),
-                    copilot_header,
-                    section_content,
-                )
-            else:
-                # It's a command - create command files using the original section name for header
-                write_cursor_command(section_content, filename, cursor_commands_dir, section_name)
-                write_github_prompt(
-                    section_content, filename, github_prompts_dir, section_name
-                )
-                write_claude_command(section_content, filename, claude_commands_dir, section_name)
-                write_gemini_command(section_content, filename, gemini_commands_dir, section_name)
+            copilot_header = generate_copilot_frontmatter(glob_pattern)
+            write_rule(
+                os.path.join(copilot_dir, filename + ".instructions.md"),
+                copilot_header,
+                section_content,
+            )
 
     # Check for sections in mapping that don't exist in the file
     for section_name in SECTION_GLOBS:
         if section_name not in found_sections:
             logger.warning("Section not found in file", section=section_name)
 
-    # Process unmapped sections as manually applied rules (commands)
-    processed_unmapped = set()
+    # Process unmapped sections in instructions.md as always-apply rules
     for line in lines:
         if line.startswith("## "):
-            section_header = line.strip()
-            section_name = section_header[3:]  # Remove "## "
-            # Case insensitive check and avoid duplicate processing
-            if (
-                not any(
-                    section_name.lower() == mapped_section.lower()
-                    for mapped_section in SECTION_GLOBS
-                )
-                and section_name not in processed_unmapped
+            section_name = line.strip()[3:]  # Remove "## "
+            if not any(
+                section_name.lower() == mapped_section.lower()
+                for mapped_section in SECTION_GLOBS
             ):
-                if process_unmapped_section(
-                    lines, section_name, cursor_commands_dir, github_prompts_dir, claude_commands_dir, gemini_commands_dir
-                ):
-                    processed_unmapped.add(section_name)
+                logger.warning(
+                    "Unmapped section in instructions.md, treating as always-apply rule",
+                    section=section_name
+                )
+                section_content = extract_section(lines, f"## {section_name}")
+                process_unmapped_as_always_apply(
+                    section_name, section_content, rules_dir, copilot_dir
+                )
+
+    # Process commands from commands.md if it exists
+    if commands_lines:
+        command_sections = extract_all_sections(commands_lines)
+        for section_name, section_content in command_sections.items():
+            process_command_section(
+                section_name,
+                section_content,
+                cursor_commands_dir,
+                github_prompts_dir,
+                claude_commands_dir,
+                gemini_commands_dir,
+            )
 
     logger.info(
         "Explode operation completed",

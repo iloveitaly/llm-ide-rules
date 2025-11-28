@@ -57,46 +57,6 @@ def get_ordered_files_github(file_list, section_globs_keys):
     return ordered_files
 
 
-def bundle_cursor_rules(rules_dir, commands_dir, output_file, section_globs):
-    """Bundle Cursor rule and command files into a single file."""
-    rule_files = list(Path(rules_dir).glob("*.mdc"))
-    command_files = list(Path(commands_dir).glob("*.md"))
-
-    general = [f for f in rule_files if f.stem == "general"]
-    others = [f for f in rule_files if f.stem != "general"]
-
-    # Order the non-general files based on section_globs
-    ordered_others = get_ordered_files(others, section_globs.keys())
-    ordered_commands = get_ordered_files(command_files, section_globs.keys())
-    ordered = general + ordered_others + ordered_commands
-
-    def resolve_header_from_stem(stem):
-        """Return the canonical header for a given filename stem.
-
-        Prefer exact header names from section_globs (preserves acronyms like FastAPI, TypeScript).
-        Fallback to title-casing the filename when not found in section_globs.
-        """
-        for section_name in section_globs.keys():
-            if header_to_filename(section_name) == stem:
-                return section_name
-        return filename_to_header(stem)
-
-    with open(output_file, "w") as out:
-        for rule_file in ordered:
-            with open(rule_file, "r") as f:
-                content = f.read().strip()
-                if not content:
-                    continue
-                content = strip_yaml_frontmatter(content)
-                content = strip_header(content)
-                # Use canonical header names from SECTION_GLOBS when available
-                header = resolve_header_from_stem(rule_file.stem)
-                if rule_file.stem != "general":
-                    out.write(f"## {header}\n\n")
-                out.write(content)
-                out.write("\n\n")
-
-
 def strip_yaml_frontmatter(text):
     """Strip YAML frontmatter from text."""
     lines = text.splitlines()
@@ -118,108 +78,6 @@ def strip_header(text):
             remaining_lines = remaining_lines[1:]
         return "\n".join(remaining_lines)
     return text
-
-
-def bundle_github_instructions(instructions_dir, prompts_dir, output_file, section_globs):
-    """Bundle GitHub instruction and prompt files into a single file."""
-    copilot_general = Path(os.getcwd()) / ".github" / "copilot-instructions.md"
-    instr_files = list(Path(instructions_dir).glob("*.instructions.md"))
-    prompt_files = list(Path(prompts_dir).glob("*.prompt.md"))
-
-    # Order the instruction files based on section_globs
-    # We need to create a modified version that strips .instructions from stems for ordering
-    ordered_instructions = get_ordered_files_github(instr_files, section_globs.keys())
-
-    # For prompts, we need to handle .prompt suffix similarly
-    ordered_prompts = []
-    prompt_dict = {}
-    for f in prompt_files:
-        base_stem = f.stem.replace(".prompt", "")
-        prompt_dict[base_stem] = f
-
-    for section_name in section_globs.keys():
-        filename = header_to_filename(section_name)
-        if filename in prompt_dict:
-            ordered_prompts.append(prompt_dict[filename])
-            del prompt_dict[filename]
-
-    # Add remaining prompts alphabetically
-    remaining_prompts = sorted(prompt_dict.values(), key=lambda p: p.name)
-    ordered_prompts.extend(remaining_prompts)
-
-    def resolve_header_from_stem(stem):
-        """Return the canonical header for a given filename stem.
-
-        Prefer exact header names from section_globs (preserves acronyms like FastAPI, TypeScript).
-        Fallback to title-casing the filename when not found in section_globs.
-        """
-        for section_name in section_globs.keys():
-            if header_to_filename(section_name) == stem:
-                return section_name
-        return filename_to_header(stem)
-
-    with open(output_file, "w") as out:
-        # Write general copilot instructions if present
-        if copilot_general.exists():
-            content = copilot_general.read_text().strip()
-            if content:
-                out.write(content)
-                out.write("\n\n")
-        for instr_file in ordered_instructions:
-            with open(instr_file, "r") as f:
-                content = f.read().strip()
-                if not content:
-                    continue
-                content = strip_yaml_frontmatter(content)
-                content = strip_header(content)
-                # Use canonical header names from SECTION_GLOBS when available
-                base_stem = instr_file.stem.replace(".instructions", "")
-                header = resolve_header_from_stem(base_stem)
-                out.write(f"## {header}\n\n")
-                out.write(content)
-                out.write("\n\n")
-        for prompt_file in ordered_prompts:
-            with open(prompt_file, "r") as f:
-                content = f.read().strip()
-                if not content:
-                    continue
-                content = strip_yaml_frontmatter(content)
-                content = strip_header(content)
-                # Use canonical header names from SECTION_GLOBS when available
-                base_stem = prompt_file.stem.replace(".prompt", "")
-                header = resolve_header_from_stem(base_stem)
-                out.write(f"## {header}\n\n")
-                out.write(content)
-                out.write("\n\n")
-
-
-def bundle_claude_commands(commands_dir, output_file, section_globs):
-    """Bundle Claude Code command files into a single file."""
-    command_files = list(Path(commands_dir).glob("*.md"))
-    ordered_commands = get_ordered_files(command_files, section_globs.keys())
-
-    def resolve_header_from_stem(stem):
-        """Return the canonical header for a given filename stem.
-
-        Prefer exact header names from section_globs (preserves acronyms like FastAPI, TypeScript).
-        Fallback to title-casing the filename when not found in section_globs.
-        """
-        for section_name in section_globs.keys():
-            if header_to_filename(section_name) == stem:
-                return section_name
-        return filename_to_header(stem)
-
-    with open(output_file, "w") as out:
-        for command_file in ordered_commands:
-            with open(command_file, "r") as f:
-                content = f.read().strip()
-                if not content:
-                    continue
-                # Claude commands don't have frontmatter, just content
-                header = resolve_header_from_stem(command_file.stem)
-                out.write(f"## {header}\n\n")
-                out.write(content)
-                out.write("\n\n")
 
 
 def strip_toml_metadata(text):
@@ -251,109 +109,319 @@ def strip_toml_metadata(text):
     return "\n".join(content_lines).strip()
 
 
-def bundle_gemini_commands(commands_dir, output_file, section_globs):
-    """Bundle Gemini CLI command files into a single file."""
-    command_files = list(Path(commands_dir).glob("*.toml"))
+def resolve_header_from_stem(stem, section_globs):
+    """Return the canonical header for a given filename stem.
+
+    Prefer exact header names from section_globs (preserves acronyms like FastAPI, TypeScript).
+    Fallback to title-casing the filename when not found in section_globs.
+    """
+    for section_name in section_globs.keys():
+        if header_to_filename(section_name) == stem:
+            return section_name
+    return filename_to_header(stem)
+
+
+def bundle_cursor_rules_only(rules_dir, output_file, section_globs):
+    """Bundle Cursor rule files (not commands) into instructions.md."""
+    rule_files = list(Path(rules_dir).glob("*.mdc"))
+
+    general = [f for f in rule_files if f.stem == "general"]
+    others = [f for f in rule_files if f.stem != "general"]
+
+    ordered_others = get_ordered_files(others, section_globs.keys())
+    ordered = general + ordered_others
+
+    content_written = False
+    with open(output_file, "w") as out:
+        for rule_file in ordered:
+            with open(rule_file, "r") as f:
+                content = f.read().strip()
+                if not content:
+                    continue
+
+                content = strip_yaml_frontmatter(content)
+                content = strip_header(content)
+                header = resolve_header_from_stem(rule_file.stem, section_globs)
+
+                if rule_file.stem != "general":
+                    out.write(f"## {header}\n\n")
+
+                out.write(content)
+                out.write("\n\n")
+                content_written = True
+
+    return content_written
+
+
+def bundle_cursor_commands_only(commands_dir, output_file, section_globs):
+    """Bundle Cursor command files into commands.md."""
+    commands_path = Path(commands_dir)
+    if not commands_path.exists():
+        return False
+
+    command_files = list(commands_path.glob("*.md"))
+    if not command_files:
+        return False
+
     ordered_commands = get_ordered_files(command_files, section_globs.keys())
 
-    def resolve_header_from_stem(stem):
-        """Return the canonical header for a given filename stem.
-
-        Prefer exact header names from section_globs (preserves acronyms like FastAPI, TypeScript).
-        Fallback to title-casing the filename when not found in section_globs.
-        """
-        for section_name in section_globs.keys():
-            if header_to_filename(section_name) == stem:
-                return section_name
-        return filename_to_header(stem)
-
+    content_written = False
     with open(output_file, "w") as out:
         for command_file in ordered_commands:
             with open(command_file, "r") as f:
                 content = f.read().strip()
                 if not content:
                     continue
-                # Extract content from TOML shell block
-                content = strip_toml_metadata(content)
-                header = resolve_header_from_stem(command_file.stem)
+
+                header = resolve_header_from_stem(command_file.stem, section_globs)
                 out.write(f"## {header}\n\n")
                 out.write(content)
                 out.write("\n\n")
+                content_written = True
+
+    return content_written
+
+
+def bundle_github_instructions_only(instructions_dir, output_file, section_globs):
+    """Bundle GitHub instruction files (not prompts) into instructions.md."""
+    copilot_general = Path(os.getcwd()) / ".github" / "copilot-instructions.md"
+    instr_files = list(Path(instructions_dir).glob("*.instructions.md"))
+
+    ordered_instructions = get_ordered_files_github(instr_files, section_globs.keys())
+
+    content_written = False
+    with open(output_file, "w") as out:
+        # Write general copilot instructions if present
+        if copilot_general.exists():
+            content = copilot_general.read_text().strip()
+            if content:
+                out.write(content)
+                out.write("\n\n")
+                content_written = True
+
+        for instr_file in ordered_instructions:
+            with open(instr_file, "r") as f:
+                content = f.read().strip()
+                if not content:
+                    continue
+
+                content = strip_yaml_frontmatter(content)
+                content = strip_header(content)
+                base_stem = instr_file.stem.replace(".instructions", "")
+                header = resolve_header_from_stem(base_stem, section_globs)
+                out.write(f"## {header}\n\n")
+                out.write(content)
+                out.write("\n\n")
+                content_written = True
+
+    return content_written
+
+
+def bundle_github_prompts_only(prompts_dir, output_file, section_globs):
+    """Bundle GitHub prompt files into commands.md."""
+    prompts_path = Path(prompts_dir)
+    if not prompts_path.exists():
+        return False
+
+    prompt_files = list(prompts_path.glob("*.prompt.md"))
+    if not prompt_files:
+        return False
+
+    # Order prompts
+    prompt_dict = {}
+    for f in prompt_files:
+        base_stem = f.stem.replace(".prompt", "")
+        prompt_dict[base_stem] = f
+
+    ordered_prompts = []
+    for section_name in section_globs.keys():
+        filename = header_to_filename(section_name)
+        if filename in prompt_dict:
+            ordered_prompts.append(prompt_dict[filename])
+            del prompt_dict[filename]
+
+    # Add remaining prompts alphabetically
+    remaining_prompts = sorted(prompt_dict.values(), key=lambda p: p.name)
+    ordered_prompts.extend(remaining_prompts)
+
+    content_written = False
+    with open(output_file, "w") as out:
+        for prompt_file in ordered_prompts:
+            with open(prompt_file, "r") as f:
+                content = f.read().strip()
+                if not content:
+                    continue
+
+                content = strip_yaml_frontmatter(content)
+                content = strip_header(content)
+                base_stem = prompt_file.stem.replace(".prompt", "")
+                header = resolve_header_from_stem(base_stem, section_globs)
+                out.write(f"## {header}\n\n")
+                out.write(content)
+                out.write("\n\n")
+                content_written = True
+
+    return content_written
+
+
+def bundle_claude_commands(commands_dir, output_file, section_globs):
+    """Bundle Claude Code command files into a single file."""
+    commands_path = Path(commands_dir)
+    if not commands_path.exists():
+        return False
+
+    command_files = list(commands_path.glob("*.md"))
+    if not command_files:
+        return False
+
+    ordered_commands = get_ordered_files(command_files, section_globs.keys())
+
+    content_written = False
+    with open(output_file, "w") as out:
+        for command_file in ordered_commands:
+            with open(command_file, "r") as f:
+                content = f.read().strip()
+                if not content:
+                    continue
+
+                header = resolve_header_from_stem(command_file.stem, section_globs)
+                out.write(f"## {header}\n\n")
+                out.write(content)
+                out.write("\n\n")
+                content_written = True
+
+    return content_written
+
+
+def bundle_gemini_commands(commands_dir, output_file, section_globs):
+    """Bundle Gemini CLI command files into a single file."""
+    commands_path = Path(commands_dir)
+    if not commands_path.exists():
+        return False
+
+    command_files = list(commands_path.glob("*.toml"))
+    if not command_files:
+        return False
+
+    ordered_commands = get_ordered_files(command_files, section_globs.keys())
+
+    content_written = False
+    with open(output_file, "w") as out:
+        for command_file in ordered_commands:
+            with open(command_file, "r") as f:
+                content = f.read().strip()
+                if not content:
+                    continue
+
+                # Extract content from TOML shell block
+                content = strip_toml_metadata(content)
+                header = resolve_header_from_stem(command_file.stem, section_globs)
+                out.write(f"## {header}\n\n")
+                out.write(content)
+                out.write("\n\n")
+                content_written = True
+
+    return content_written
 
 
 def cursor(
-    output: Annotated[str, typer.Argument(help="Output file")] = "instructions.md",
+    output: Annotated[str, typer.Argument(help="Output file for rules")] = "instructions.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
     config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
-    """Bundle Cursor rules and commands into a single file."""
+    """Bundle Cursor rules into instructions.md and commands into commands.md."""
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
         structlog.configure(
             wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
         )
 
-    # Load section globs (with optional custom config)
     SECTION_GLOBS = load_section_globs(config)
 
     rules_dir = os.path.join(os.getcwd(), ".cursor", "rules")
     commands_dir = os.path.join(os.getcwd(), ".cursor", "commands")
     output_path = os.path.join(os.getcwd(), output)
+    commands_output_path = os.path.join(os.getcwd(), "commands.md")
 
-    logger.info("Bundling Cursor rules and commands", rules_dir=rules_dir, commands_dir=commands_dir, output_file=output_path, config=config)
+    logger.info("Bundling Cursor rules and commands", rules_dir=rules_dir, commands_dir=commands_dir, config=config)
 
     if not Path(rules_dir).exists():
         logger.error("Cursor rules directory not found", rules_dir=rules_dir)
         raise typer.Exit(1)
 
-    bundle_cursor_rules(rules_dir, commands_dir, output_path, SECTION_GLOBS)
-    logger.info("Cursor rules and commands bundled successfully", output_file=output_path)
-    typer.echo(f"Bundled cursor rules and commands into {output}")
+    # Bundle rules to instructions.md
+    rules_written = bundle_cursor_rules_only(rules_dir, output_path, SECTION_GLOBS)
+    if rules_written:
+        logger.info("Cursor rules bundled", output_file=output_path)
+        typer.echo(f"Bundled cursor rules into {output}")
+    else:
+        Path(output_path).unlink(missing_ok=True)
+        logger.info("No cursor rules to bundle")
+
+    # Bundle commands to commands.md
+    commands_written = bundle_cursor_commands_only(commands_dir, commands_output_path, SECTION_GLOBS)
+    if commands_written:
+        logger.info("Cursor commands bundled", output_file=commands_output_path)
+        typer.echo("Bundled cursor commands into commands.md")
+    else:
+        Path(commands_output_path).unlink(missing_ok=True)
 
 
 def github(
-    output: Annotated[str, typer.Argument(help="Output file")] = "instructions.md",
+    output: Annotated[str, typer.Argument(help="Output file for instructions")] = "instructions.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
     config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
-    """Bundle GitHub/Copilot instructions and prompts into a single file."""
+    """Bundle GitHub instructions into instructions.md and prompts into commands.md."""
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
         structlog.configure(
             wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
         )
 
-    # Load section globs (with optional custom config)
     SECTION_GLOBS = load_section_globs(config)
 
     instructions_dir = os.path.join(os.getcwd(), ".github", "instructions")
     prompts_dir = os.path.join(os.getcwd(), ".github", "prompts")
     output_path = os.path.join(os.getcwd(), output)
+    commands_output_path = os.path.join(os.getcwd(), "commands.md")
 
-    logger.info("Bundling GitHub instructions and prompts", instructions_dir=instructions_dir, prompts_dir=prompts_dir, output_file=output_path, config=config)
+    logger.info("Bundling GitHub instructions and prompts", instructions_dir=instructions_dir, prompts_dir=prompts_dir, config=config)
 
     if not Path(instructions_dir).exists():
         logger.error("GitHub instructions directory not found", instructions_dir=instructions_dir)
         raise typer.Exit(1)
 
-    bundle_github_instructions(instructions_dir, prompts_dir, output_path, SECTION_GLOBS)
-    logger.info("GitHub instructions and prompts bundled successfully", output_file=output_path)
-    typer.echo(f"Bundled github instructions and prompts into {output}")
+    # Bundle instructions to instructions.md
+    instructions_written = bundle_github_instructions_only(instructions_dir, output_path, SECTION_GLOBS)
+    if instructions_written:
+        logger.info("GitHub instructions bundled", output_file=output_path)
+        typer.echo(f"Bundled github instructions into {output}")
+    else:
+        Path(output_path).unlink(missing_ok=True)
+        logger.info("No github instructions to bundle")
+
+    # Bundle prompts to commands.md
+    prompts_written = bundle_github_prompts_only(prompts_dir, commands_output_path, SECTION_GLOBS)
+    if prompts_written:
+        logger.info("GitHub prompts bundled", output_file=commands_output_path)
+        typer.echo("Bundled github prompts into commands.md")
+    else:
+        Path(commands_output_path).unlink(missing_ok=True)
 
 
 def claude(
-    output: Annotated[str, typer.Argument(help="Output file")] = "instructions.md",
+    output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
     config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
-    """Bundle Claude Code commands into a single file."""
+    """Bundle Claude Code commands into commands.md."""
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
         structlog.configure(
             wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
         )
 
-    # Load section globs (with optional custom config)
     SECTION_GLOBS = load_section_globs(config)
 
     commands_dir = os.path.join(os.getcwd(), ".claude", "commands")
@@ -365,24 +433,27 @@ def claude(
         logger.error("Claude Code commands directory not found", commands_dir=commands_dir)
         raise typer.Exit(1)
 
-    bundle_claude_commands(commands_dir, output_path, SECTION_GLOBS)
-    logger.info("Claude Code commands bundled successfully", output_file=output_path)
-    typer.echo(f"Bundled claude commands into {output}")
+    commands_written = bundle_claude_commands(commands_dir, output_path, SECTION_GLOBS)
+    if commands_written:
+        logger.info("Claude Code commands bundled successfully", output_file=output_path)
+        typer.echo(f"Bundled claude commands into {output}")
+    else:
+        Path(output_path).unlink(missing_ok=True)
+        logger.info("No claude commands to bundle")
 
 
 def gemini(
-    output: Annotated[str, typer.Argument(help="Output file")] = "instructions.md",
+    output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
     config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
-    """Bundle Gemini CLI commands into a single file."""
+    """Bundle Gemini CLI commands into commands.md."""
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
         structlog.configure(
             wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
         )
 
-    # Load section globs (with optional custom config)
     SECTION_GLOBS = load_section_globs(config)
 
     commands_dir = os.path.join(os.getcwd(), ".gemini", "commands")
@@ -394,7 +465,10 @@ def gemini(
         logger.error("Gemini CLI commands directory not found", commands_dir=commands_dir)
         raise typer.Exit(1)
 
-    bundle_gemini_commands(commands_dir, output_path, SECTION_GLOBS)
-    logger.info("Gemini CLI commands bundled successfully", output_file=output_path)
-    typer.echo(f"Bundled gemini commands into {output}")
-
+    commands_written = bundle_gemini_commands(commands_dir, output_path, SECTION_GLOBS)
+    if commands_written:
+        logger.info("Gemini CLI commands bundled successfully", output_file=output_path)
+        typer.echo(f"Bundled gemini commands into {output}")
+    else:
+        Path(output_path).unlink(missing_ok=True)
+        logger.info("No gemini commands to bundle")
