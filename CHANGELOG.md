@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.4.0...v0.5.0) (2025-11-27)
+
+
+### Features
+
+* add claude and gemini command generation, update unmapped section handling ([2eebc36](https://github.com/iloveitaly/llm-ide-rules/commit/2eebc3665b8e4c0c95223d11c1c25b7ef825fabc))
+
+
+### Documentation
+
+* clarify pnpm usage instructions and add reference to [@local](https://github.com/local).md ([6000c0b](https://github.com/iloveitaly/llm-ide-rules/commit/6000c0bf585a8fd4d282e8ec4e4ac06e7a0eef3a))
+
 ## [0.4.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.3.0...v0.4.0) (2025-11-06)
 
 
