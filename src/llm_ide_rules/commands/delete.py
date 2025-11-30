@@ -5,13 +5,11 @@ import shutil
 from pathlib import Path
 from typing import List
 
-import structlog
 import typer
 from typing_extensions import Annotated
 
 from llm_ide_rules.commands.download import INSTRUCTION_TYPES, DEFAULT_TYPES
-
-logger = structlog.get_logger()
+from llm_ide_rules.log import log
 
 
 def find_files_to_delete(
@@ -27,7 +25,7 @@ def find_files_to_delete(
 
     for inst_type in instruction_types:
         if inst_type not in INSTRUCTION_TYPES:
-            logger.warning("Unknown instruction type", type=inst_type)
+            log.warning("Unknown instruction type", type=inst_type)
             continue
 
         config = INSTRUCTION_TYPES[inst_type]
@@ -92,16 +90,13 @@ def delete_main(
     """
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
-        structlog.configure(
-            wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
-        )
 
     if not instruction_types:
         instruction_types = DEFAULT_TYPES
 
     invalid_types = [t for t in instruction_types if t not in INSTRUCTION_TYPES]
     if invalid_types:
-        logger.error(
+        log.error(
             "Invalid instruction types",
             invalid_types=invalid_types,
             valid_types=list(INSTRUCTION_TYPES.keys()),
@@ -111,11 +106,11 @@ def delete_main(
     target_path = Path(target_dir).resolve()
 
     if not target_path.exists():
-        logger.error("Target directory does not exist", target_dir=str(target_path))
+        log.error("Target directory does not exist", target_dir=str(target_path))
         typer.echo(f"Error: Target directory does not exist: {target_path}")
         raise typer.Exit(1)
 
-    logger.info(
+    log.info(
         "Finding files to delete",
         instruction_types=instruction_types,
         target_dir=str(target_path),
@@ -126,7 +121,7 @@ def delete_main(
     )
 
     if not dirs_to_delete and not files_to_delete:
-        logger.info("No files found to delete")
+        log.info("No files found to delete")
         typer.echo("No matching instruction files found to delete.")
         return
 
@@ -151,7 +146,7 @@ def delete_main(
         typer.echo()
         confirm = typer.confirm("Are you sure you want to delete these files?")
         if not confirm:
-            logger.info("Deletion cancelled by user")
+            log.info("Deletion cancelled by user")
             typer.echo("Deletion cancelled.")
             raise typer.Exit(0)
 
@@ -159,21 +154,21 @@ def delete_main(
 
     for dir_path in dirs_to_delete:
         try:
-            logger.info("Deleting directory", path=str(dir_path))
+            log.info("Deleting directory", path=str(dir_path))
             shutil.rmtree(dir_path)
             deleted_count += 1
         except Exception as e:
-            logger.error("Failed to delete directory", path=str(dir_path), error=str(e))
+            log.error("Failed to delete directory", path=str(dir_path), error=str(e))
             typer.echo(f"Error deleting {dir_path}: {e}", err=True)
 
     for file_path in files_to_delete:
         try:
-            logger.info("Deleting file", path=str(file_path))
+            log.info("Deleting file", path=str(file_path))
             file_path.unlink()
             deleted_count += 1
         except Exception as e:
-            logger.error("Failed to delete file", path=str(file_path), error=str(e))
+            log.error("Failed to delete file", path=str(file_path), error=str(e))
             typer.echo(f"Error deleting {file_path}: {e}", err=True)
 
-    logger.info("Deletion completed", deleted_count=deleted_count, total_items=total_items)
+    log.info("Deletion completed", deleted_count=deleted_count, total_items=total_items)
     typer.echo(f"\nSuccessfully deleted {deleted_count} of {total_items} items.")

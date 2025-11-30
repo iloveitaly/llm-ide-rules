@@ -8,11 +8,10 @@ from pathlib import Path
 from typing import List
 
 import requests
-import structlog
 import typer
 from typing_extensions import Annotated
 
-logger = structlog.get_logger()
+from llm_ide_rules.log import log
 
 DEFAULT_REPO = "iloveitaly/llm-ide-rules"
 DEFAULT_BRANCH = "master"
@@ -62,13 +61,13 @@ def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
     normalized_repo = normalize_repo(repo)
     zip_url = f"https://github.com/{normalized_repo}/archive/{branch}.zip"
 
-    logger.info("Downloading repository", repo=repo, normalized_repo=normalized_repo, branch=branch, url=zip_url)
+    log.info("Downloading repository", repo=repo, normalized_repo=normalized_repo, branch=branch, url=zip_url)
 
     try:
         response = requests.get(zip_url, timeout=30)
         response.raise_for_status()
     except requests.RequestException as e:
-        logger.error("Failed to download repository", error=str(e), url=zip_url)
+        log.error("Failed to download repository", error=str(e), url=zip_url)
         raise typer.Exit(1)
 
     # Create temporary directory and file
@@ -88,11 +87,11 @@ def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
     # Find the extracted repository directory (should be the only directory)
     repo_dirs = [d for d in extract_dir.iterdir() if d.is_dir()]
     if not repo_dirs:
-        logger.error("No directories found in extracted ZIP")
+        log.error("No directories found in extracted ZIP")
         raise typer.Exit(1)
 
     repo_dir = repo_dirs[0]
-    logger.info("Repository extracted", path=str(repo_dir))
+    log.info("Repository extracted", path=str(repo_dir))
 
     return repo_dir
 
@@ -105,7 +104,7 @@ def copy_instruction_files(
 
     for inst_type in instruction_types:
         if inst_type not in INSTRUCTION_TYPES:
-            logger.warning("Unknown instruction type", type=inst_type)
+            log.warning("Unknown instruction type", type=inst_type)
             continue
 
         config = INSTRUCTION_TYPES[inst_type]
@@ -116,7 +115,7 @@ def copy_instruction_files(
             target_subdir = target_dir / dir_name
 
             if source_dir.exists():
-                logger.info(
+                log.info(
                     "Copying directory",
                     source=str(source_dir),
                     target=str(target_subdir),
@@ -137,7 +136,7 @@ def copy_instruction_files(
             target_file = target_dir / file_name
 
             if source_file.exists():
-                logger.info(
+                log.info(
                     "Copying file", source=str(source_file), target=str(target_file)
                 )
 
@@ -185,14 +184,14 @@ def copy_recursive_files(
         # Check if target directory already exists
         target_parent = target_file.parent
         if not target_parent.exists():
-            logger.warning(
+            log.warning(
                 "Target directory does not exist, skipping file copy",
                 target_directory=str(target_parent),
                 file=str(relative_path)
             )
             continue
-            
-        logger.info(
+
+        log.info(
             "Copying recursive file",
             source=str(source_file),
             target=str(target_file)
@@ -228,7 +227,7 @@ def copy_directory_contents(
                     break
 
             if should_exclude:
-                logger.debug("Excluding file", file=relative_str, pattern=pattern)
+                log.debug("Excluding file", file=relative_str, pattern=pattern)
                 continue
 
             target_file = target_dir / relative_path
@@ -281,9 +280,6 @@ def download_main(
     """
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
-        structlog.configure(
-            wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
-        )
 
     # Use default types if none specified
     if not instruction_types:
@@ -292,7 +288,7 @@ def download_main(
     # Validate instruction types
     invalid_types = [t for t in instruction_types if t not in INSTRUCTION_TYPES]
     if invalid_types:
-        logger.error(
+        log.error(
             "Invalid instruction types",
             invalid_types=invalid_types,
             valid_types=list(INSTRUCTION_TYPES.keys()),
@@ -301,7 +297,7 @@ def download_main(
 
     target_path = Path(target_dir).resolve()
 
-    logger.info(
+    log.info(
         "Starting download",
         repo=repo,
         branch=branch,
@@ -317,12 +313,12 @@ def download_main(
         copied_items = copy_instruction_files(repo_dir, instruction_types, target_path)
 
         if copied_items:
-            logger.info("Download completed successfully", copied_items=copied_items)
+            log.info("Download completed successfully", copied_items=copied_items)
             typer.echo(f"Downloaded {len(copied_items)} items to {target_path}:")
             for item in copied_items:
                 typer.echo(f"  - {item}")
         else:
-            logger.warning("No files were copied")
+            log.warning("No files were copied")
             typer.echo("No matching instruction files found in the repository.")
 
     finally:

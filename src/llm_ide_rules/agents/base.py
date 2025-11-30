@@ -236,3 +236,4 @@ def extract_description_and_filter_content(
 
     return description, filtered_content
 
+

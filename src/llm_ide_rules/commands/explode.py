@@ -4,18 +4,16 @@ import logging
 from pathlib import Path
 from typing_extensions import Annotated
 
-import structlog
 import typer
 
 from llm_ide_rules.agents import get_all_agents, get_agent
+from llm_ide_rules.log import log
 from llm_ide_rules.agents.base import (
     trim_content,
     replace_header_with_proper_casing,
     write_rule_file,
 )
 from llm_ide_rules.constants import load_section_globs, header_to_filename
-
-logger = structlog.get_logger()
 
 
 def extract_general(lines: list[str]) -> list[str]:
@@ -125,13 +123,10 @@ def explode_main(
     """Convert instruction file to separate rule files."""
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
-        structlog.configure(
-            wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
-        )
 
     section_globs = load_section_globs(config)
 
-    logger.info("Starting explode operation", input_file=input_file, config=config)
+    log.info("Starting explode operation", input_file=input_file, config=config)
 
     cwd = Path.cwd()
 
@@ -159,14 +154,14 @@ def explode_main(
     try:
         lines = input_path.read_text().splitlines(keepends=True)
     except FileNotFoundError:
-        logger.error("Input file not found", input_file=str(input_path))
+        log.error("Input file not found", input_file=str(input_path))
         raise typer.Exit(1)
 
     commands_path = input_path.parent / "commands.md"
     commands_lines = []
     if commands_path.exists():
         commands_lines = commands_path.read_text().splitlines(keepends=True)
-        logger.info("Found commands file", commands_file=str(commands_path))
+        log.info("Found commands file", commands_file=str(commands_path))
 
     general = extract_general(lines)
     if any(line.strip() for line in general):
@@ -199,7 +194,7 @@ alwaysApply: true
 
     for section_name in section_globs:
         if section_name not in found_sections:
-            logger.warning("Section not found in file", section=section_name)
+            log.warning("Section not found in file", section=section_name)
 
     for line in lines:
         if line.startswith("## "):
@@ -208,7 +203,7 @@ alwaysApply: true
                 section_name.lower() == mapped_section.lower()
                 for mapped_section in section_globs
             ):
-                logger.warning(
+                log.warning(
                     "Unmapped section in instructions.md, treating as always-apply rule",
                     section=section_name,
                 )
@@ -234,7 +229,7 @@ alwaysApply: true
         for section_name, section_content in command_sections.items():
             process_command_section(section_name, section_content, agents, command_dirs)
 
-    logger.info(
+    log.info(
         "Explode operation completed",
         cursor_rules=str(rules_dir),
         cursor_commands=str(cursor_commands_dir),
