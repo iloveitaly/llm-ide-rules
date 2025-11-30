@@ -1,12 +1,11 @@
 """Shared constants for explode and implode functionality."""
 
 import json
-import os
 from pathlib import Path
 
 VALID_AGENTS = ["cursor", "github", "claude", "gemini", "all"]
 
-def load_section_globs(custom_config_path: str = None) -> dict:
+def load_section_globs(custom_config_path: str | None = None) -> dict[str, str | None]:
     """Load section globs from JSON config file.
     
     Args:
@@ -15,24 +14,22 @@ def load_section_globs(custom_config_path: str = None) -> dict:
     Returns:
         Dictionary mapping section headers to their file globs or None for prompts
     """
-    if custom_config_path and os.path.exists(custom_config_path):
+    if custom_config_path and Path(custom_config_path).exists():
         config_path = Path(custom_config_path)
     else:
-        # Load default bundled config
         config_path = Path(__file__).parent / "sections.json"
-    
-    with open(config_path, 'r') as f:
-        config = json.load(f)
+
+    config = json.loads(config_path.read_text())
     
     return config["section_globs"]
 
 # Default section globs - loaded from bundled JSON
 SECTION_GLOBS = load_section_globs()
 
-def header_to_filename(header):
+def header_to_filename(header: str) -> str:
     """Convert a section header to a filename."""
-    return header.lower().replace(' ', '-')
+    return header.lower().replace(" ", "-")
 
-def filename_to_header(filename):
+def filename_to_header(filename: str) -> str:
     """Convert a filename back to a section header."""
-    return filename.replace('-', ' ').title()
+    return filename.replace("-", " ").title()

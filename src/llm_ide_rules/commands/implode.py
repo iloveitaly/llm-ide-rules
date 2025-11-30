@@ -14,8 +14,8 @@ from llm_ide_rules.log import log
 def cursor(
     output: Annotated[str, typer.Argument(help="Output file for rules")] = "instructions.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
-    config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
-):
+    config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
+) -> None:
     """Bundle Cursor rules into instructions.md and commands into commands.md."""
     if verbose and "LOG_LEVEL" not in os.environ:
         os.environ["LOG_LEVEL"] = "DEBUG"
@@ -57,8 +57,8 @@ def cursor(
 def github(
     output: Annotated[str, typer.Argument(help="Output file for instructions")] = "instructions.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
-    config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
-):
+    config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
+) -> None:
     """Bundle GitHub instructions into instructions.md and prompts into commands.md."""
     if verbose and "LOG_LEVEL" not in os.environ:
         os.environ["LOG_LEVEL"] = "DEBUG"
@@ -100,8 +100,8 @@ def github(
 def claude(
     output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
-    config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
-):
+    config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
+) -> None:
     """Bundle Claude Code commands into commands.md."""
     if verbose and "LOG_LEVEL" not in os.environ:
         os.environ["LOG_LEVEL"] = "DEBUG"
@@ -134,8 +134,8 @@ def claude(
 def gemini(
     output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
-    config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
-):
+    config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
+) -> None:
     """Bundle Gemini CLI commands into commands.md."""
     if verbose and "LOG_LEVEL" not in os.environ:
         os.environ["LOG_LEVEL"] = "DEBUG"

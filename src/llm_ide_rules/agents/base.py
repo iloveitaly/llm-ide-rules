@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from llm_ide_rules.constants import header_to_filename, filename_to_header
+from llm_ide_rules.constants import header_to_filename
 
 
 class BaseAgent(ABC):
@@ -16,12 +16,12 @@ class BaseAgent(ABC):
     command_extension: str | None = None
 
     @abstractmethod
-    def bundle_rules(self, output_file: Path, section_globs: dict) -> bool:
+    def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
         """Bundle rule files into a single output file."""
         ...
 
     @abstractmethod
-    def bundle_commands(self, output_file: Path, section_globs: dict) -> bool:
+    def bundle_commands(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
         """Bundle command files into a single output file."""
         ...
 
@@ -149,7 +149,7 @@ def get_ordered_files_github(
     return ordered_files
 
 
-def resolve_header_from_stem(stem: str, section_globs: dict) -> str:
+def resolve_header_from_stem(stem: str, section_globs: dict[str, str | None]) -> str:
     """Return the canonical header for a given filename stem.
 
     Prefer exact header names from section_globs (preserves acronyms like FastAPI, TypeScript).
@@ -158,7 +158,8 @@ def resolve_header_from_stem(stem: str, section_globs: dict) -> str:
     for section_name in section_globs.keys():
         if header_to_filename(section_name) == stem:
             return section_name
-    return filename_to_header(stem)
+
+    return stem.replace("-", " ").title()
 
 
 def trim_content(content_lines: list[str]) -> list[str]:
@@ -183,10 +184,8 @@ def trim_content(content_lines: list[str]) -> list[str]:
 def write_rule_file(path: Path, header_yaml: str, content_lines: list[str]) -> None:
     """Write a rule file with front matter and content."""
     trimmed_content = trim_content(content_lines)
-    with open(path, "w") as f:
-        f.write(header_yaml.strip() + "\n")
-        for line in trimmed_content:
-            f.write(line)
+    output = header_yaml.strip() + "\n" + "".join(trimmed_content)
+    path.write_text(output)
 
 
 def replace_header_with_proper_casing(

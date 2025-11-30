@@ -7,12 +7,13 @@ from typing_extensions import Annotated
 import typer
 
 from llm_ide_rules.agents import get_agent
-from llm_ide_rules.log import log
 from llm_ide_rules.agents.base import (
+    BaseAgent,
     trim_content,
     replace_header_with_proper_casing,
     write_rule_file,
 )
+from llm_ide_rules.log import log
 from llm_ide_rules.constants import load_section_globs, header_to_filename, VALID_AGENTS
 
 
@@ -23,6 +24,7 @@ def extract_general(lines: list[str]) -> list[str]:
         if line.startswith("## "):
             break
         general.append(line)
+
     return general
 
 
@@ -41,14 +43,15 @@ def extract_section(lines: list[str], header: str) -> list[str]:
         elif line.strip().lower() == header.lower():
             in_section = True
             content.append(line)
+
     return content
 
 
 def extract_all_sections(lines: list[str]) -> dict[str, list[str]]:
     """Extract all sections from lines, returning dict of section_name -> content_lines."""
-    sections = {}
-    current_section = None
-    current_content = []
+    sections: dict[str, list[str]] = {}
+    current_section: str | None = None
+    current_content: list[str] = []
 
     for line in lines:
         if line.startswith("## "):
@@ -69,7 +72,7 @@ def extract_all_sections(lines: list[str]) -> dict[str, list[str]]:
 def process_command_section(
     section_name: str,
     section_content: list[str],
-    agents: list,
+    agents: list[BaseAgent],
     dirs: dict[str, Path],
 ) -> bool:
     """Process a section as a command for all agents."""
@@ -117,12 +120,12 @@ def explode_main(
         bool, typer.Option("--verbose", "-v", help="Enable verbose logging")
     ] = False,
     config: Annotated[
-        str, typer.Option("--config", "-c", help="Custom configuration file path")
+        str | None, typer.Option("--config", "-c", help="Custom configuration file path")
     ] = None,
     agent: Annotated[
         str, typer.Option("--agent", "-a", help="Agent to explode for (cursor, github, claude, gemini, or all)")
     ] = "all",
-):
+) -> None:
     """Convert instruction file to separate rule files."""
     if verbose and "LOG_LEVEL" not in os.environ:
         os.environ["LOG_LEVEL"] = "DEBUG"

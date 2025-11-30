@@ -24,7 +24,7 @@ class GitHubAgent(BaseAgent):
     rule_extension = ".instructions.md"
     command_extension = ".prompt.md"
 
-    def bundle_rules(self, output_file: Path, section_globs: dict) -> bool:
+    def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
         """Bundle GitHub instruction files into a single output file."""
         base_dir = output_file.parent
         instructions_path = base_dir / self.rules_dir
@@ -35,32 +35,33 @@ class GitHubAgent(BaseAgent):
             instr_files, list(section_globs.keys())
         )
 
-        content_written = False
-        with open(output_file, "w") as out:
-            if copilot_general.exists():
-                content = copilot_general.read_text().strip()
-                if content:
-                    out.write(content)
-                    out.write("\n\n")
-                    content_written = True
+        content_parts: list[str] = []
+        if copilot_general.exists():
+            content = copilot_general.read_text().strip()
+            if content:
+                content_parts.append(content)
+                content_parts.append("\n\n")
 
-            for instr_file in ordered_instructions:
-                content = instr_file.read_text().strip()
-                if not content:
-                    continue
+        for instr_file in ordered_instructions:
+            content = instr_file.read_text().strip()
+            if not content:
+                continue
 
-                content = strip_yaml_frontmatter(content)
-                content = strip_header(content)
-                base_stem = instr_file.stem.replace(".instructions", "")
-                header = resolve_header_from_stem(base_stem, section_globs)
-                out.write(f"## {header}\n\n")
-                out.write(content)
-                out.write("\n\n")
-                content_written = True
+            content = strip_yaml_frontmatter(content)
+            content = strip_header(content)
+            base_stem = instr_file.stem.replace(".instructions", "")
+            header = resolve_header_from_stem(base_stem, section_globs)
+            content_parts.append(f"## {header}\n\n")
+            content_parts.append(content)
+            content_parts.append("\n\n")
 
-        return content_written
+        if not content_parts:
+            return False
 
-    def bundle_commands(self, output_file: Path, section_globs: dict) -> bool:
+        output_file.write_text("".join(content_parts))
+        return True
+
+    def bundle_commands(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
         """Bundle GitHub prompt files into a single output file."""
         prompts_path = output_file.parent / self.commands_dir
         if not prompts_path.exists():
@@ -85,23 +86,25 @@ class GitHubAgent(BaseAgent):
         remaining_prompts = sorted(prompt_dict.values(), key=lambda p: p.name)
         ordered_prompts.extend(remaining_prompts)
 
-        content_written = False
-        with open(output_file, "w") as out:
-            for prompt_file in ordered_prompts:
-                content = prompt_file.read_text().strip()
-                if not content:
-                    continue
+        content_parts: list[str] = []
+        for prompt_file in ordered_prompts:
+            content = prompt_file.read_text().strip()
+            if not content:
+                continue
 
-                content = strip_yaml_frontmatter(content)
-                content = strip_header(content)
-                base_stem = prompt_file.stem.replace(".prompt", "")
-                header = resolve_header_from_stem(base_stem, section_globs)
-                out.write(f"## {header}\n\n")
-                out.write(content)
-                out.write("\n\n")
-                content_written = True
+            content = strip_yaml_frontmatter(content)
+            content = strip_header(content)
+            base_stem = prompt_file.stem.replace(".prompt", "")
+            header = resolve_header_from_stem(base_stem, section_globs)
+            content_parts.append(f"## {header}\n\n")
+            content_parts.append(content)
+            content_parts.append("\n\n")
 
-        return content_written
+        if not content_parts:
+            return False
+
+        output_file.write_text("".join(content_parts))
+        return True
 
     def write_rule(
         self,
@@ -137,16 +140,8 @@ applyTo: "{glob_pattern}"
             content_lines, ""
         )
 
-        frontmatter = f"""---
-mode: 'agent'
-description: '{description}'
----
-"""
-
-        with open(filepath, "w") as f:
-            f.write(frontmatter)
-            for line in filtered_content:
-                f.write(line)
+        frontmatter = f"---\nmode: 'agent'\ndescription: '{description}'\n---\n"
+        filepath.write_text(frontmatter + "".join(filtered_content))
 
     def write_general_instructions(self, content_lines: list[str], base_dir: Path) -> None:
         """Write the general copilot-instructions.md file (no frontmatter)."""

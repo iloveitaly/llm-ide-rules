@@ -21,11 +21,11 @@ class GeminiAgent(BaseAgent):
     rule_extension = None
     command_extension = ".toml"
 
-    def bundle_rules(self, output_file: Path, section_globs: dict) -> bool:
+    def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
         """Gemini CLI doesn't support rules, only commands."""
         return False
 
-    def bundle_commands(self, output_file: Path, section_globs: dict) -> bool:
+    def bundle_commands(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
         """Bundle Gemini CLI command files (.toml) into a single output file."""
         commands_path = output_file.parent / self.commands_dir
         if not commands_path.exists():
@@ -37,21 +37,23 @@ class GeminiAgent(BaseAgent):
 
         ordered_commands = get_ordered_files(command_files, list(section_globs.keys()))
 
-        content_written = False
-        with open(output_file, "w") as out:
-            for command_file in ordered_commands:
-                content = command_file.read_text().strip()
-                if not content:
-                    continue
+        content_parts: list[str] = []
+        for command_file in ordered_commands:
+            content = command_file.read_text().strip()
+            if not content:
+                continue
 
-                content = strip_toml_metadata(content)
-                header = resolve_header_from_stem(command_file.stem, section_globs)
-                out.write(f"## {header}\n\n")
-                out.write(content)
-                out.write("\n\n")
-                content_written = True
+            content = strip_toml_metadata(content)
+            header = resolve_header_from_stem(command_file.stem, section_globs)
+            content_parts.append(f"## {header}\n\n")
+            content_parts.append(content)
+            content_parts.append("\n\n")
 
-        return content_written
+        if not content_parts:
+            return False
+
+        output_file.write_text("".join(content_parts))
+        return True
 
     def write_rule(
         self,
@@ -88,15 +90,8 @@ class GeminiAgent(BaseAgent):
         final_content = trim_content(final_content)
         content_str = "".join(final_content).strip()
 
-        with open(filepath, "w") as f:
-            f.write(f'name = "{filename}"\n')
-            if description:
-                f.write(f'description = "{description}"\n')
-            else:
-                f.write(f'description = "{section_name or filename}"\n')
-            f.write("\n[command]\n")
-            f.write('shell = """\n')
-            f.write(content_str)
-            f.write('\n"""\n')
+        desc = description if description else (section_name or filename)
+        output = f'name = "{filename}"\ndescription = "{desc}"\n\n[command]\nshell = """\n{content_str}\n"""\n'
+        filepath.write_text(output)
 
 

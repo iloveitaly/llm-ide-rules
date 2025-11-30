@@ -19,11 +19,11 @@ class ClaudeAgent(BaseAgent):
     rule_extension = None
     command_extension = ".md"
 
-    def bundle_rules(self, output_file: Path, section_globs: dict) -> bool:
+    def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
         """Claude Code doesn't support rules, only commands."""
         return False
 
-    def bundle_commands(self, output_file: Path, section_globs: dict) -> bool:
+    def bundle_commands(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
         """Bundle Claude Code command files (.md) into a single output file."""
         commands_path = output_file.parent / self.commands_dir
         if not commands_path.exists():
@@ -35,20 +35,22 @@ class ClaudeAgent(BaseAgent):
 
         ordered_commands = get_ordered_files(command_files, list(section_globs.keys()))
 
-        content_written = False
-        with open(output_file, "w") as out:
-            for command_file in ordered_commands:
-                content = command_file.read_text().strip()
-                if not content:
-                    continue
+        content_parts: list[str] = []
+        for command_file in ordered_commands:
+            content = command_file.read_text().strip()
+            if not content:
+                continue
 
-                header = resolve_header_from_stem(command_file.stem, section_globs)
-                out.write(f"## {header}\n\n")
-                out.write(content)
-                out.write("\n\n")
-                content_written = True
+            header = resolve_header_from_stem(command_file.stem, section_globs)
+            content_parts.append(f"## {header}\n\n")
+            content_parts.append(content)
+            content_parts.append("\n\n")
 
-        return content_written
+        if not content_parts:
+            return False
+
+        output_file.write_text("".join(content_parts))
+        return True
 
     def write_rule(
         self,
@@ -81,9 +83,6 @@ class ClaudeAgent(BaseAgent):
             filtered_content.append(line)
 
         filtered_content = trim_content(filtered_content)
-
-        with open(filepath, "w") as f:
-            for line in filtered_content:
-                f.write(line)
+        filepath.write_text("".join(filtered_content))
 
 
