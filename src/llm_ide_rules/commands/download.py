@@ -1,11 +1,10 @@
 """Download command: Download LLM instruction files from GitHub repositories."""
 
-import logging
+import os
 import re
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import List
 
 import requests
 import typer
@@ -97,7 +96,7 @@ def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
 
 
 def copy_instruction_files(
-    repo_dir: Path, instruction_types: List[str], target_dir: Path
+    repo_dir: Path, instruction_types: list[str], target_dir: Path
 ):
     """Copy instruction files from the repository to the target directory."""
     copied_items = []
@@ -237,7 +236,7 @@ def copy_directory_contents(
 
 def download_main(
     instruction_types: Annotated[
-        List[str],
+        list[str],
         typer.Argument(
             help="Types of instructions to download (cursor, github, gemini, claude, agent, agents). Downloads everything by default."
         ),
@@ -278,8 +277,8 @@ def download_main(
     # Download to a specific directory
     llm_ide_rules download --target ./my-project
     """
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
+    if verbose and "LOG_LEVEL" not in os.environ:
+        os.environ["LOG_LEVEL"] = "DEBUG"
 
     # Use default types if none specified
     if not instruction_types:

@@ -1,6 +1,6 @@
 """Implode command: Bundle rule files into a single instruction file."""
 
-import logging
+import os
 from pathlib import Path
 from typing_extensions import Annotated
 
@@ -17,8 +17,8 @@ def cursor(
     config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
     """Bundle Cursor rules into instructions.md and commands into commands.md."""
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
+    if verbose and "LOG_LEVEL" not in os.environ:
+        os.environ["LOG_LEVEL"] = "DEBUG"
 
     section_globs = load_section_globs(config)
     agent = get_agent("cursor")
@@ -60,8 +60,8 @@ def github(
     config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
     """Bundle GitHub instructions into instructions.md and prompts into commands.md."""
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
+    if verbose and "LOG_LEVEL" not in os.environ:
+        os.environ["LOG_LEVEL"] = "DEBUG"
 
     section_globs = load_section_globs(config)
     agent = get_agent("github")
@@ -103,8 +103,8 @@ def claude(
     config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
     """Bundle Claude Code commands into commands.md."""
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
+    if verbose and "LOG_LEVEL" not in os.environ:
+        os.environ["LOG_LEVEL"] = "DEBUG"
 
     section_globs = load_section_globs(config)
     agent = get_agent("claude")
@@ -137,8 +137,8 @@ def gemini(
     config: Annotated[str, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ):
     """Bundle Gemini CLI commands into commands.md."""
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
+    if verbose and "LOG_LEVEL" not in os.environ:
+        os.environ["LOG_LEVEL"] = "DEBUG"
 
     section_globs = load_section_globs(config)
     agent = get_agent("gemini")

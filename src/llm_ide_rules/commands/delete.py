@@ -1,9 +1,8 @@
 """Delete command: Remove downloaded LLM instruction files."""
 
-import logging
+import os
 import shutil
 from pathlib import Path
-from typing import List
 
 import typer
 from typing_extensions import Annotated
@@ -13,8 +12,8 @@ from llm_ide_rules.log import log
 
 
 def find_files_to_delete(
-    instruction_types: List[str], target_dir: Path
-) -> tuple[List[Path], List[Path]]:
+    instruction_types: list[str], target_dir: Path
+) -> tuple[list[Path], list[Path]]:
     """Find all files and directories that would be deleted.
     
     Returns:
@@ -49,7 +48,7 @@ def find_files_to_delete(
 
 def delete_main(
     instruction_types: Annotated[
-        List[str],
+        list[str],
         typer.Argument(
             help="Types of instructions to delete (cursor, github, gemini, claude, agent, agents). Deletes everything by default."
         ),
@@ -88,8 +87,8 @@ def delete_main(
     # Delete from a specific directory
     llm_ide_rules delete --target ./my-project
     """
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
+    if verbose and "LOG_LEVEL" not in os.environ:
+        os.environ["LOG_LEVEL"] = "DEBUG"
 
     if not instruction_types:
         instruction_types = DEFAULT_TYPES

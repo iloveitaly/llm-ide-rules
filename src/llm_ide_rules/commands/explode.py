@@ -1,12 +1,12 @@
 """Explode command: Convert instruction file to separate rule files."""
 
-import logging
+import os
 from pathlib import Path
 from typing_extensions import Annotated
 
 import typer
 
-from llm_ide_rules.agents import get_all_agents, get_agent
+from llm_ide_rules.agents import get_agent
 from llm_ide_rules.log import log
 from llm_ide_rules.agents.base import (
     trim_content,
@@ -121,8 +121,8 @@ def explode_main(
     ] = None,
 ):
     """Convert instruction file to separate rule files."""
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
+    if verbose and "LOG_LEVEL" not in os.environ:
+        os.environ["LOG_LEVEL"] = "DEBUG"
 
     section_globs = load_section_globs(config)
 
