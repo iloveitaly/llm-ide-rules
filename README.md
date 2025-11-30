@@ -101,7 +101,7 @@ Different AI coding assistants use different formats for commands:
 
 ### Using the CLI for Development
 
-The CLI replaces the old standalone scripts. Use the CLI commands in your development workflow:
+It's easiest to hack on this by using the rules bundled in this repo.
 
 ```shell
 # Setup the environment
@@ -111,7 +111,7 @@ uv sync
 uvx llm-ide-rules explode
 
 # Bundle rules back into instructions
-uvx llm-ide-rules implode cursor instructions.md
+uvx llm-ide-rules implode cursor non_standard_instructions.md
 ```
 
 ### Building and Testing
