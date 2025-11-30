@@ -323,36 +323,29 @@ def test_download_agents_with_directory_structure(mock_zipfile, mock_requests):
 def test_copy_recursive_files_warning_for_missing_directories():
     """Test that copy_recursive_files warns when target directories don't exist."""
     from llm_ide_rules.commands.download import copy_recursive_files
-    import logging
-    
+
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
 
-        # Create a fake repo structure 
         repo_dir = Path("repo")
         repo_dir.mkdir()
-        
-        # Create AGENTS.md files in different locations
+
         (repo_dir / "AGENTS.md").write_text("Root agents file")
-        
+
         subdir = repo_dir / "missing-in-target"
         subdir.mkdir()
         (subdir / "AGENTS.md").write_text("Will be skipped")
-        
-        # Create target directory without the subdirectory
+
         target_dir = Path("target")
         target_dir.mkdir()
-        
-        # Capture log output
-        with patch('llm_ide_rules.commands.download.logger') as mock_logger:
+
+        with patch('llm_ide_rules.commands.download.log') as mock_log:
             copied_items = copy_recursive_files(repo_dir, target_dir, "AGENTS.md")
-            
-            # Should only copy root file
+
             assert len(copied_items) == 1
             assert "AGENTS.md" in copied_items
             assert "missing-in-target/AGENTS.md" not in copied_items
-            
-            # Should have called warning for missing directory
-            mock_logger.warning.assert_called_once()
-            call_args = mock_logger.warning.call_args
+
+            mock_log.warning.assert_called_once()
+            call_args = mock_log.warning.call_args
             assert "Target directory does not exist, skipping file copy" in call_args[0]
