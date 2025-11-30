@@ -24,17 +24,3 @@ def get_agent(name: str) -> BaseAgent:
 def get_all_agents() -> list[BaseAgent]:
     """Get instances of all registered agents."""
     return [agent_cls() for agent_cls in AGENTS.values()]
-
-
-__all__ = [
-    "BaseAgent",
-    "CursorAgent",
-    "GitHubAgent",
-    "ClaudeAgent",
-    "GeminiAgent",
-    "AGENTS",
-    "get_agent",
-    "get_all_agents",
-]
-
-
