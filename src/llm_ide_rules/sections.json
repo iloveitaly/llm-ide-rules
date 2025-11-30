@@ -10,6 +10,8 @@
     "React": "**/*.tsx",
     "React Router": "web/app/routes/**/*.tsx",
     "Shell": "**/*.sh",
-    "TypeScript": "**/*.ts,**/*.tsx"
+    "TypeScript": "**/*.ts,**/*.tsx",
+    "Secrets": "env/*.sh,.envrc",
+    "Stripe Backend": "manual"
   }
 }

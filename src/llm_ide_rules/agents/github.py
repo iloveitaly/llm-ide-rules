@@ -116,7 +116,7 @@ class GitHubAgent(BaseAgent):
         """Write a GitHub instruction file (.instructions.md) with YAML frontmatter."""
         filepath = rules_dir / f"{filename}{self.rule_extension}"
 
-        if glob_pattern:
+        if glob_pattern and glob_pattern != "manual":
             header_yaml = f"""---
 applyTo: "{glob_pattern}"
 ---

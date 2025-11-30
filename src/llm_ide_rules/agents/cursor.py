@@ -95,10 +95,16 @@ class CursorAgent(BaseAgent):
         """Write a Cursor rule file (.mdc) with YAML frontmatter."""
         filepath = rules_dir / f"{filename}{self.rule_extension}"
 
-        if glob_pattern:
+        if glob_pattern and glob_pattern != "manual":
             header_yaml = f"""---
 description:
 globs: {glob_pattern}
+alwaysApply: false
+---
+"""
+        elif glob_pattern == "manual":
+            header_yaml = """---
+description:
 alwaysApply: false
 ---
 """
