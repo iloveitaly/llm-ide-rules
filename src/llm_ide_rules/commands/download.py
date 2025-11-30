@@ -156,7 +156,7 @@ def copy_instruction_files(
 
 def copy_recursive_files(
     repo_dir: Path, target_dir: Path, file_pattern: str
-) -> List[str]:
+) -> list[str]:
     """Recursively copy files matching pattern, preserving directory structure.
     
     Only copies files to locations where the target directory already exists.
@@ -204,7 +204,7 @@ def copy_recursive_files(
 
 
 def copy_directory_contents(
-    source_dir: Path, target_dir: Path, exclude_patterns: List[str]
+    source_dir: Path, target_dir: Path, exclude_patterns: list[str]
 ):
     """Recursively copy directory contents, excluding specified patterns."""
     for item in source_dir.rglob("*"):
