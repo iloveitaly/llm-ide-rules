@@ -491,25 +491,6 @@ Here's how environment variables are managed in this application:
 - `env/*local.*` files have a `-example` variant which is committed to version control. These document helpful environment variables for local development.
 - When writing TypeScript/JavaScript/React, use `requireEnv("THE_ENV_VAR_NAME")` to read an environment variable. `import {requireEnv} from '~/utils/environment'`
 
-## Standalone Python Scripts
-
-# Writing Standalone Python Scripts
-
-Use this header:
-
-```python
-#!/usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.13"
-# dependencies = []
-# ///
-```
-
-- Specify dependencies via the `dependencies` variable in the above comment
-- Do not install packages with pip or any other package manager, assume packages will be installed when needed
-- Use `click` for CLI interfaces
-- Use `structlog_config` for logging. Read the usage guide: @https://github.com/iloveitaly/structlog-config/
-
 ## Stripe Backend
 
 - `cast(object, ...)` should not be used. Can you instead cast expandable fields to PaymentIntent, or whatever their expandable type is?
@@ -518,8 +499,4 @@ Use this header:
 - When iterating through a list that you expect to be comprehensive use `auto_paging_iter` for example `stripe_client.prices.list(params={ ... }).auto_paging_iter()`
 - Assume the new `StripeClient` is used everywhere and type it as such. When using this client, all API params should be a dictionary inside a `params=` kwarg.
 - `amount_refunded=0` when the charge is disputed. The dispute amount only exists in the `balance_transactions` of the dispute object.
-
-## Typescript Docstring
-
-Add a file-level docstring with a simple description of what this file does and where this is used.
 
