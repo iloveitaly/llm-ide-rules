@@ -1,6 +1,6 @@
 # Copilot, Cursor, Claude, Gemini, etc LLM Instructions
 
-Going to try to centralize all my prompts in a single place and create some scripts to help convert from copilot to cursor, etc.
+This project makes it easy to download prompts and implode/explode them so they can be used by various providers.
 
 I don't want to be tied to a specific IDE and it's a pain to have to edit instructions for various languages across a ton of different files.
 
@@ -10,16 +10,8 @@ Some of the glob assumptions in this repo are specific to how I've chosen to org
 
 ## Installation
 
-You can run the `llm-ide-rules` CLI tool using uvx:
-
 ```sh
-uvx llm-ide-rules
-```
-
-Or install from the repository:
-
-```sh
-uv tool install git+https://github.com/iloveitaly/llm-ide-rules.git
+uvx llm-ide-rules@latest --help
 ```
 
 ## Usage
@@ -45,7 +37,6 @@ uvx llm-ide-rules download --repo other/repo      # Download from different repo
 uvx llm-ide-rules delete [instruction_types]      # Delete everything by default
 uvx llm-ide-rules delete cursor gemini            # Delete specific types
 uvx llm-ide-rules delete --yes                    # Skip confirmation prompt
-
 ```
 
 ### Examples
@@ -89,33 +80,6 @@ Different AI coding assistants use different formats for commands:
 | **Claude Code** | `.claude/commands/` | `.md` (plain markdown) | Simple, no frontmatter |
 | **GitHub Copilot** | `.github/prompts/` | `.prompt.md` (YAML + markdown) | Requires frontmatter with `mode: 'agent'` |
 | **Gemini CLI** | `.gemini/commands/` | `.toml` | Uses TOML format, supports `{{args}}` and shell commands |
-
-## Development
-
-### Using the CLI for Development
-
-It's easiest to hack on this by using the rules bundled in this repo.
-
-```shell
-# Setup the environment
-uv sync
-
-# Explode instructions into separate rule files
-uvx llm-ide-rules explode
-
-# Bundle rules back into instructions
-uvx llm-ide-rules implode cursor non_standard_instructions.md
-```
-
-### Building and Testing
-
-```shell
-# Build the package
-uv build
-
-# Run tests
-pytest
-```
 
 ## Extracting Changes
 
