@@ -37,17 +37,15 @@ def cursor(
     output_path = cwd / output
     rules_written = agent.bundle_rules(output_path, section_globs)
     if rules_written:
-        log.info("cursor rules bundled", output_file=str(output_path))
         success_msg = f"Bundled cursor rules into {output}"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         output_path.unlink(missing_ok=True)
-        log.info("No cursor rules to bundle")
+        log.info("no cursor rules to bundle")
 
     commands_output_path = cwd / "commands.md"
     commands_written = agent.bundle_commands(commands_output_path, section_globs)
     if commands_written:
-        log.info("cursor commands bundled", output_file=str(commands_output_path))
         success_msg = "Bundled cursor commands into commands.md"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
@@ -81,17 +79,15 @@ def github(
     output_path = cwd / output
     instructions_written = agent.bundle_rules(output_path, section_globs)
     if instructions_written:
-        log.info("github instructions bundled", output_file=str(output_path))
         success_msg = f"Bundled github instructions into {output}"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         output_path.unlink(missing_ok=True)
-        log.info("No github instructions to bundle")
+        log.info("no github instructions to bundle")
 
     commands_output_path = cwd / "commands.md"
     prompts_written = agent.bundle_commands(commands_output_path, section_globs)
     if prompts_written:
-        log.info("github prompts bundled", output_file=str(commands_output_path))
         success_msg = "Bundled github prompts into commands.md"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
@@ -124,12 +120,11 @@ def claude(
     output_path = cwd / output
     commands_written = agent.bundle_commands(output_path, section_globs)
     if commands_written:
-        log.info("claude code commands bundled successfully", output_file=str(output_path))
         success_msg = f"Bundled claude commands into {output}"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         output_path.unlink(missing_ok=True)
-        log.info("No claude commands to bundle")
+        log.info("no claude commands to bundle")
 
 
 def gemini(
@@ -158,9 +153,8 @@ def gemini(
     output_path = cwd / output
     commands_written = agent.bundle_commands(output_path, section_globs)
     if commands_written:
-        log.info("gemini cli commands bundled successfully", output_file=str(output_path))
         success_msg = f"Bundled gemini commands into {output}"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         output_path.unlink(missing_ok=True)
-        log.info("No gemini commands to bundle")
+        log.info("no gemini commands to bundle")

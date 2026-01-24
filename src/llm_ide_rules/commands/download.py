@@ -44,8 +44,8 @@ INSTRUCTION_TYPES = {
         "files": [],
         "exclude_patterns": ["workflows/*"],
     },
-    "gemini": {"directories": [], "files": ["GEMINI.md"]},
-    "claude": {"directories": [], "files": ["CLAUDE.md"]},
+    "gemini": {"directories": [".gemini/commands"], "files": ["GEMINI.md"]},
+    "claude": {"directories": [".claude/commands"], "files": ["CLAUDE.md"]},
     "agent": {"directories": [], "files": ["AGENT.md"]},
     "agents": {"directories": [], "files": [], "recursive_files": ["AGENTS.md"]},
 }
@@ -307,7 +307,6 @@ def download_main(
         copied_items = copy_instruction_files(repo_dir, instruction_types, target_path)
 
         if copied_items:
-            log.info("download completed successfully", copied_items=copied_items)
             success_msg = f"Downloaded {len(copied_items)} items to {target_path}:"
             typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
             for item in copied_items:

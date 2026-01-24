@@ -163,6 +163,5 @@ def delete_main(
             log.error("failed to delete file", path=str(file_path), error=str(e))
             typer.echo(f"Error deleting {file_path}: {e}", err=True)
 
-    log.info("deletion completed", deleted_count=deleted_count, total_items=total_items)
     success_msg = f"Successfully deleted {deleted_count} of {total_items} items."
     typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))

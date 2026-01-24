@@ -281,8 +281,6 @@ alwaysApply: true
             log_data[f"{agent_name}_commands"] = str(agent_dirs[agent_name]["commands"])
             created_dirs.append(f".{agent_name}/")
 
-    log.info("explode operation completed", **log_data)
-
     if len(created_dirs) == 1:
         success_msg = f"Created files in {created_dirs[0]} directory"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
