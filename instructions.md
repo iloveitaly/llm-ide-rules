@@ -44,9 +44,6 @@ Pay careful attention to these instructions when running tests, generating datab
   - Initially run `pytest --ignore=tests/integration` then only run `pytest tests/integration`
   - When debugging integration tests look at `$PLAYWRIGHT_RESULT_DIRECTORY`. There's a directory for each test failure. In that directory you fill find a `failure.html` containing the rendered DOM of the page on failure and a screenshot of the contents. Use these to debug why it failed.
 - Do not attempt to create or run database migrations. Pause your work and let me know you need a migration run.
-- Use `uv add` to add python packages. No need for `pip compile`, etc.
-- Use `pnpm` or `pnpx` and not `npm` or `npx`.
-- Run all `pnpm` commands in the `web/` directory.
 
 Look at @local.md
 
@@ -457,7 +454,8 @@ function TheComponent() {
 
 ## TypeScript
 
-- Use `pnpm`, not `npm`
+- Use `pnpm` or `pnpx` and not `npm` or `npx`.
+  - Use `just js_shadcn`, `just pnpm`, and `just js_lint` instead of executing these operations exactly. @just/javascript.just
 - Node libraries are not available
 - Use `lib/` for generic code, `utils/` for project utilities, `hooks/` for React hooks, and `helpers/` for page-specific helpers.
 - Prefer `function theName() {` over `const theName = () =>`
