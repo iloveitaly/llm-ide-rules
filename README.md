@@ -8,6 +8,23 @@ Additionally, it becomes challenging to copy these prompts into various projects
 
 Some of the glob assumptions in this repo are specific to how I've chosen to organize python and typescript [in the python starter template](https://github.com/iloveitaly/python-starter-template) and what tooling (fastapi, etc) that I've chosen to use.
 
+## IDE Format Comparison
+
+Different AI coding assistants use different formats for instructions and commands:
+
+| IDE | type | folder | Notes |
+|-----|------|--------|-------|
+| **Cursor** | instructions | `.cursor/rules/*.mdc` | Multiple plain markdown files |
+| **Cursor** | commands | `.cursor/commands/*.md` | Plain markdown, no frontmatter |
+| **Claude Code** | instructions | `CLAUDE.md` | Single markdown file at root |
+| **Claude Code** | instructions | `AGENT.md` | Single markdown file at root (agent-specific) |
+| **Claude Code** | commands | `.claude/commands/*.md` | Plain markdown, no frontmatter |
+| **GitHub Copilot** | instructions | `.github/copilot-instructions.md` | Single markdown file |
+| **GitHub Copilot** | instructions | `.github/instructions/*.instructions.md` | Multiple instruction files |
+| **GitHub Copilot** | prompts | `.github/prompts/*.prompt.md` | YAML frontmatter with `mode: 'agent'` |
+| **Gemini CLI** | instructions | `GEMINI.md` | Single markdown file at root |
+| **Gemini CLI** | commands | `.gemini/commands/*.toml` | TOML format, supports `{{args}}` and shell commands |
+
 ## Installation
 
 ```sh
@@ -69,17 +86,6 @@ uvx llm-ide-rules delete cursor gemini --target ./my-project
 # Delete without confirmation prompt
 uvx llm-ide-rules delete --yes
 ```
-
-### IDE Command Format Comparison
-
-Different AI coding assistants use different formats for commands:
-
-| IDE | Directory | Format | Notes |
-|-----|-----------|--------|-------|
-| **Cursor** | `.cursor/commands/` | `.md` (plain markdown) | Simple, no frontmatter |
-| **Claude Code** | `.claude/commands/` | `.md` (plain markdown) | Simple, no frontmatter |
-| **GitHub Copilot** | `.github/prompts/` | `.prompt.md` (YAML + markdown) | Requires frontmatter with `mode: 'agent'` |
-| **Gemini CLI** | `.gemini/commands/` | `.toml` | Uses TOML format, supports `{{args}}` and shell commands |
 
 ## Extracting Changes
 
