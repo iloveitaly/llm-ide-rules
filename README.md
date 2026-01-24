@@ -22,13 +22,6 @@ Or install from the repository:
 uv tool install git+https://github.com/iloveitaly/llm-ide-rules.git
 ```
 
-```sh
-git clone https://github.com/iloveitaly/llm-ide-rules.git
-cd llm-ide-rules
-uv sync
-source .venv/bin/activate
-```
-
 ## Usage
 
 ### CLI Commands
