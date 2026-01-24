@@ -1,6 +1,5 @@
 """Implode command: Bundle rule files into a single instruction file."""
 
-import os
 from pathlib import Path
 from typing_extensions import Annotated
 
@@ -13,19 +12,16 @@ from llm_ide_rules.log import log
 
 def cursor(
     output: Annotated[str, typer.Argument(help="Output file for rules")] = "instructions.md",
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
     config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ) -> None:
     """Bundle Cursor rules into instructions.md and commands into commands.md."""
-    if verbose and "LOG_LEVEL" not in os.environ:
-        os.environ["LOG_LEVEL"] = "DEBUG"
 
     section_globs = load_section_globs(config)
     agent = get_agent("cursor")
     cwd = Path.cwd()
 
     log.info(
-        "Bundling Cursor rules and commands",
+        "bundling cursor rules and commands",
         rules_dir=agent.rules_dir,
         commands_dir=agent.commands_dir,
         config=config,
@@ -33,14 +29,17 @@ def cursor(
 
     rules_path = cwd / agent.rules_dir
     if not rules_path.exists():
-        log.error("Cursor rules directory not found", rules_dir=str(rules_path))
+        log.error("cursor rules directory not found", rules_dir=str(rules_path))
+        error_msg = f"Cursor rules directory not found: {rules_path}"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
     output_path = cwd / output
     rules_written = agent.bundle_rules(output_path, section_globs)
     if rules_written:
-        log.info("Cursor rules bundled", output_file=str(output_path))
-        typer.echo(f"Bundled cursor rules into {output}")
+        log.info("cursor rules bundled", output_file=str(output_path))
+        success_msg = f"Bundled cursor rules into {output}"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         output_path.unlink(missing_ok=True)
         log.info("No cursor rules to bundle")
@@ -48,27 +47,25 @@ def cursor(
     commands_output_path = cwd / "commands.md"
     commands_written = agent.bundle_commands(commands_output_path, section_globs)
     if commands_written:
-        log.info("Cursor commands bundled", output_file=str(commands_output_path))
-        typer.echo("Bundled cursor commands into commands.md")
+        log.info("cursor commands bundled", output_file=str(commands_output_path))
+        success_msg = "Bundled cursor commands into commands.md"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         commands_output_path.unlink(missing_ok=True)
 
 
 def github(
     output: Annotated[str, typer.Argument(help="Output file for instructions")] = "instructions.md",
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
     config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ) -> None:
     """Bundle GitHub instructions into instructions.md and prompts into commands.md."""
-    if verbose and "LOG_LEVEL" not in os.environ:
-        os.environ["LOG_LEVEL"] = "DEBUG"
 
     section_globs = load_section_globs(config)
     agent = get_agent("github")
     cwd = Path.cwd()
 
     log.info(
-        "Bundling GitHub instructions and prompts",
+        "bundling github instructions and prompts",
         instructions_dir=agent.rules_dir,
         prompts_dir=agent.commands_dir,
         config=config,
@@ -76,14 +73,17 @@ def github(
 
     rules_path = cwd / agent.rules_dir
     if not rules_path.exists():
-        log.error("GitHub instructions directory not found", instructions_dir=str(rules_path))
+        log.error("github instructions directory not found", instructions_dir=str(rules_path))
+        error_msg = f"GitHub instructions directory not found: {rules_path}"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
     output_path = cwd / output
     instructions_written = agent.bundle_rules(output_path, section_globs)
     if instructions_written:
-        log.info("GitHub instructions bundled", output_file=str(output_path))
-        typer.echo(f"Bundled github instructions into {output}")
+        log.info("github instructions bundled", output_file=str(output_path))
+        success_msg = f"Bundled github instructions into {output}"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         output_path.unlink(missing_ok=True)
         log.info("No github instructions to bundle")
@@ -91,41 +91,42 @@ def github(
     commands_output_path = cwd / "commands.md"
     prompts_written = agent.bundle_commands(commands_output_path, section_globs)
     if prompts_written:
-        log.info("GitHub prompts bundled", output_file=str(commands_output_path))
-        typer.echo("Bundled github prompts into commands.md")
+        log.info("github prompts bundled", output_file=str(commands_output_path))
+        success_msg = "Bundled github prompts into commands.md"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         commands_output_path.unlink(missing_ok=True)
 
 
 def claude(
     output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
     config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ) -> None:
     """Bundle Claude Code commands into commands.md."""
-    if verbose and "LOG_LEVEL" not in os.environ:
-        os.environ["LOG_LEVEL"] = "DEBUG"
 
     section_globs = load_section_globs(config)
     agent = get_agent("claude")
     cwd = Path.cwd()
 
     log.info(
-        "Bundling Claude Code commands",
+        "bundling claude code commands",
         commands_dir=agent.commands_dir,
         config=config,
     )
 
     commands_path = cwd / agent.commands_dir
     if not commands_path.exists():
-        log.error("Claude Code commands directory not found", commands_dir=str(commands_path))
+        log.error("claude code commands directory not found", commands_dir=str(commands_path))
+        error_msg = f"Claude Code commands directory not found: {commands_path}"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
     output_path = cwd / output
     commands_written = agent.bundle_commands(output_path, section_globs)
     if commands_written:
-        log.info("Claude Code commands bundled successfully", output_file=str(output_path))
-        typer.echo(f"Bundled claude commands into {output}")
+        log.info("claude code commands bundled successfully", output_file=str(output_path))
+        success_msg = f"Bundled claude commands into {output}"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         output_path.unlink(missing_ok=True)
         log.info("No claude commands to bundle")
@@ -133,33 +134,33 @@ def claude(
 
 def gemini(
     output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable verbose logging")] = False,
     config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
 ) -> None:
     """Bundle Gemini CLI commands into commands.md."""
-    if verbose and "LOG_LEVEL" not in os.environ:
-        os.environ["LOG_LEVEL"] = "DEBUG"
 
     section_globs = load_section_globs(config)
     agent = get_agent("gemini")
     cwd = Path.cwd()
 
     log.info(
-        "Bundling Gemini CLI commands",
+        "bundling gemini cli commands",
         commands_dir=agent.commands_dir,
         config=config,
     )
 
     commands_path = cwd / agent.commands_dir
     if not commands_path.exists():
-        log.error("Gemini CLI commands directory not found", commands_dir=str(commands_path))
+        log.error("gemini cli commands directory not found", commands_dir=str(commands_path))
+        error_msg = f"Gemini CLI commands directory not found: {commands_path}"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
     output_path = cwd / output
     commands_written = agent.bundle_commands(output_path, section_globs)
     if commands_written:
-        log.info("Gemini CLI commands bundled successfully", output_file=str(output_path))
-        typer.echo(f"Bundled gemini commands into {output}")
+        log.info("gemini cli commands bundled successfully", output_file=str(output_path))
+        success_msg = f"Bundled gemini commands into {output}"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         output_path.unlink(missing_ok=True)
         log.info("No gemini commands to bundle")

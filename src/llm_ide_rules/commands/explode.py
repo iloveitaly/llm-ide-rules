@@ -1,6 +1,5 @@
 """Explode command: Convert instruction file to separate rule files."""
 
-import os
 from pathlib import Path
 from typing_extensions import Annotated
 
@@ -116,9 +115,6 @@ def explode_main(
     input_file: Annotated[
         str, typer.Argument(help="Input markdown file")
     ] = "instructions.md",
-    verbose: Annotated[
-        bool, typer.Option("--verbose", "-v", help="Enable verbose logging")
-    ] = False,
     config: Annotated[
         str | None, typer.Option("--config", "-c", help="Custom configuration file path")
     ] = None,
@@ -127,17 +123,16 @@ def explode_main(
     ] = "all",
 ) -> None:
     """Convert instruction file to separate rule files."""
-    if verbose and "LOG_LEVEL" not in os.environ:
-        os.environ["LOG_LEVEL"] = "DEBUG"
 
     if agent not in VALID_AGENTS:
-        log.error("Invalid agent", agent=agent, valid_agents=VALID_AGENTS)
-        typer.echo(f"Error: Invalid agent '{agent}'. Must be one of: {', '.join(VALID_AGENTS)}")
+        log.error("invalid agent", agent=agent, valid_agents=VALID_AGENTS)
+        error_msg = f"Invalid agent '{agent}'. Must be one of: {', '.join(VALID_AGENTS)}"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
     section_globs = load_section_globs(config)
 
-    log.info("Starting explode operation", input_file=input_file, agent=agent, config=config)
+    log.info("starting explode operation", input_file=input_file, agent=agent, config=config)
 
     cwd = Path.cwd()
 
@@ -173,14 +168,16 @@ def explode_main(
     try:
         lines = input_path.read_text().splitlines(keepends=True)
     except FileNotFoundError:
-        log.error("Input file not found", input_file=str(input_path))
+        log.error("input file not found", input_file=str(input_path))
+        error_msg = f"Input file not found: {input_path}"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
     commands_path = input_path.parent / "commands.md"
     commands_lines = []
     if commands_path.exists():
         commands_lines = commands_path.read_text().splitlines(keepends=True)
-        log.info("Found commands file", commands_file=str(commands_path))
+        log.info("found commands file", commands_file=str(commands_path))
 
     # Process general instructions for agents that support rules
     general = extract_general(lines)
@@ -219,7 +216,7 @@ alwaysApply: true
 
     for section_name in section_globs:
         if section_name not in found_sections:
-            log.warning("Section not found in file", section=section_name)
+            log.warning("section not found in file", section=section_name)
 
     # Process unmapped sections for agents that support rules
     if "cursor" in agent_instances or "github" in agent_instances:
@@ -231,7 +228,7 @@ alwaysApply: true
                     for mapped_section in section_globs
                 ):
                     log.warning(
-                        "Unmapped section in instructions.md, treating as always-apply rule",
+                        "unmapped section in instructions.md, treating as always-apply rule",
                         section=section_name,
                     )
                     section_content = extract_section(lines, f"## {section_name}")
@@ -284,9 +281,11 @@ alwaysApply: true
             log_data[f"{agent_name}_commands"] = str(agent_dirs[agent_name]["commands"])
             created_dirs.append(f".{agent_name}/")
 
-    log.info("Explode operation completed", **log_data)
+    log.info("explode operation completed", **log_data)
 
     if len(created_dirs) == 1:
-        typer.echo(f"Created files in {created_dirs[0]} directory")
+        success_msg = f"Created files in {created_dirs[0]} directory"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
-        typer.echo(f"Created files in {', '.join(created_dirs)} directories")
+        success_msg = f"Created files in {', '.join(created_dirs)} directories"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))

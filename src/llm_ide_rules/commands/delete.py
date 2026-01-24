@@ -1,6 +1,5 @@
 """Delete command: Remove downloaded LLM instruction files."""
 
-import os
 import shutil
 from pathlib import Path
 
@@ -24,7 +23,7 @@ def find_files_to_delete(
 
     for inst_type in instruction_types:
         if inst_type not in INSTRUCTION_TYPES:
-            log.warning("Unknown instruction type", type=inst_type)
+            log.warning("unknown instruction type", type=inst_type)
             continue
 
         config = INSTRUCTION_TYPES[inst_type]
@@ -60,9 +59,6 @@ def delete_main(
         bool,
         typer.Option("--yes", "-y", help="Skip confirmation prompt and delete immediately"),
     ] = False,
-    verbose: Annotated[
-        bool, typer.Option("--verbose", "-v", help="Enable verbose logging")
-    ] = False,
 ):
     """Remove downloaded LLM instruction files.
 
@@ -87,16 +83,13 @@ def delete_main(
     # Delete from a specific directory
     llm_ide_rules delete --target ./my-project
     """
-    if verbose and "LOG_LEVEL" not in os.environ:
-        os.environ["LOG_LEVEL"] = "DEBUG"
-
     if not instruction_types:
         instruction_types = DEFAULT_TYPES
 
     invalid_types = [t for t in instruction_types if t not in INSTRUCTION_TYPES]
     if invalid_types:
         log.error(
-            "Invalid instruction types",
+            "invalid instruction types",
             invalid_types=invalid_types,
             valid_types=list(INSTRUCTION_TYPES.keys()),
         )
@@ -105,12 +98,13 @@ def delete_main(
     target_path = Path(target_dir).resolve()
 
     if not target_path.exists():
-        log.error("Target directory does not exist", target_dir=str(target_path))
-        typer.echo(f"Error: Target directory does not exist: {target_path}")
+        log.error("target directory does not exist", target_dir=str(target_path))
+        error_msg = f"Target directory does not exist: {target_path}"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
     log.info(
-        "Finding files to delete",
+        "finding files to delete",
         instruction_types=instruction_types,
         target_dir=str(target_path),
     )
@@ -120,7 +114,7 @@ def delete_main(
     )
 
     if not dirs_to_delete and not files_to_delete:
-        log.info("No files found to delete")
+        log.info("no files found to delete")
         typer.echo("No matching instruction files found to delete.")
         return
 
@@ -145,7 +139,7 @@ def delete_main(
         typer.echo()
         confirm = typer.confirm("Are you sure you want to delete these files?")
         if not confirm:
-            log.info("Deletion cancelled by user")
+            log.info("deletion cancelled by user")
             typer.echo("Deletion cancelled.")
             raise typer.Exit(0)
 
@@ -153,21 +147,22 @@ def delete_main(
 
     for dir_path in dirs_to_delete:
         try:
-            log.info("Deleting directory", path=str(dir_path))
+            log.info("deleting directory", path=str(dir_path))
             shutil.rmtree(dir_path)
             deleted_count += 1
         except Exception as e:
-            log.error("Failed to delete directory", path=str(dir_path), error=str(e))
+            log.error("failed to delete directory", path=str(dir_path), error=str(e))
             typer.echo(f"Error deleting {dir_path}: {e}", err=True)
 
     for file_path in files_to_delete:
         try:
-            log.info("Deleting file", path=str(file_path))
+            log.info("deleting file", path=str(file_path))
             file_path.unlink()
             deleted_count += 1
         except Exception as e:
-            log.error("Failed to delete file", path=str(file_path), error=str(e))
+            log.error("failed to delete file", path=str(file_path), error=str(e))
             typer.echo(f"Error deleting {file_path}: {e}", err=True)
 
-    log.info("Deletion completed", deleted_count=deleted_count, total_items=total_items)
-    typer.echo(f"\nSuccessfully deleted {deleted_count} of {total_items} items.")
+    log.info("deletion completed", deleted_count=deleted_count, total_items=total_items)
+    success_msg = f"Successfully deleted {deleted_count} of {total_items} items."
+    typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))

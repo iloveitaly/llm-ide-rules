@@ -1,6 +1,5 @@
 """Download command: Download LLM instruction files from GitHub repositories."""
 
-import os
 import re
 import tempfile
 import zipfile
@@ -60,13 +59,13 @@ def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
     normalized_repo = normalize_repo(repo)
     zip_url = f"https://github.com/{normalized_repo}/archive/{branch}.zip"
 
-    log.info("Downloading repository", repo=repo, normalized_repo=normalized_repo, branch=branch, url=zip_url)
+    log.info("downloading repository", repo=repo, normalized_repo=normalized_repo, branch=branch, url=zip_url)
 
     try:
         response = requests.get(zip_url, timeout=30)
         response.raise_for_status()
     except requests.RequestException as e:
-        log.error("Failed to download repository", error=str(e), url=zip_url)
+        log.error("failed to download repository", error=str(e), url=zip_url)
         raise typer.Exit(1)
 
     # Create temporary directory and file
@@ -86,11 +85,11 @@ def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
     # Find the extracted repository directory (should be the only directory)
     repo_dirs = [d for d in extract_dir.iterdir() if d.is_dir()]
     if not repo_dirs:
-        log.error("No directories found in extracted ZIP")
+        log.error("no directories found in extracted zip")
         raise typer.Exit(1)
 
     repo_dir = repo_dirs[0]
-    log.info("Repository extracted", path=str(repo_dir))
+    log.info("repository extracted", path=str(repo_dir))
 
     return repo_dir
 
@@ -103,7 +102,7 @@ def copy_instruction_files(
 
     for inst_type in instruction_types:
         if inst_type not in INSTRUCTION_TYPES:
-            log.warning("Unknown instruction type", type=inst_type)
+            log.warning("unknown instruction type", type=inst_type)
             continue
 
         config = INSTRUCTION_TYPES[inst_type]
@@ -115,7 +114,7 @@ def copy_instruction_files(
 
             if source_dir.exists():
                 log.info(
-                    "Copying directory",
+                    "copying directory",
                     source=str(source_dir),
                     target=str(target_subdir),
                 )
@@ -136,7 +135,7 @@ def copy_instruction_files(
 
             if source_file.exists():
                 log.info(
-                    "Copying file", source=str(source_file), target=str(target_file)
+                    "copying file", source=str(source_file), target=str(target_file)
                 )
 
                 # Create parent directories if needed
@@ -184,14 +183,14 @@ def copy_recursive_files(
         target_parent = target_file.parent
         if not target_parent.exists():
             log.warning(
-                "Target directory does not exist, skipping file copy",
+                "target directory does not exist, skipping file copy",
                 target_directory=str(target_parent),
                 file=str(relative_path)
             )
             continue
 
         log.info(
-            "Copying recursive file",
+            "copying recursive file",
             source=str(source_file),
             target=str(target_file)
         )
@@ -226,7 +225,7 @@ def copy_directory_contents(
                     break
 
             if should_exclude:
-                log.debug("Excluding file", file=relative_str, pattern=pattern)
+                log.debug("excluding file", file=relative_str, pattern=pattern)
                 continue
 
             target_file = target_dir / relative_path
@@ -250,9 +249,6 @@ def download_main(
     target_dir: Annotated[
         str, typer.Option("--target", "-t", help="Target directory to download to")
     ] = ".",
-    verbose: Annotated[
-        bool, typer.Option("--verbose", "-v", help="Enable verbose logging")
-    ] = False,
 ):
     """Download LLM instruction files from GitHub repositories.
 
@@ -277,9 +273,6 @@ def download_main(
     # Download to a specific directory
     llm_ide_rules download --target ./my-project
     """
-    if verbose and "LOG_LEVEL" not in os.environ:
-        os.environ["LOG_LEVEL"] = "DEBUG"
-
     # Use default types if none specified
     if not instruction_types:
         instruction_types = DEFAULT_TYPES
@@ -288,16 +281,18 @@ def download_main(
     invalid_types = [t for t in instruction_types if t not in INSTRUCTION_TYPES]
     if invalid_types:
         log.error(
-            "Invalid instruction types",
+            "invalid instruction types",
             invalid_types=invalid_types,
             valid_types=list(INSTRUCTION_TYPES.keys()),
         )
+        error_msg = f"Invalid instruction types: {', '.join(invalid_types)}"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
     target_path = Path(target_dir).resolve()
 
     log.info(
-        "Starting download",
+        "starting download",
         repo=repo,
         branch=branch,
         instruction_types=instruction_types,
@@ -312,12 +307,13 @@ def download_main(
         copied_items = copy_instruction_files(repo_dir, instruction_types, target_path)
 
         if copied_items:
-            log.info("Download completed successfully", copied_items=copied_items)
-            typer.echo(f"Downloaded {len(copied_items)} items to {target_path}:")
+            log.info("download completed successfully", copied_items=copied_items)
+            success_msg = f"Downloaded {len(copied_items)} items to {target_path}:"
+            typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
             for item in copied_items:
                 typer.echo(f"  - {item}")
         else:
-            log.warning("No files were copied")
+            log.warning("no files were copied")
             typer.echo("No matching instruction files found in the repository.")
 
     finally:

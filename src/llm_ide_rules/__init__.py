@@ -1,5 +1,6 @@
 """LLM Rules CLI package for managing IDE prompts and rules."""
 
+import os
 import typer
 from typing_extensions import Annotated
 
@@ -15,6 +16,16 @@ app = typer.Typer(
     help="CLI tool for managing LLM IDE prompts and rules",
     no_args_is_help=True,
 )
+
+@app.callback()
+def main_callback(
+    verbose: Annotated[
+        bool, typer.Option("--verbose", "-v", help="Enable verbose logging (sets LOG_LEVEL=DEBUG)")
+    ] = False,
+):
+    """Global CLI options."""
+    if verbose and "LOG_LEVEL" not in os.environ:
+        os.environ["LOG_LEVEL"] = "DEBUG"
 
 # Add commands directly
 app.command("explode", help="Convert instruction file to separate rule files")(explode_main)
