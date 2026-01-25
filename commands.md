@@ -1,3 +1,26 @@
+## Secrets
+
+Here's how environment variables are managed in this application:
+
+- `.envrc` entry point to load the correct env stack. Should not contain secrets and should be simple some shell logic and direnv stdlib calls.
+- `env/all.sh` common configuration for all systems. No secrets. No dotenv/custom scripts. Just `export`s to modify core configuration settings like `export TZ=UTC`.
+- `env/all.local.sh` overrides across all environments (dev and test). Useful for things like 1Password service account token and database hosts which mutate the logic followed in `env/not_production.sh`. Not committed to source control.
+- `env/not_production.sh` This contains the bulk of your system configuration. Shared across test, CI, dev, etc but not production.
+- `env/dev.local.sh` configuration overrides for non-test environments. `PYTHONBREAKPOINT`, `LOG_LEVEL`, etc. Most of your environment changes end up happening here.
+- `env/test.sh` test-only environment variables (`PYTHON_ENV=test`). This file should generally be short.
+- `env/production.{backend,frontend}.sh` for most medium-sized projects you'll have separate frontend and backend systems (even if your frontend is SPA, which I'm a fan of). These two files enable you to document the variables required to build (in the case of a SPA frontend) or run (in the case of a python backend) your system in production.
+- `env/*local.*` files have a `-example` variant which is committed to version control. These document helpful environment variables for local development.
+- When writing TypeScript/JavaScript/React, use `requireEnv("THE_ENV_VAR_NAME")` to read an environment variable. `import {requireEnv} from '~/utils/environment'`
+
+## Stripe Backend
+
+- `cast(object, ...)` should not be used. Can you instead cast expandable fields to PaymentIntent, or whatever their expandable type is?
+- `from stripe import Charge` can we use top-level imports instead of importing from private packages?
+- Do not `customer = getattr(session, "customer", None)` instead just access `session.customer` and assert that it is not null. Use the pattern for all stripe objects.
+- When iterating through a list that you expect to be comprehensive use `auto_paging_iter` for example `stripe_client.prices.list(params={ ... }).auto_paging_iter()`
+- Assume the new `StripeClient` is used everywhere and type it as such. When using this client, all API params should be a dictionary inside a `params=` kwarg.
+- `amount_refunded=0` when the charge is disputed. The dispute amount only exists in the `balance_transactions` of the dispute object.
+
 ## Dev In Browser
 
 Use your browser to view `https://verso.localhost` which is tied to livereload dev server which is already running. You can inspect that page (including taking screenshots!) to validate that your changes fixed the issue.
@@ -213,15 +236,6 @@ Use this header:
 - Do not install packages with pip or any other package manager, assume packages will be installed when needed
 - Use `click` for CLI interfaces
 - Use `structlog_config` for logging. Read the usage guide: @https://github.com/iloveitaly/structlog-config/
-
-## Stripe Backend
-
-- `cast(object, ...)` should not be used. Can you instead cast expandable fields to PaymentIntent, or whatever their expandable type is?
-- `from stripe import Charge` can we use top-level imports instead of importing from private packages?
-- Do not `customer = getattr(session, "customer", None)` instead just access `session.customer` and assert that it is not null. Use the pattern for all stripe objects.
-- When iterating through a list that you expect to be comprehensive use `auto_paging_iter` for example `stripe_client.prices.list(params={ ... }).auto_paging_iter()`
-- Assume the new `StripeClient` is used everywhere and type it as such. When using this client, all API params should be a dictionary inside a `params=` kwarg.
-- `amount_refunded=0` when the charge is disputed. The dispute amount only exists in the `balance_transactions` of the dispute object.
 
 ## Typescript Docstring
 

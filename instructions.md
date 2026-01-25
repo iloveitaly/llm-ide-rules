@@ -150,19 +150,28 @@ class Distribution(
 
 ## Python App
 
-* Files within `app/commands/` should have:
-  * Are not designed for CLI execution, but instead are interactor-style internal commands.
-  * Should not be used on the queuing system
-  * A `perform` function that is the main entry point for the command.
-  * Look at existing commands for examples of how to structure the command.
-  * Use `TypeIDType` for any parameters that are IDs of models.
-* Files within `app/jobs/` should have:
-  * Are designed for use on the queuing system.
-  * A `perform` function that is the main entry point for the job.
-  * Look at existing jobs for examples of how to structure the job.
-  * Use `TypeIDType | str` for any parameters that are IDs of models.
-* When referencing a command, use the full-qualified name, e.g. `app.commands.transcript_deletion.perform`.
-* When queuing a job or `perform`ing it in a test, use the full-qualified name, e.g. `app.jobs.transcript_deletion.perform`.
+- `app/lib/` is for code that is not specified to this application and with some effort could extracted into a external package.
+- `app/helpers` is for larger reusable modules that if they weren't specific to this application, could be extracted into their own package.
+- `app/utils` are small helper functions that are specific to a particular page or area of the application.
+- `app/__init__.py` is the entrypoint for the application which is run when _anything_ is executed (fastapi, celery, etc).
+  - It primarily runs `configure_*` commands for any `app.configuration.*` modules. These modules primary setup API clients, database connections, python language configuration, etc.
+  - Also makes sure anything that mutates global state loads early.
+- FastAPI server and routes are specified in `app/routes/`
+- SQLModels are specified in `app/models/`
+- Files within `app/commands/` should have:
+  - Are not designed for CLI execution, but instead are interactor-style internal commands.
+  - Should not be used on the queuing system
+  - A `perform` function that is the main entry point for the command.
+  - Look at existing commands for examples of how to structure the command.
+  - Use `TypeIDType` for any parameters that are IDs of models.
+- Files within `app/jobs/` should have:
+  - Are designed for use on the queuing system.
+  - A `perform` function that is the main entry point for the job.
+  - Look at existing jobs for examples of how to structure the job.
+  - Use `TypeIDType | str` for any parameters that are IDs of models.
+- When referencing a command, use the full-qualified name, e.g. `app.commands.transcript_deletion.perform`.
+- When queuing a job or `perform`ing it in a test, use the full-qualified name, e.g. `app.jobs.transcript_deletion.perform`.
+- `app/cli/` is for scripts or CLI tools that are specific to the application.
 
 ## Pytest Integration Tests
 
@@ -474,27 +483,4 @@ Here's how frontend code is organized in `web/app/`:
   - `ui/` reusable ShadCN UI components (buttons, forms, etc.).
   - `shared/` components shared across multiple pages.
   - create additional folders for route- or section-specific components.
-
-## Secrets
-
-Here's how environment variables are managed in this application:
-
-- `.envrc` entry point to load the correct env stack. Should not contain secrets and should be simple some shell logic and direnv stdlib calls.
-- `env/all.sh` common configuration for all systems. No secrets. No dotenv/custom scripts. Just `export`s to modify core configuration settings like `export TZ=UTC`.
-- `env/all.local.sh` overrides across all environments (dev and test). Useful for things like 1Password service account token and database hosts which mutate the logic followed in `env/not_production.sh`. Not committed to source control.
-- `env/not_production.sh` This contains the bulk of your system configuration. Shared across test, CI, dev, etc but not production.
-- `env/dev.local.sh` configuration overrides for non-test environments. `PYTHONBREAKPOINT`, `LOG_LEVEL`, etc. Most of your environment changes end up happening here.
-- `env/test.sh` test-only environment variables (`PYTHON_ENV=test`). This file should generally be short.
-- `env/production.{backend,frontend}.sh` for most medium-sized projects you'll have separate frontend and backend systems (even if your frontend is SPA, which I'm a fan of). These two files enable you to document the variables required to build (in the case of a SPA frontend) or run (in the case of a python backend) your system in production.
-- `env/*local.*` files have a `-example` variant which is committed to version control. These document helpful environment variables for local development.
-- When writing TypeScript/JavaScript/React, use `requireEnv("THE_ENV_VAR_NAME")` to read an environment variable. `import {requireEnv} from '~/utils/environment'`
-
-## Stripe Backend
-
-- `cast(object, ...)` should not be used. Can you instead cast expandable fields to PaymentIntent, or whatever their expandable type is?
-- `from stripe import Charge` can we use top-level imports instead of importing from private packages?
-- Do not `customer = getattr(session, "customer", None)` instead just access `session.customer` and assert that it is not null. Use the pattern for all stripe objects.
-- When iterating through a list that you expect to be comprehensive use `auto_paging_iter` for example `stripe_client.prices.list(params={ ... }).auto_paging_iter()`
-- Assume the new `StripeClient` is used everywhere and type it as such. When using this client, all API params should be a dictionary inside a `params=` kwarg.
-- `amount_refunded=0` when the charge is disputed. The dispute amount only exists in the `balance_transactions` of the dispute object.
 
