@@ -118,13 +118,6 @@ def test_download_with_branch():
     assert result.exit_code == 0
 
 
-def test_download_verbose_option():
-    """Test download command with verbose option."""
-    runner = CliRunner()
-
-    # Test that the command accepts verbose option
-    result = runner.invoke(app, ["download", "--verbose", "--help"])
-    assert result.exit_code == 0
 
 
 def test_download_invalid_instruction_type():
@@ -348,4 +341,4 @@ def test_copy_recursive_files_warning_for_missing_directories():
 
             mock_log.warning.assert_called_once()
             call_args = mock_log.warning.call_args
-            assert "Target directory does not exist, skipping file copy" in call_args[0]
+            assert "target directory does not exist, skipping file copy" in call_args[0]

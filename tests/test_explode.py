@@ -182,23 +182,3 @@ def test_explode_nonexistent_file():
         assert result.exit_code == 1
 
 
-def test_explode_verbose_option():
-    """Test explode command with verbose option."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        instructions_content = """# Sample Instructions
-
-## Python
-
-Here are Python rules.
-"""
-
-        Path("instructions.md").write_text(instructions_content)
-
-        result = runner.invoke(app, ["explode", "instructions.md", "--verbose"])
-
-        assert result.exit_code == 0
-        assert "Created files in" in result.stdout

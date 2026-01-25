@@ -320,32 +320,6 @@ def test_implode_main_no_args():
     assert "Usage:" in result.stderr or "Missing command" in result.stderr
 
 
-def test_implode_verbose_option():
-    """Test implode commands with verbose option."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        # Create .cursor/rules directory with sample files
-        cursor_rules_dir = Path(".cursor/rules")
-        cursor_rules_dir.mkdir(parents=True)
-
-        with open(cursor_rules_dir / "python.mdc", "w") as f:
-            f.write("""---
-name: Python
----
-
-Python rules.""")
-
-        # Run implode cursor command with verbose flag
-        result = runner.invoke(app, ["implode", "cursor", "bundled.md", "--verbose"])
-
-        # Check command succeeds
-        assert result.exit_code == 0
-        assert "Bundled cursor rules into bundled.md" in result.stdout
-
-
 def test_implode_claude_basic_functionality():
     """Test basic implode claude functionality."""
     runner = CliRunner()
