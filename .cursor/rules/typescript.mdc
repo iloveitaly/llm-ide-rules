@@ -1,6 +1,6 @@
 ---
 description:
-globs: **/*.ts,**/*.tsx,package.json
+globs: **/*.ts,**/*.tsx
 alwaysApply: false
 ---
 ## TypeScript
