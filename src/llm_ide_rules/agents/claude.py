@@ -73,16 +73,6 @@ class ClaudeAgent(BaseAgent):
         filepath = commands_dir / f"{filename}{self.command_extension}"
 
         trimmed = trim_content(content_lines)
-
-        filtered_content = []
-        found_header = False
-        for line in trimmed:
-            if not found_header and line.startswith("## "):
-                found_header = True
-                continue
-            filtered_content.append(line)
-
-        filtered_content = trim_content(filtered_content)
-        filepath.write_text("".join(filtered_content))
+        filepath.write_text("".join(trimmed))
 
 
