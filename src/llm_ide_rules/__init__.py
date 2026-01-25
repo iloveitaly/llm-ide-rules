@@ -1,6 +1,10 @@
 """LLM Rules CLI package for managing IDE prompts and rules."""
 
 import os
+
+if "LOG_LEVEL" not in os.environ:
+    os.environ["LOG_LEVEL"] = "WARNING"
+
 import typer
 from typing_extensions import Annotated
 
@@ -24,8 +28,10 @@ def main_callback(
     ] = False,
 ):
     """Global CLI options."""
-    if verbose and "LOG_LEVEL" not in os.environ:
+    if verbose:
         os.environ["LOG_LEVEL"] = "DEBUG"
+        import structlog_config
+        structlog_config.configure_logger()
 
 # Add commands directly
 app.command("explode", help="Convert instruction file to separate rule files")(explode_main)
