@@ -1,18 +1,11 @@
-import shutil
-import re
 import tempfile
 from pathlib import Path
 
+import click
 from typer.testing import CliRunner
 
 from llm_ide_rules import app
 from llm_ide_rules.commands.delete import find_files_to_delete
-
-
-def strip_ansi(text: str) -> str:
-    """Strip ANSI escape codes from text."""
-    ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-    return ansi_escape.sub("", text)
 
 
 def test_delete_help():
@@ -20,7 +13,7 @@ def test_delete_help():
     runner = CliRunner()
     result = runner.invoke(app, ["delete", "--help"])
     assert result.exit_code == 0
-    stdout = strip_ansi(result.stdout)
+    stdout = click.unstyle(result.stdout)
     assert "Remove downloaded LLM instruction files" in stdout
     assert "--yes" in stdout
     assert "--target" in stdout
