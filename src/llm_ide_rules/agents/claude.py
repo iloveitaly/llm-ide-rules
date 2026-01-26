@@ -32,11 +32,19 @@ class ClaudeAgent(BaseAgent):
         self, output_file: Path, section_globs: dict[str, str | None]
     ) -> bool:
         """Bundle Claude Code command files (.md) into a single output file."""
-        commands_path = output_file.parent / self.commands_dir
+        commands_dir = self.commands_dir
+        if not commands_dir:
+            return False
+
+        commands_path = output_file.parent / commands_dir
         if not commands_path.exists():
             return False
 
-        command_files = list(commands_path.glob(f"*{self.command_extension}"))
+        extension = self.command_extension
+        if not extension:
+            return False
+
+        command_files = list(commands_path.glob(f"*{extension}"))
         if not command_files:
             return False
 
@@ -77,7 +85,8 @@ class ClaudeAgent(BaseAgent):
         section_name: str | None = None,
     ) -> None:
         """Write a Claude Code command file (.md) - plain markdown, no frontmatter."""
-        filepath = commands_dir / f"{filename}{self.command_extension}"
+        extension = self.command_extension or ".md"
+        filepath = commands_dir / f"{filename}{extension}"
 
         trimmed = trim_content(content_lines)
         filepath.write_text("".join(trimmed))

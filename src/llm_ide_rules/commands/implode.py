@@ -25,14 +25,19 @@ def cursor(
     agent = get_agent("cursor")
     cwd = Path.cwd()
 
+    rules_dir = agent.rules_dir
+    if not rules_dir:
+        log.error("cursor rules directory not configured")
+        raise typer.Exit(1)
+
     log.info(
         "bundling cursor rules and commands",
-        rules_dir=agent.rules_dir,
+        rules_dir=rules_dir,
         commands_dir=agent.commands_dir,
         config=config,
     )
 
-    rules_path = cwd / agent.rules_dir
+    rules_path = cwd / rules_dir
     if not rules_path.exists():
         log.error("cursor rules directory not found", rules_dir=str(rules_path))
         error_msg = f"Cursor rules directory not found: {rules_path}"
@@ -72,14 +77,19 @@ def github(
     agent = get_agent("github")
     cwd = Path.cwd()
 
+    rules_dir = agent.rules_dir
+    if not rules_dir:
+        log.error("github rules directory not configured")
+        raise typer.Exit(1)
+
     log.info(
         "bundling github instructions and prompts",
-        instructions_dir=agent.rules_dir,
+        instructions_dir=rules_dir,
         prompts_dir=agent.commands_dir,
         config=config,
     )
 
-    rules_path = cwd / agent.rules_dir
+    rules_path = cwd / rules_dir
     if not rules_path.exists():
         log.error(
             "github instructions directory not found", instructions_dir=str(rules_path)
@@ -119,13 +129,18 @@ def claude(
     agent = get_agent("claude")
     cwd = Path.cwd()
 
+    commands_dir = agent.commands_dir
+    if not commands_dir:
+        log.error("claude code commands directory not configured")
+        raise typer.Exit(1)
+
     log.info(
         "bundling claude code commands",
-        commands_dir=agent.commands_dir,
+        commands_dir=commands_dir,
         config=config,
     )
 
-    commands_path = cwd / agent.commands_dir
+    commands_path = cwd / commands_dir
     if not commands_path.exists():
         log.error(
             "claude code commands directory not found", commands_dir=str(commands_path)
@@ -157,13 +172,18 @@ def gemini(
     agent = get_agent("gemini")
     cwd = Path.cwd()
 
+    commands_dir = agent.commands_dir
+    if not commands_dir:
+        log.error("gemini cli commands directory not configured")
+        raise typer.Exit(1)
+
     log.info(
         "bundling gemini cli commands",
-        commands_dir=agent.commands_dir,
+        commands_dir=commands_dir,
         config=config,
     )
 
-    commands_path = cwd / agent.commands_dir
+    commands_path = cwd / commands_dir
     if not commands_path.exists():
         log.error(
             "gemini cli commands directory not found", commands_dir=str(commands_path)
@@ -195,13 +215,18 @@ def opencode(
     agent = get_agent("opencode")
     cwd = Path.cwd()
 
+    commands_dir = agent.commands_dir
+    if not commands_dir:
+        log.error("opencode commands directory not configured")
+        raise typer.Exit(1)
+
     log.info(
         "bundling opencode commands",
-        commands_dir=agent.commands_dir,
+        commands_dir=commands_dir,
         config=config,
     )
 
-    commands_path = cwd / agent.commands_dir
+    commands_path = cwd / commands_dir
     if not commands_path.exists():
         log.error(
             "opencode commands directory not found", commands_dir=str(commands_path)

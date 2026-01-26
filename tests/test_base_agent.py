@@ -149,10 +149,9 @@ def test_strip_toml_metadata_invalid_returns_original():
     # Invalid TOML but text we might want to preserve if it wasn't TOML to begin with
     text = """Just some plain text
 without any toml structure"""
-    
+
     result = strip_toml_metadata(text)
     assert result == text.strip()
-
 
 
 def test_get_ordered_files():

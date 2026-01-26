@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from llm_ide_rules.constants import header_to_filename
+from llm_ide_rules.mcp import McpServer
 
 
 class BaseAgent(ABC):
@@ -68,25 +69,21 @@ class BaseAgent(ABC):
             raise NotImplementedError(f"{self.name} does not support commands")
         return base_dir / self.commands_dir
 
-    def transform_mcp_server(self, server: "McpServer") -> dict:
+    def transform_mcp_server(self, server: McpServer) -> dict:
         """Transform unified server to platform-specific format."""
-        from llm_ide_rules.mcp import McpServer
-
         if server.url:
-            result = {"url": server.url}
+            result: dict = {"url": server.url}
             if server.env:
                 result["env"] = server.env
             return result
 
-        result = {"command": server.command, "args": server.args or []}
+        result: dict = {"command": server.command, "args": server.args or []}
         if server.env:
             result["env"] = server.env
         return result
 
-    def reverse_transform_mcp_server(self, name: str, config: dict) -> "McpServer":
+    def reverse_transform_mcp_server(self, name: str, config: dict) -> McpServer:
         """Transform platform config back to unified format."""
-        from llm_ide_rules.mcp import McpServer
-
         if "url" in config:
             return McpServer(
                 url=config["url"],
@@ -145,7 +142,11 @@ def strip_toml_metadata(text: str) -> str:
         if "prompt" in data:
             return str(data["prompt"]).strip()
         # Check legacy format
-        if "command" in data and isinstance(data["command"], dict) and "shell" in data["command"]:
+        if (
+            "command" in data
+            and isinstance(data["command"], dict)
+            and "shell" in data["command"]
+        ):
             return str(data["command"]["shell"]).strip()
     except Exception:
         pass

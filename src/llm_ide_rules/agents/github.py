@@ -12,6 +12,7 @@ from llm_ide_rules.agents.base import (
     extract_description_and_filter_content,
 )
 from llm_ide_rules.constants import header_to_filename
+from llm_ide_rules.mcp import McpServer
 
 
 class GitHubAgent(BaseAgent):
@@ -30,10 +31,19 @@ class GitHubAgent(BaseAgent):
         self, output_file: Path, section_globs: dict[str, str | None]
     ) -> bool:
         """Bundle GitHub instruction files into a single output file."""
+        rules_dir = self.rules_dir
+        if not rules_dir:
+            return False
+
         base_dir = output_file.parent
-        instructions_path = base_dir / self.rules_dir
+        instructions_path = base_dir / rules_dir
         copilot_general = base_dir / ".github" / "copilot-instructions.md"
-        instr_files = list(instructions_path.glob(f"*{self.rule_extension}"))
+
+        rule_ext = self.rule_extension
+        if not rule_ext:
+            return False
+
+        instr_files = list(instructions_path.glob(f"*{rule_ext}"))
 
         ordered_instructions = get_ordered_files_github(
             instr_files, list(section_globs.keys())
@@ -69,11 +79,19 @@ class GitHubAgent(BaseAgent):
         self, output_file: Path, section_globs: dict[str, str | None]
     ) -> bool:
         """Bundle GitHub prompt files into a single output file."""
-        prompts_path = output_file.parent / self.commands_dir
+        commands_dir = self.commands_dir
+        if not commands_dir:
+            return False
+
+        prompts_path = output_file.parent / commands_dir
         if not prompts_path.exists():
             return False
 
-        prompt_files = list(prompts_path.glob(f"*{self.command_extension}"))
+        command_ext = self.command_extension
+        if not command_ext:
+            return False
+
+        prompt_files = list(prompts_path.glob(f"*{command_ext}"))
         if not prompt_files:
             return False
 
@@ -120,7 +138,8 @@ class GitHubAgent(BaseAgent):
         glob_pattern: str | None = None,
     ) -> None:
         """Write a GitHub instruction file (.instructions.md) with YAML frontmatter."""
-        filepath = rules_dir / f"{filename}{self.rule_extension}"
+        extension = self.rule_extension or ".instructions.md"
+        filepath = rules_dir / f"{filename}{extension}"
 
         if glob_pattern and glob_pattern != "manual":
             header_yaml = f"""---
@@ -140,7 +159,8 @@ applyTo: "{glob_pattern}"
         section_name: str | None = None,
     ) -> None:
         """Write a GitHub prompt file (.prompt.md) with YAML frontmatter."""
-        filepath = commands_dir / f"{filename}{self.command_extension}"
+        extension = self.command_extension or ".prompt.md"
+        filepath = commands_dir / f"{filename}{extension}"
 
         description, filtered_content = extract_description_and_filter_content(
             content_lines, ""
@@ -156,11 +176,9 @@ applyTo: "{glob_pattern}"
         filepath = base_dir / ".github" / "copilot-instructions.md"
         write_rule_file(filepath, "", content_lines)
 
-    def transform_mcp_server(self, server: "McpServer") -> dict:
+    def transform_mcp_server(self, server: McpServer) -> dict:
         """Transform unified server to GitHub Copilot format (adds type and tools)."""
-        from llm_ide_rules.mcp import McpServer
-
-        base = {"tools": ["*"]}
+        base: dict = {"tools": ["*"]}
         if server.env:
             base["env"] = server.env
 
@@ -174,10 +192,8 @@ applyTo: "{glob_pattern}"
             **base,
         }
 
-    def reverse_transform_mcp_server(self, name: str, config: dict) -> "McpServer":
+    def reverse_transform_mcp_server(self, name: str, config: dict) -> McpServer:
         """Transform GitHub Copilot config back to unified format."""
-        from llm_ide_rules.mcp import McpServer
-
         if config.get("type") == "http":
             return McpServer(
                 url=config["url"],

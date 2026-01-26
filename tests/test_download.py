@@ -272,8 +272,6 @@ def test_download_agents_with_directory_structure(mock_zipfile, mock_requests):
     """Test downloading AGENTS.md files with preserved directory structure."""
     from llm_ide_rules.commands.download import copy_recursive_files
 
-    runner = CliRunner()
-
     # Mock the HTTP request
     mock_response = Mock()
     mock_response.content = b"fake zip content"

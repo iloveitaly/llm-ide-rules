@@ -218,6 +218,7 @@ def copy_directory_contents(
 
             # Check if file matches any exclude pattern
             should_exclude = False
+            pattern = ""
             for pattern in exclude_patterns:
                 if pattern.endswith("/*"):
                     # Pattern like "workflows/*" - exclude if path starts with "workflows/"
@@ -240,7 +241,7 @@ def copy_directory_contents(
 
 def download_main(
     instruction_types: Annotated[
-        list[str],
+        list[str] | None,
         typer.Argument(
             help="Types of instructions to download (cursor, github, gemini, claude, agent, agents). Downloads everything by default."
         ),

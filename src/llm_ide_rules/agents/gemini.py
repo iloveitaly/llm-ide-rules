@@ -11,6 +11,7 @@ from llm_ide_rules.agents.base import (
     trim_content,
     extract_description_and_filter_content,
 )
+from llm_ide_rules.mcp import McpServer
 
 
 class GeminiAgent(BaseAgent):
@@ -35,11 +36,19 @@ class GeminiAgent(BaseAgent):
         self, output_file: Path, section_globs: dict[str, str | None]
     ) -> bool:
         """Bundle Gemini CLI command files (.toml) into a single output file."""
-        commands_path = output_file.parent / self.commands_dir
+        commands_dir = self.commands_dir
+        if not commands_dir:
+            return False
+
+        commands_path = output_file.parent / commands_dir
         if not commands_path.exists():
             return False
 
-        command_files = list(commands_path.glob(f"*{self.command_extension}"))
+        extension = self.command_extension
+        if not extension:
+            return False
+
+        command_files = list(commands_path.glob(f"*{extension}"))
         if not command_files:
             return False
 
@@ -83,7 +92,8 @@ class GeminiAgent(BaseAgent):
         """Write a Gemini CLI command file (.toml) with TOML format."""
         import tomli_w
 
-        filepath = commands_dir / f"{filename}{self.command_extension}"
+        extension = self.command_extension or ".toml"
+        filepath = commands_dir / f"{filename}{extension}"
 
         description, filtered_content = extract_description_and_filter_content(
             content_lines, ""
@@ -101,36 +111,32 @@ class GeminiAgent(BaseAgent):
         content_str = "".join(final_content).strip()
 
         desc = description if description else (section_name or filename)
-        
+
         # Construct dict and dump to TOML
         data = {
             "description": desc,
-            "prompt": content_str + "\n"  # Ensure trailing newline in multiline string
+            "prompt": content_str + "\n",  # Ensure trailing newline in multiline string
         }
-        
+
         # tomli-w will handle escaping and multiline strings automatically
         output = tomli_w.dumps(data)
         filepath.write_text(output)
 
-    def transform_mcp_server(self, server: "McpServer") -> dict:
+    def transform_mcp_server(self, server: McpServer) -> dict:
         """Transform unified server to Gemini format (uses httpUrl instead of url)."""
-        from llm_ide_rules.mcp import McpServer
-
         if server.url:
-            result = {"httpUrl": server.url}
+            result: dict = {"httpUrl": server.url}
             if server.env:
                 result["env"] = server.env
             return result
 
-        result = {"command": server.command, "args": server.args or []}
+        result: dict = {"command": server.command, "args": server.args or []}
         if server.env:
             result["env"] = server.env
         return result
 
-    def reverse_transform_mcp_server(self, name: str, config: dict) -> "McpServer":
+    def reverse_transform_mcp_server(self, name: str, config: dict) -> McpServer:
         """Transform Gemini config back to unified format."""
-        from llm_ide_rules.mcp import McpServer
-
         if "httpUrl" in config:
             return McpServer(
                 url=config["httpUrl"],

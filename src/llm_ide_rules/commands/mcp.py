@@ -43,16 +43,18 @@ def explode(
         if not ag.mcp_project_path:
             continue
 
+        mcp_project_path = ag.mcp_project_path
+
         servers = {
             name: ag.transform_mcp_server(s) for name, s in config.servers.items()
         }
 
         if scope in ("project", "both"):
-            project_path = Path.cwd() / ag.mcp_project_path
+            project_path = Path.cwd() / mcp_project_path
             ag.write_mcp_config(servers, project_path)
             log.info("wrote project config", agent=ag.name, path=str(project_path))
 
-        if scope in ("global", "both"):
+        if scope in ("global", "both") and ag.mcp_global_path:
             global_path = Path.home() / ag.mcp_global_path
             ag.write_mcp_config(servers, global_path)
             log.info("wrote global config", agent=ag.name, path=str(global_path))
@@ -78,9 +80,17 @@ def implode(
     ag = get_agent(source)
 
     if scope == "project":
-        source_path = Path.cwd() / ag.mcp_project_path
+        mcp_project_path = ag.mcp_project_path
+        if not mcp_project_path:
+            log.error("project config path not defined for agent", agent=source)
+            raise typer.Exit(1)
+        source_path = Path.cwd() / mcp_project_path
     else:
-        source_path = Path.home() / ag.mcp_global_path
+        mcp_global_path = ag.mcp_global_path
+        if not mcp_global_path:
+            log.error("global config path not defined for agent", agent=source)
+            raise typer.Exit(1)
+        source_path = Path.home() / mcp_global_path
 
     if not source_path.exists():
         log.error("source config not found", path=str(source_path))

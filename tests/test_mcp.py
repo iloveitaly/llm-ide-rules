@@ -7,7 +7,6 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from llm_ide_rules import app
-from llm_ide_rules.agents import get_agent
 from llm_ide_rules.agents.claude import ClaudeAgent
 from llm_ide_rules.agents.gemini import GeminiAgent
 from llm_ide_rules.agents.github import GitHubAgent

@@ -47,7 +47,7 @@ def find_files_to_delete(
 
 def delete_main(
     instruction_types: Annotated[
-        list[str],
+        list[str] | None,
         typer.Argument(
             help="Types of instructions to delete (cursor, github, gemini, claude, agent, agents). Deletes everything by default."
         ),

@@ -30,8 +30,17 @@ class CursorAgent(BaseAgent):
         self, output_file: Path, section_globs: dict[str, str | None]
     ) -> bool:
         """Bundle Cursor rule files (.mdc) into a single output file."""
-        rules_path = output_file.parent / self.rules_dir
-        rule_files = list(rules_path.glob(f"*{self.rule_extension}"))
+        rules_dir = self.rules_dir
+        if not rules_dir:
+            return False
+
+        rules_path = output_file.parent / rules_dir
+
+        rule_ext = self.rule_extension
+        if not rule_ext:
+            return False
+
+        rule_files = list(rules_path.glob(f"*{rule_ext}"))
 
         general = [f for f in rule_files if f.stem == "general"]
         others = [f for f in rule_files if f.stem != "general"]
@@ -65,11 +74,19 @@ class CursorAgent(BaseAgent):
         self, output_file: Path, section_globs: dict[str, str | None]
     ) -> bool:
         """Bundle Cursor command files (.md) into a single output file."""
-        commands_path = output_file.parent / self.commands_dir
+        commands_dir = self.commands_dir
+        if not commands_dir:
+            return False
+
+        commands_path = output_file.parent / commands_dir
         if not commands_path.exists():
             return False
 
-        command_files = list(commands_path.glob(f"*{self.command_extension}"))
+        command_ext = self.command_extension
+        if not command_ext:
+            return False
+
+        command_files = list(commands_path.glob(f"*{command_ext}"))
         if not command_files:
             return False
 
@@ -100,7 +117,8 @@ class CursorAgent(BaseAgent):
         glob_pattern: str | None = None,
     ) -> None:
         """Write a Cursor rule file (.mdc) with YAML frontmatter."""
-        filepath = rules_dir / f"{filename}{self.rule_extension}"
+        extension = self.rule_extension or ".mdc"
+        filepath = rules_dir / f"{filename}{extension}"
 
         if glob_pattern and glob_pattern != "manual":
             header_yaml = f"""---
@@ -131,7 +149,8 @@ alwaysApply: true
         section_name: str | None = None,
     ) -> None:
         """Write a Cursor command file (.md) - plain markdown, no frontmatter."""
-        filepath = commands_dir / f"{filename}{self.command_extension}"
+        extension = self.command_extension or ".md"
+        filepath = commands_dir / f"{filename}{extension}"
 
         trimmed = trim_content(content_lines)
         filepath.write_text("".join(trimmed))
@@ -144,7 +163,8 @@ alwaysApply: true
         section_name: str | None = None,
     ) -> None:
         """Write a Cursor prompt file (.mdc) with optional frontmatter."""
-        filepath = prompts_dir / f"{filename}{self.rule_extension}"
+        extension = self.rule_extension or ".mdc"
+        filepath = prompts_dir / f"{filename}{extension}"
 
         description, filtered_content = extract_description_and_filter_content(
             content_lines, ""

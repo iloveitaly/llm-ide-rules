@@ -323,12 +323,12 @@ It should be treated as always-apply.
 
         roundtrip_content = Path("roundtrip.md").read_text()
 
-        original_sections = extract_sections(original_content)
+        orig_sections = extract_sections(original_content)
         roundtrip_sections = extract_sections(roundtrip_content)
 
         assert "Custom Unmapped Section" in roundtrip_sections
         assert normalize_whitespace(
-            original_sections["Custom Unmapped Section"]
+            orig_sections["Custom Unmapped Section"]
         ) == normalize_whitespace(roundtrip_sections["Custom Unmapped Section"])
 
 
@@ -372,10 +372,12 @@ Custom section rules.
 
         roundtrip_content = Path("roundtrip.md").read_text()
 
-        original_sections = extract_sections(original_content)
+        orig_sections = extract_sections(original_content)
         roundtrip_sections = extract_sections(roundtrip_content)
 
-        assert set(original_sections.keys()) == set(roundtrip_sections.keys())
+        # Verify sections are preserved
+        assert len(orig_sections) == len(roundtrip_sections)
+        assert set(orig_sections.keys()) == set(roundtrip_sections.keys())
 
 
 def test_roundtrip_preserves_multiline_content():
@@ -415,7 +417,6 @@ That's all.
 
         roundtrip_content = Path("roundtrip.md").read_text()
 
-        original_sections = extract_sections(original_content)
         roundtrip_sections = extract_sections(roundtrip_content)
 
         assert "```python" in roundtrip_sections["Python"]
