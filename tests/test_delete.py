@@ -1,5 +1,5 @@
-"""Test delete command functionality."""
-
+import shutil
+import re
 import tempfile
 from pathlib import Path
 
@@ -9,14 +9,21 @@ from llm_ide_rules import app
 from llm_ide_rules.commands.delete import find_files_to_delete
 
 
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text."""
+    ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+    return ansi_escape.sub("", text)
+
+
 def test_delete_help():
     """Test that delete command shows help."""
     runner = CliRunner()
     result = runner.invoke(app, ["delete", "--help"])
     assert result.exit_code == 0
-    assert "Remove downloaded LLM instruction files" in result.stdout
-    assert "--yes" in result.stdout
-    assert "--target" in result.stdout
+    stdout = strip_ansi(result.stdout)
+    assert "Remove downloaded LLM instruction files" in stdout
+    assert "--yes" in stdout
+    assert "--target" in stdout
 
 
 def test_find_files_to_delete_cursor():
