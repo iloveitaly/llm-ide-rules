@@ -1,7 +1,3 @@
----
-description:
-alwaysApply: false
----
 ## Stripe Backend
 
 - `cast(object, ...)` should not be used. Can you instead cast expandable fields to PaymentIntent, or whatever their expandable type is?

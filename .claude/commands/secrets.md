@@ -1,8 +1,3 @@
----
-description:
-globs: env/*.sh,.envrc
-alwaysApply: false
----
 ## Secrets
 
 Here's how environment variables are managed in this application:
