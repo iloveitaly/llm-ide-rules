@@ -10,6 +10,7 @@ from llm_ide_rules.agents.base import (
     strip_toml_metadata,
     trim_content,
     extract_description_and_filter_content,
+    replace_header_with_proper_casing,
 )
 from llm_ide_rules.mcp import McpServer
 
@@ -159,3 +160,18 @@ class GeminiAgent(BaseAgent):
 
         existing[self.mcp_root_key] = servers
         path.write_text(json.dumps(existing, indent=2))
+
+    def generate_root_doc(
+        self,
+        general_lines: list[str],
+        rules_sections: dict[str, list[str]],
+        command_sections: dict[str, list[str]],
+        output_dir: Path,
+        section_globs: dict[str, str | None],
+    ) -> None:
+        """Generate GEMINI.md from rules."""
+        content = self.build_root_doc_content(
+            general_lines, rules_sections, section_globs
+        )
+        if content.strip():
+            (output_dir / "GEMINI.md").write_text(content)

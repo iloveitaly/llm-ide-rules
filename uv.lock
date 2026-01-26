@@ -173,6 +173,7 @@ version = "0.5.0"
 source = { editable = "." }
 dependencies = [
     { name = "json5" },
+    { name = "markdown-it-py" },
     { name = "pydantic" },
     { name = "requests" },
     { name = "structlog-config" },
@@ -191,6 +192,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "json5", specifier = ">=0.9.0" },
+    { name = "markdown-it-py", specifier = ">=4.0.0" },
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "requests", specifier = ">=2.25.0" },
     { name = "structlog-config", specifier = ">=0.6.0" },

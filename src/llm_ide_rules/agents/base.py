@@ -57,6 +57,54 @@ class BaseAgent(ABC):
         """Write a single command file."""
         ...
 
+    def generate_root_doc(
+        self,
+        general_lines: list[str],
+        rules_sections: dict[str, list[str]],
+        command_sections: dict[str, list[str]],
+        output_dir: Path,
+        section_globs: dict[str, str | None],
+    ) -> None:
+        """Generate a root documentation file (e.g. CLAUDE.md) if supported."""
+        pass
+
+    def build_root_doc_content(
+        self,
+        general_lines: list[str],
+        rules_sections: dict[str, list[str]],
+        section_globs: dict[str, str | None],
+    ) -> str:
+        """Build the content string for a root documentation file by aggregating rules."""
+        content = []
+
+        # Add general instructions
+        if general_lines:
+            trimmed = trim_content(general_lines)
+            if trimmed:
+                content.extend(trimmed)
+                content.append("\n\n")
+
+        # Add mapped sections in order
+        for section_name in section_globs:
+            if section_name in rules_sections:
+                lines = rules_sections[section_name]
+                # Fix casing
+                lines = replace_header_with_proper_casing(list(lines), section_name)
+                trimmed = trim_content(lines)
+                if trimmed:
+                    content.extend(trimmed)
+                    content.append("\n\n")
+
+        # Add unmapped sections
+        for section_name, lines in rules_sections.items():
+            if section_name not in section_globs:
+                trimmed = trim_content(lines)
+                if trimmed:
+                    content.extend(trimmed)
+                    content.append("\n\n")
+
+        return "".join(content).strip() + "\n" if content else ""
+
     def get_rules_path(self, base_dir: Path) -> Path:
         """Get the full path to the rules directory."""
         if not self.rules_dir:

@@ -13,58 +13,7 @@ from llm_ide_rules.agents.base import (
 )
 from llm_ide_rules.log import log
 from llm_ide_rules.constants import load_section_globs, header_to_filename, VALID_AGENTS
-
-
-def extract_general(lines: list[str]) -> list[str]:
-    """Extract lines before the first section header '## '."""
-    general = []
-    for line in lines:
-        if line.startswith("## "):
-            break
-        general.append(line)
-
-    return general
-
-
-def extract_section(lines: list[str], header: str) -> list[str]:
-    """Extract lines under a given section header until the next header or EOF.
-
-    Includes the header itself in the output.
-    """
-    content = []
-    in_section = False
-    for line in lines:
-        if in_section:
-            if line.startswith("## "):
-                break
-            content.append(line)
-        elif line.strip().lower() == header.lower():
-            in_section = True
-            content.append(line)
-
-    return content
-
-
-def extract_all_sections(lines: list[str]) -> dict[str, list[str]]:
-    """Extract all sections from lines, returning dict of section_name -> content_lines."""
-    sections: dict[str, list[str]] = {}
-    current_section: str | None = None
-    current_content: list[str] = []
-
-    for line in lines:
-        if line.startswith("## "):
-            if current_section:
-                sections[current_section] = current_content
-
-            current_section = line.strip()[3:]
-            current_content = [line]
-        elif current_section:
-            current_content.append(line)
-
-    if current_section:
-        sections[current_section] = current_content
-
-    return sections
+from llm_ide_rules.markdown_parser import parse_sections
 
 
 def process_command_section(
@@ -177,7 +126,7 @@ def explode_main(
     input_path = cwd / input_file
 
     try:
-        lines = input_path.read_text().splitlines(keepends=True)
+        input_text = input_path.read_text()
     except FileNotFoundError:
         log.error("input file not found", input_file=str(input_path))
         error_msg = f"Input file not found: {input_path}"
@@ -185,13 +134,15 @@ def explode_main(
         raise typer.Exit(1)
 
     commands_path = input_path.parent / "commands.md"
-    commands_lines = []
+    commands_text = ""
     if commands_path.exists():
-        commands_lines = commands_path.read_text().splitlines(keepends=True)
+        commands_text = commands_path.read_text()
         log.info("found commands file", commands_file=str(commands_path))
 
+    # Parse instructions
+    general, instruction_sections = parse_sections(input_text)
+
     # Process general instructions for agents that support rules
-    general = extract_general(lines)
     if any(line.strip() for line in general):
         general_header = """
 ---
@@ -208,14 +159,23 @@ alwaysApply: true
 
     # Process mapped sections for agents that support rules
     found_sections = set()
+    rules_sections: dict[str, list[str]] = {}
+
     for section_name, glob_pattern in section_globs.items():
-        section_content = extract_section(lines, f"## {section_name}")
-        if any(line.strip() for line in section_content):
+        # Look for section (case-insensitive search in parsed sections)
+        matched_section_content = None
+        for parsed_header, content in instruction_sections.items():
+            if parsed_header.lower() == section_name.lower():
+                matched_section_content = content
+                break
+        
+        if matched_section_content and any(line.strip() for line in matched_section_content):
             found_sections.add(section_name)
+            rules_sections[section_name] = matched_section_content
             filename = header_to_filename(section_name)
 
             section_content = replace_header_with_proper_casing(
-                section_content, section_name
+                matched_section_content, section_name
             )
 
             if "cursor" in agent_instances:
@@ -238,59 +198,60 @@ alwaysApply: true
             log.warning("section not found in file", section=section_name)
 
     # Process unmapped sections for agents that support rules
-    if "cursor" in agent_instances or "github" in agent_instances:
-        for line in lines:
-            if line.startswith("## "):
-                section_name = line.strip()[3:]
-                if not any(
-                    section_name.lower() == mapped_section.lower()
-                    for mapped_section in section_globs
-                ):
-                    log.warning(
-                        "unmapped section in instructions.md, treating as always-apply rule",
-                        section=section_name,
-                    )
-                    section_content = extract_section(lines, f"## {section_name}")
+    for parsed_header, content in instruction_sections.items():
+        # Check if this header was already processed as a mapped section
+        is_mapped = False
+        for section_name in section_globs:
+            if parsed_header.lower() == section_name.lower():
+                is_mapped = True
+                break
+        
+        if not is_mapped:
+            log.warning(
+                "unmapped section in instructions.md, treating as always-apply rule",
+                section=parsed_header,
+            )
+            if any(line.strip() for line in content):
+                rules_sections[parsed_header] = content
 
-                    if "cursor" in agent_instances and "github" in agent_instances:
-                        process_unmapped_as_always_apply(
-                            section_name,
-                            section_content,
-                            agent_instances["cursor"],
-                            agent_instances["github"],
-                            agent_dirs["cursor"]["rules"],
-                            agent_dirs["github"]["rules"],
-                        )
-                    elif "cursor" in agent_instances:
-                        # Only cursor - write just cursor rules
-                        if any(line.strip() for line in section_content):
-                            filename = header_to_filename(section_name)
-                            section_content = replace_header_with_proper_casing(
-                                section_content, section_name
-                            )
-                            agent_instances["cursor"].write_rule(
-                                section_content,
-                                filename,
-                                agent_dirs["cursor"]["rules"],
-                                glob_pattern=None,
-                            )
-                    elif "github" in agent_instances:
-                        # Only github - write just github rules
-                        if any(line.strip() for line in section_content):
-                            filename = header_to_filename(section_name)
-                            section_content = replace_header_with_proper_casing(
-                                section_content, section_name
-                            )
-                            agent_instances["github"].write_rule(
-                                section_content,
-                                filename,
-                                agent_dirs["github"]["rules"],
-                                glob_pattern=None,
-                            )
+                if "cursor" in agent_instances and "github" in agent_instances:
+                    process_unmapped_as_always_apply(
+                        parsed_header,
+                        content,
+                        agent_instances["cursor"],
+                        agent_instances["github"],
+                        agent_dirs["cursor"]["rules"],
+                        agent_dirs["github"]["rules"],
+                    )
+                elif "cursor" in agent_instances:
+                    # Only cursor - write just cursor rules
+                    filename = header_to_filename(parsed_header)
+                    section_content = replace_header_with_proper_casing(
+                        content, parsed_header
+                    )
+                    agent_instances["cursor"].write_rule(
+                        section_content,
+                        filename,
+                        agent_dirs["cursor"]["rules"],
+                        glob_pattern=None,
+                    )
+                elif "github" in agent_instances:
+                    # Only github - write just github rules
+                    filename = header_to_filename(parsed_header)
+                    section_content = replace_header_with_proper_casing(
+                        content, parsed_header
+                    )
+                    agent_instances["github"].write_rule(
+                        section_content,
+                        filename,
+                        agent_dirs["github"]["rules"],
+                        glob_pattern=None,
+                    )
 
     # Process commands for all agents
-    if commands_lines:
-        command_sections = extract_all_sections(commands_lines)
+    command_sections = {}
+    if commands_text:
+        _, command_sections = parse_sections(commands_text)
         agents = [agent_instances[name] for name in agents_to_process]
         command_dirs = {
             name: agent_dirs[name]["commands"] for name in agents_to_process
@@ -298,6 +259,16 @@ alwaysApply: true
 
         for section_name, section_content in command_sections.items():
             process_command_section(section_name, section_content, agents, command_dirs)
+
+    # Generate root documentation (CLAUDE.md, GEMINI.md, etc.)
+    for agent_name, agent_inst in agent_instances.items():
+        agent_inst.generate_root_doc(
+            general,
+            rules_sections,
+            command_sections,
+            cwd,
+            section_globs,
+        )
 
     # Build log message and user output based on processed agents
     log_data = {"agent": agent}

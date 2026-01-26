@@ -182,3 +182,43 @@ def test_explode_nonexistent_file():
         result = runner.invoke(app, ["explode", "nonexistent.md"])
 
         assert result.exit_code == 1
+
+def test_explode_generates_root_docs():
+    """Test that explode generates CLAUDE.md and GEMINI.md."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        instructions_content = """# Sample Instructions
+
+## Python
+
+Here are Python rules.
+
+## Unmapped
+
+Here are unmapped rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        result = runner.invoke(app, ["explode", "instructions.md"])
+
+        assert result.exit_code == 0
+        
+        # Check CLAUDE.md
+        claude_md = Path("CLAUDE.md")
+        assert claude_md.exists()
+        claude_content = claude_md.read_text()
+        assert "## Python" in claude_content
+        assert "Here are Python rules." in claude_content
+        assert "## Unmapped" in claude_content
+        assert "Here are unmapped rules." in claude_content
+        
+        # Check GEMINI.md
+        gemini_md = Path("GEMINI.md")
+        assert gemini_md.exists()
+        gemini_content = gemini_md.read_text()
+        assert "## Python" in gemini_content
+        assert "Here are Python rules." in gemini_content
+        assert "## Unmapped" in gemini_content

@@ -7,6 +7,7 @@ from llm_ide_rules.agents.base import (
     get_ordered_files,
     resolve_header_from_stem,
     trim_content,
+    replace_header_with_proper_casing,
 )
 
 
@@ -90,3 +91,18 @@ class ClaudeAgent(BaseAgent):
 
         trimmed = trim_content(content_lines)
         filepath.write_text("".join(trimmed))
+
+    def generate_root_doc(
+        self,
+        general_lines: list[str],
+        rules_sections: dict[str, list[str]],
+        command_sections: dict[str, list[str]],
+        output_dir: Path,
+        section_globs: dict[str, str | None],
+    ) -> None:
+        """Generate CLAUDE.md from rules."""
+        content = self.build_root_doc_content(
+            general_lines, rules_sections, section_globs
+        )
+        if content.strip():
+            (output_dir / "CLAUDE.md").write_text(content)
