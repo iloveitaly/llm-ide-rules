@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - master
+  pull_request: {}
 
 env:
   # avoid build failures due to flaky pypi
@@ -41,9 +42,23 @@ jobs:
           # bump-minor-pre-major: true
           token: ${{ secrets.GH_PERSONAL_TOKEN }}
 
-  # NOTE you could easily pull the matrix
-  build:
+  lint:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jdx/mise-action@v3
+        env:
+          MISE_ENV: ci
+      - uses: iloveitaly/github-action-direnv-load-and-mask@master
+      - run: uv sync
+      - run: just lint
+
+  build:
+    needs: lint
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v6
       - uses: jdx/mise-action@v3

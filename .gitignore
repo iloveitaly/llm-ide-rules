@@ -129,4 +129,8 @@ dmypy.json
 .pyre/
 
 # ai stuff
+.cursor/settings.local.json
 .claude/settings.local.json
+
+# i like having temporary files specified locally vs globally
+tmp/
