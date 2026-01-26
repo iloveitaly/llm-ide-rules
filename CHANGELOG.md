@@ -1,5 +1,50 @@
 # Changelog
 
+## [0.6.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.5.0...v0.6.0) (2026-01-26)
+
+
+### Features
+
+* add commands.md ([aabd520](https://github.com/iloveitaly/llm-ide-rules/commit/aabd520abef1aa2373812932f8189b38125172e6))
+* **agents:** add Claude, Gemini, and GitHub agent implementations ([a861552](https://github.com/iloveitaly/llm-ide-rules/commit/a861552550a2e153b0cbfc1a0d6c5abe5d08e2c6))
+* **cli:** add global verbose option and improve user feedback ([ae6d5de](https://github.com/iloveitaly/llm-ide-rules/commit/ae6d5de49fa3de0daeffe4ff7764dd770e2d37b6))
+* **explode:** support single agent with --agent option ([3351ac3](https://github.com/iloveitaly/llm-ide-rules/commit/3351ac3e8fa6075049a1386c86063e9ce6e166e8))
+* set default log level and configure verbose in CLI init ([c8a012a](https://github.com/iloveitaly/llm-ide-rules/commit/c8a012a0f5fa7ea3473fdb62216ccb65dc3adb2a))
+* support opencode command format and tomli-w for toml output ([e79a144](https://github.com/iloveitaly/llm-ide-rules/commit/e79a144a1d408b2fffd04d57a6f49cf606a7fb01))
+
+
+### Bug Fixes
+
+* correct structlog-config version in dependencies list ([23780ce](https://github.com/iloveitaly/llm-ide-rules/commit/23780ce963205fbc3d8461331eb8b3ae808c8671))
+* handle manual-only sections in rule file generation ([8ad0143](https://github.com/iloveitaly/llm-ide-rules/commit/8ad014382c6493ec454a408dd05976ff4bdaca19))
+
+
+### Documentation
+
+* add commands.md with detailed dev and project instructions ([7eff67d](https://github.com/iloveitaly/llm-ide-rules/commit/7eff67db206fd8c2c33dce77c0c874979b4b5cdd))
+* add IDE format comparison table to README.md ([f6d5afa](https://github.com/iloveitaly/llm-ide-rules/commit/f6d5afa022c22301a6216d1264b60d0b65d67c46))
+* clarify dev instructions and pnpm usage in docs ([e4b8bc9](https://github.com/iloveitaly/llm-ide-rules/commit/e4b8bc94aa308ea540e1c1392217a9e6864acaa7))
+* clarify pnpm usage and reorganize dev instructions ([417dc2a](https://github.com/iloveitaly/llm-ide-rules/commit/417dc2a6580fa00271bbb5e002b4a8fee02374b3))
+* clarify python package management and update applyTo glob pattern ([5fe5fb1](https://github.com/iloveitaly/llm-ide-rules/commit/5fe5fb17b21d86c84baafa27219a8b5165aa8c0c))
+* document OpenCode format and update CLI usage examples ([353c103](https://github.com/iloveitaly/llm-ide-rules/commit/353c1033448c9352f58c33a71a9e32eb90c721ec))
+* expand python app module layout and folder purposes ([06671c1](https://github.com/iloveitaly/llm-ide-rules/commit/06671c122ffe6f44957d7a550660f3117cda2fd7))
+* expand python app structure guidelines and module roles ([9784d9f](https://github.com/iloveitaly/llm-ide-rules/commit/9784d9f4d6da05f414f531ae5d79955fb4371a0a))
+* fix prompt syntax and update section titles for consistency ([7ed21e6](https://github.com/iloveitaly/llm-ide-rules/commit/7ed21e6038919bbd8378c38c5c97690135ee10e0))
+* **opencode:** add new command markdowns for workflow rules ([f30578d](https://github.com/iloveitaly/llm-ide-rules/commit/f30578dea8de50f0490b1580685ef28a44421391))
+* recommend section comments in integration browser tests ([40e883b](https://github.com/iloveitaly/llm-ide-rules/commit/40e883b1b8290f57c6b0d0aafccefa97eb9e06b7))
+* remove duplicate git clone instructions from README ([b639e5e](https://github.com/iloveitaly/llm-ide-rules/commit/b639e5ea1fa4d7729b39d247cb15ad415d18477a))
+* remove environment variable and secrets management section ([ff27f2a](https://github.com/iloveitaly/llm-ide-rules/commit/ff27f2a126363709af5a7f538c2ec5da82591a41))
+* remove outdated testing and implementation instructions ([2846cb2](https://github.com/iloveitaly/llm-ide-rules/commit/2846cb2a6f0673e057fc29be7ef51042a1ba9cad))
+* remove python script and typescript docstring guidelines ([abc17e5](https://github.com/iloveitaly/llm-ide-rules/commit/abc17e52d3e9678ca9ab31a5a7a8d438985d54f6))
+* reorder sections and move TypeScript docstring guidance ([8dbbfe3](https://github.com/iloveitaly/llm-ide-rules/commit/8dbbfe341dc74eb3733a895cce8e4875bd099e20))
+* reorganize secrets and backend notes, clarify app structure ([c9dc712](https://github.com/iloveitaly/llm-ide-rules/commit/c9dc7120562378544651b31fc540a5b9bce7f388))
+* **rules:** update package management and apply headers in mdc files ([0f8e8ff](https://github.com/iloveitaly/llm-ide-rules/commit/0f8e8ffb004c6bf60d0721978ff76443f50ee93c))
+* simplify readme, improve install and usage details ([d4c9a5d](https://github.com/iloveitaly/llm-ide-rules/commit/d4c9a5d3eea0216b625a5eeb89bae7b1c722faca))
+* update dev instructions and remove redundant package commands ([3f9614c](https://github.com/iloveitaly/llm-ide-rules/commit/3f9614c3dbaf2f85d92b4b33799e844d0f89af76))
+* update dev instructions to clarify rule usage and file name ([4940408](https://github.com/iloveitaly/llm-ide-rules/commit/494040875881b3c911f818a0ecb62c7a5f70f224))
+* update pnpm usage instructions in instructions.md ([5ebc27a](https://github.com/iloveitaly/llm-ide-rules/commit/5ebc27ab176fbe2e1ed4e304907f52432d36699b))
+* update python section globs and package install guidance ([afcd4cb](https://github.com/iloveitaly/llm-ide-rules/commit/afcd4cbe2d1e5aab59ad49a8e520cdc1c26d0e1b))
+
 ## [0.5.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.4.0...v0.5.0) (2025-11-27)
 
 
