@@ -23,7 +23,7 @@ When writing Python:
 
 ### Package Management
 
-- Use `uv add` to add python packages. No need for `pip compile`, etc.
+- Use `uv add` to add python packages. No need for `pip compile`, `pip install`, etc.
 
 ### Typing
 
