@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-VALID_AGENTS = ["cursor", "github", "claude", "gemini", "all"]
+VALID_AGENTS = ["cursor", "github", "claude", "gemini", "opencode", "all"]
 
 def load_section_globs(custom_config_path: str | None = None) -> dict[str, str | None]:
     """Load section globs from JSON config file.

@@ -8,7 +8,6 @@ import typer
 from llm_ide_rules.agents import get_agent
 from llm_ide_rules.agents.base import (
     BaseAgent,
-    trim_content,
     replace_header_with_proper_casing,
     write_rule_file,
 )
@@ -139,7 +138,7 @@ def explode_main(
     # Initialize only the agents we need
     agents_to_process = []
     if agent == "all":
-        agents_to_process = ["cursor", "github", "claude", "gemini"]
+        agents_to_process = ["cursor", "github", "claude", "gemini", "opencode"]
     else:
         agents_to_process = [agent]
 
@@ -158,7 +157,7 @@ def explode_main(
             commands_dir.mkdir(parents=True, exist_ok=True)
             agent_dirs[agent_name] = {"rules": rules_dir, "commands": commands_dir}
         else:
-            # claude and gemini only have commands
+            # claude, gemini, and opencode only have commands
             commands_dir = cwd / agent_instances[agent_name].commands_dir
             commands_dir.mkdir(parents=True, exist_ok=True)
             agent_dirs[agent_name] = {"commands": commands_dir}

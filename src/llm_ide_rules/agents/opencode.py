@@ -1,4 +1,4 @@
-"""Claude Code agent implementation."""
+"""OpenCode agent implementation."""
 
 from pathlib import Path
 
@@ -10,24 +10,25 @@ from llm_ide_rules.agents.base import (
 )
 
 
-class ClaudeAgent(BaseAgent):
-    """Agent for Claude Code."""
+class OpenCodeAgent(BaseAgent):
+    """Agent for OpenCode."""
 
-    name = "claude"
+    name = "opencode"
     rules_dir = None
-    commands_dir = ".claude/commands"
+    commands_dir = ".opencode/commands"
     rule_extension = None
     command_extension = ".md"
 
-    mcp_global_path = ".claude.json"
-    mcp_project_path = ".mcp.json"
+    mcp_global_path = ".config/opencode/opencode.json"
+    mcp_project_path = "opencode.json"
+    mcp_root_key = "mcp"
 
     def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
-        """Claude Code doesn't support rules, only commands."""
+        """OpenCode doesn't support rules."""
         return False
 
     def bundle_commands(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
-        """Bundle Claude Code command files (.md) into a single output file."""
+        """Bundle OpenCode command files (.md) into a single output file."""
         commands_path = output_file.parent / self.commands_dir
         if not commands_path.exists():
             return False
@@ -62,7 +63,7 @@ class ClaudeAgent(BaseAgent):
         rules_dir: Path,
         glob_pattern: str | None = None,
     ) -> None:
-        """Claude Code doesn't support rules."""
+        """OpenCode doesn't support rules."""
         pass
 
     def write_command(
@@ -72,10 +73,44 @@ class ClaudeAgent(BaseAgent):
         commands_dir: Path,
         section_name: str | None = None,
     ) -> None:
-        """Write a Claude Code command file (.md) - plain markdown, no frontmatter."""
+        """Write an OpenCode command file (.md) - plain markdown, no frontmatter."""
         filepath = commands_dir / f"{filename}{self.command_extension}"
 
         trimmed = trim_content(content_lines)
         filepath.write_text("".join(trimmed))
 
+    def transform_mcp_server(self, server: "McpServer") -> dict:
+        """Transform unified server to OpenCode format (merged command array, environment key)."""
+        from llm_ide_rules.mcp import McpServer
 
+        if server.url:
+            result = {"type": "sse", "url": server.url, "enabled": True}
+            if server.env:
+                result["environment"] = server.env
+            return result
+
+        result = {
+            "type": "local",
+            "command": [server.command] + (server.args or []),
+            "enabled": True,
+        }
+        if server.env:
+            result["environment"] = server.env
+        return result
+
+    def reverse_transform_mcp_server(self, name: str, config: dict) -> "McpServer":
+        """Transform OpenCode config back to unified format."""
+        from llm_ide_rules.mcp import McpServer
+
+        if config.get("type") == "sse":
+            return McpServer(
+                url=config["url"],
+                env=config.get("environment"),
+            )
+
+        command_array = config["command"]
+        return McpServer(
+            command=command_array[0] if command_array else None,
+            args=command_array[1:] if len(command_array) > 1 else [],
+            env=config.get("environment"),
+        )

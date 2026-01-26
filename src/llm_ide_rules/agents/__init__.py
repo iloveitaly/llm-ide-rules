@@ -5,12 +5,14 @@ from llm_ide_rules.agents.cursor import CursorAgent
 from llm_ide_rules.agents.github import GitHubAgent
 from llm_ide_rules.agents.claude import ClaudeAgent
 from llm_ide_rules.agents.gemini import GeminiAgent
+from llm_ide_rules.agents.opencode import OpenCodeAgent
 
 AGENTS: dict[str, type[BaseAgent]] = {
     "cursor": CursorAgent,
     "github": GitHubAgent,
     "claude": ClaudeAgent,
     "gemini": GeminiAgent,
+    "opencode": OpenCodeAgent,
 }
 
 

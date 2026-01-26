@@ -1,5 +1,6 @@
 """Base agent class and shared utilities for LLM IDE rules."""
 
+import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -14,6 +15,10 @@ class BaseAgent(ABC):
     commands_dir: str | None = None
     rule_extension: str | None = None
     command_extension: str | None = None
+
+    mcp_global_path: str | None = None
+    mcp_project_path: str | None = None
+    mcp_root_key: str = "mcpServers"
 
     @abstractmethod
     def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
@@ -58,6 +63,51 @@ class BaseAgent(ABC):
         if not self.commands_dir:
             raise NotImplementedError(f"{self.name} does not support commands")
         return base_dir / self.commands_dir
+
+    def transform_mcp_server(self, server: "McpServer") -> dict:
+        """Transform unified server to platform-specific format."""
+        from llm_ide_rules.mcp import McpServer
+
+        if server.url:
+            result = {"url": server.url}
+            if server.env:
+                result["env"] = server.env
+            return result
+
+        result = {"command": server.command, "args": server.args or []}
+        if server.env:
+            result["env"] = server.env
+        return result
+
+    def reverse_transform_mcp_server(self, name: str, config: dict) -> "McpServer":
+        """Transform platform config back to unified format."""
+        from llm_ide_rules.mcp import McpServer
+
+        if "url" in config:
+            return McpServer(
+                url=config["url"],
+                env=config.get("env"),
+            )
+
+        return McpServer(
+            command=config["command"],
+            args=config.get("args", []),
+            env=config.get("env"),
+        )
+
+    def write_mcp_config(self, servers: dict, path: Path) -> None:
+        """Write MCP config to path."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        config = {self.mcp_root_key: servers}
+        path.write_text(json.dumps(config, indent=2))
+
+    def read_mcp_config(self, path: Path) -> dict | None:
+        """Read MCP config from path."""
+        if not path.exists():
+            return None
+
+        config = json.loads(path.read_text())
+        return config.get(self.mcp_root_key)
 
 
 def strip_yaml_frontmatter(text: str) -> str:

@@ -1,5 +1,6 @@
 """Gemini CLI agent implementation."""
 
+import json
 from pathlib import Path
 
 from llm_ide_rules.agents.base import (
@@ -20,6 +21,9 @@ class GeminiAgent(BaseAgent):
     commands_dir = ".gemini/commands"
     rule_extension = None
     command_extension = ".toml"
+
+    mcp_global_path = ".gemini/settings.json"
+    mcp_project_path = ".gemini/settings.json"
 
     def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
         """Gemini CLI doesn't support rules, only commands."""
@@ -93,5 +97,47 @@ class GeminiAgent(BaseAgent):
         desc = description if description else (section_name or filename)
         output = f'name = "{filename}"\ndescription = "{desc}"\n\n[command]\nshell = """\n{content_str}\n"""\n'
         filepath.write_text(output)
+
+    def transform_mcp_server(self, server: "McpServer") -> dict:
+        """Transform unified server to Gemini format (uses httpUrl instead of url)."""
+        from llm_ide_rules.mcp import McpServer
+
+        if server.url:
+            result = {"httpUrl": server.url}
+            if server.env:
+                result["env"] = server.env
+            return result
+
+        result = {"command": server.command, "args": server.args or []}
+        if server.env:
+            result["env"] = server.env
+        return result
+
+    def reverse_transform_mcp_server(self, name: str, config: dict) -> "McpServer":
+        """Transform Gemini config back to unified format."""
+        from llm_ide_rules.mcp import McpServer
+
+        if "httpUrl" in config:
+            return McpServer(
+                url=config["httpUrl"],
+                env=config.get("env"),
+            )
+
+        return McpServer(
+            command=config["command"],
+            args=config.get("args", []),
+            env=config.get("env"),
+        )
+
+    def write_mcp_config(self, servers: dict, path: Path) -> None:
+        """Write MCP config to path, merging with existing settings."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        existing = {}
+        if path.exists():
+            existing = json.loads(path.read_text())
+
+        existing[self.mcp_root_key] = servers
+        path.write_text(json.dumps(existing, indent=2))
 
 
