@@ -1,7 +1,5 @@
-name = "typescript-docstring"
 description = "Typescript Docstring"
 
-[command]
-shell = """
+prompt = """
 Add a file-level docstring with a simple description of what this file does and where this is used.
 """

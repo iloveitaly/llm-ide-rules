@@ -1,8 +1,6 @@
-name = "stripe-backend"
 description = "Stripe Backend"
 
-[command]
-shell = """
+prompt = """
 - `cast(object, ...)` should not be used. Can you instead cast expandable fields to PaymentIntent, or whatever their expandable type is?
 - `from stripe import Charge` can we use top-level imports instead of importing from private packages?
 - Do not `customer = getattr(session, "customer", None)` instead just access `session.customer` and assert that it is not null. Use the pattern for all stripe objects.

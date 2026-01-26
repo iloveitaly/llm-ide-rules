@@ -1,8 +1,6 @@
-name = "fastapi_stripe"
 description = "Fastapi_Stripe"
 
-[command]
-shell = """
+prompt = """
 A Stripe Checkout implementation takes four steps:
 
 1. Create a checkout session. Happens when the user visits the checkout page.

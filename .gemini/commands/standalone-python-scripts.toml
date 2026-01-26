@@ -1,8 +1,6 @@
-name = "standalone-python-scripts"
 description = "Standalone Python Scripts"
 
-[command]
-shell = """
+prompt = """
 # Writing Standalone Python Scripts
 
 Use this header:
