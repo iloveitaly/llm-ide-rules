@@ -1,6 +1,6 @@
 {
   "section_globs": {
-    "Python": "**/*.py",
+    "Python": "**/*.py,pyproject.toml",
     "Python App": "**/*.py",
     "Pytest Integration Tests": "tests/integration/**/*.py",
     "Pytest Tests": "tests/**/*.py",

@@ -65,6 +65,10 @@ When writing Python:
 * Place all comments on dedicated lines immediately above the code statements they describe. Avoid inline comments appended to the end of code lines.
 * Do not `try/catch` raw `Exceptions` unless explicitly told to. Prefer to let exceptions raise and cause an explicit error.
 
+### Package Management
+
+- Use `uv add` to add python packages. No need for `pip compile`, `pip install`, etc.
+
 ### Typing
 
 * Assume the latest pyright version
