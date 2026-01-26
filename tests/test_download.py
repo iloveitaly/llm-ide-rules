@@ -155,11 +155,11 @@ def test_download_instruction_types_configuration():
     from llm_ide_rules.commands.download import DEFAULT_TYPES, INSTRUCTION_TYPES
 
     # Check that all expected types are present
-    expected_types = ["cursor", "github", "gemini", "claude", "agent", "agents"]
+    expected_types = ["cursor", "github", "gemini", "claude", "opencode", "agent", "agents"]
     assert all(t in INSTRUCTION_TYPES for t in expected_types)
 
     # Check that DEFAULT_TYPES uses the keys from INSTRUCTION_TYPES
-    assert DEFAULT_TYPES == list(INSTRUCTION_TYPES.keys())
+    assert set(DEFAULT_TYPES) == set(INSTRUCTION_TYPES.keys())
 
     # Check that each instruction type has proper configuration
     for inst_type, config in INSTRUCTION_TYPES.items():
@@ -172,13 +172,48 @@ def test_download_instruction_types_configuration():
             assert isinstance(config["recursive_files"], list)
 
 
-def test_download_exclude_patterns():
-    """Test that github instruction type has exclude patterns configured."""
+def test_download_include_patterns_configuration():
+    """Test that instruction types have proper include_patterns configured."""
     from llm_ide_rules.commands.download import INSTRUCTION_TYPES
 
-    github_config = INSTRUCTION_TYPES["github"]
-    assert "exclude_patterns" in github_config
-    assert "workflows/*" in github_config["exclude_patterns"]
+    assert "*.mdc" in INSTRUCTION_TYPES["cursor"]["include_patterns"]
+    assert "*.instructions.md" in INSTRUCTION_TYPES["github"]["include_patterns"]
+    assert "*.toml" in INSTRUCTION_TYPES["gemini"]["include_patterns"]
+    assert "*.md" in INSTRUCTION_TYPES["claude"]["include_patterns"]
+    assert "*.md" in INSTRUCTION_TYPES["opencode"]["include_patterns"]
+
+
+def test_copy_directory_contents_with_include_patterns():
+    """Test that copy_directory_contents correctly filters files using include_patterns."""
+    from llm_ide_rules.commands.download import copy_directory_contents
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        source_dir = Path("source")
+        source_dir.mkdir()
+        (source_dir / "rule1.mdc").write_text("content")
+        (source_dir / "rule2.md").write_text("content")
+        (source_dir / "other.txt").write_text("content")
+
+        target_dir = Path("target")
+        target_dir.mkdir()
+
+        # Test filtering with *.mdc
+        copy_directory_contents(source_dir, target_dir, [], ["*.mdc"])
+
+        assert (target_dir / "rule1.mdc").exists()
+        assert not (target_dir / "rule2.md").exists()
+        assert not (target_dir / "other.txt").exists()
+
+        # Test filtering with multiple patterns
+        target_dir_2 = Path("target2")
+        target_dir_2.mkdir()
+        copy_directory_contents(source_dir, target_dir_2, [], ["*.mdc", "*.md"])
+
+        assert (target_dir_2 / "rule1.mdc").exists()
+        assert (target_dir_2 / "rule2.md").exists()
+        assert not (target_dir_2 / "other.txt").exists()
 
 
 def test_normalize_repo():
