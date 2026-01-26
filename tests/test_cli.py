@@ -1,8 +1,5 @@
 """Test CLI integration and general functionality."""
 
-import tempfile
-import os
-from pathlib import Path
 from typer.testing import CliRunner
 
 from llm_ide_rules import app

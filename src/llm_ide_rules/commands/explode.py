@@ -8,7 +8,6 @@ import typer
 from llm_ide_rules.agents import get_agent
 from llm_ide_rules.agents.base import (
     BaseAgent,
-    trim_content,
     replace_header_with_proper_casing,
     write_rule_file,
 )

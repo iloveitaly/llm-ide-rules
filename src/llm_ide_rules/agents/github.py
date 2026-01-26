@@ -8,7 +8,6 @@ from llm_ide_rules.agents.base import (
     resolve_header_from_stem,
     strip_yaml_frontmatter,
     strip_header,
-    trim_content,
     write_rule_file,
     extract_description_and_filter_content,
 )
