@@ -7,13 +7,6 @@ setup:
 build:
     uv build
 
-
-
-test:
-    pytest
-
-
-
 # Run tests
 test:
     uv run pytest -v
