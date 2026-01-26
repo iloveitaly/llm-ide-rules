@@ -39,14 +39,31 @@ def normalize_repo(repo: str) -> str:
 
 # Define what files/directories each instruction type includes
 INSTRUCTION_TYPES = {
-    "cursor": {"directories": [".cursor"], "files": []},
-    "github": {
-        "directories": [".github"],
+    "cursor": {
+        "directories": [".cursor/rules", ".cursor/commands"],
         "files": [],
-        "exclude_patterns": ["workflows/*"],
+        "include_patterns": ["*.mdc", "*.md"],
     },
-    "gemini": {"directories": [".gemini/commands"], "files": ["GEMINI.md"]},
-    "claude": {"directories": [".claude/commands"], "files": ["CLAUDE.md"]},
+    "github": {
+        "directories": [".github/instructions", ".github/prompts"],
+        "files": [".github/copilot-instructions.md"],
+        "include_patterns": ["*.instructions.md", "*.prompt.md"],
+    },
+    "gemini": {
+        "directories": [".gemini/commands"],
+        "files": [],
+        "include_patterns": ["*.toml"],
+    },
+    "claude": {
+        "directories": [".claude/commands"],
+        "files": [],
+        "include_patterns": ["*.md"],
+    },
+    "opencode": {
+        "directories": [".opencode/commands"],
+        "files": [],
+        "include_patterns": ["*.md"],
+    },
     "agent": {"directories": [], "files": ["AGENT.md"]},
     "agents": {"directories": [], "files": [], "recursive_files": ["AGENTS.md"]},
 }
@@ -131,7 +148,10 @@ def copy_instruction_files(
 
                 # Copy all files from source to target
                 copy_directory_contents(
-                    source_dir, target_subdir, config.get("exclude_patterns", [])
+                    source_dir,
+                    target_subdir,
+                    config.get("exclude_patterns", []),
+                    config.get("include_patterns", []),
                 )
                 copied_items.append(f"{dir_name}/")
 
@@ -208,7 +228,10 @@ def copy_recursive_files(
 
 
 def copy_directory_contents(
-    source_dir: Path, target_dir: Path, exclude_patterns: list[str]
+    source_dir: Path,
+    target_dir: Path,
+    exclude_patterns: list[str],
+    include_patterns: list[str] = [],
 ):
     """Recursively copy directory contents, excluding specified patterns."""
     for item in source_dir.rglob("*"):
@@ -233,6 +256,19 @@ def copy_directory_contents(
             if should_exclude:
                 log.debug("excluding file", file=relative_str, pattern=pattern)
                 continue
+
+            # Check if file matches any include pattern (if any provided)
+            if include_patterns:
+                matched_include = False
+                for include_pattern in include_patterns:
+                    # Match against filename only, or full relative path
+                    if item.match(include_pattern):
+                        matched_include = True
+                        break
+
+                if not matched_include:
+                    log.debug("skipping file (not matched in include_patterns)", file=relative_str)
+                    continue
 
             target_file = target_dir / relative_path
             target_file.parent.mkdir(parents=True, exist_ok=True)
