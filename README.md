@@ -24,6 +24,7 @@ Different AI coding assistants use different formats for instructions and comman
 | **GitHub Copilot** | prompts | `.github/prompts/*.prompt.md` | YAML frontmatter with `mode: 'agent'` |
 | **Gemini CLI** | instructions | `GEMINI.md` | Single markdown file at root |
 | **Gemini CLI** | commands | `.gemini/commands/*.toml` | TOML format, supports `{{args}}` and shell commands |
+| **OpenCode** | commands | `.opencode/commands/*.md` | Plain markdown, no frontmatter |
 
 ## Installation
 
@@ -43,7 +44,10 @@ uvx llm-ide-rules explode [input_file]
 
 # Bundle rule files back into a single instruction file
 uvx llm-ide-rules implode cursor [output_file]     # Bundle Cursor rules
-uvx llm-ide-rules implode github [output_file]    # Bundle GitHub/Copilot instructions
+uvx llm-ide-rules implode github [output_file]     # Bundle GitHub/Copilot instructions
+uvx llm-ide-rules implode claude [output_file]     # Bundle Claude Code commands
+uvx llm-ide-rules implode gemini [output_file]     # Bundle Gemini CLI commands
+uvx llm-ide-rules implode opencode [output_file]   # Bundle OpenCode commands
 
 # Download instruction files from repositories
 uvx llm-ide-rules download [instruction_types]    # Download everything by default
@@ -59,14 +63,20 @@ uvx llm-ide-rules delete --yes                    # Skip confirmation prompt
 ### Examples
 
 ```sh
-# Explode instructions.md into .cursor/rules/ and .github/instructions/
+# Explode instructions.md into all supported formats (cursor, github, claude, gemini, opencode)
 uvx llm-ide-rules explode instructions.md
+
+# Explode for a specific agent only
+uvx llm-ide-rules explode instructions.md --agent opencode
 
 # Bundle Cursor rules back into a single file
 uvx llm-ide-rules implode cursor bundled-instructions.md
 
 # Bundle GitHub instructions with verbose logging
 uvx llm-ide-rules implode github --verbose instructions.md
+
+# Bundle OpenCode commands into commands.md
+uvx llm-ide-rules implode opencode
 
 # Download everything from default repository
 uvx llm-ide-rules download
