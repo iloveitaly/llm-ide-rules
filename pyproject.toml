@@ -5,7 +5,7 @@ description = "CLI tool for managing LLM IDE prompts and rules"
 keywords = ["llm", "ide", "prompts", "cursor", "copilot"]
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["typer>=0.9.0", "structlog-config>=0.6.0", "requests>=2.25.0", "pydantic>=2.0.0", "json5>=0.9.0"]
+dependencies = ["typer>=0.9.0", "structlog-config>=0.6.0", "requests>=2.25.0", "pydantic>=2.0.0", "json5>=0.9.0", "tomli-w>=1.0.0"]
 authors = [{ name = "Michael Bianco", email = "mike@mikebian.co" }]
 urls = { "Repository" = "https://github.com/iloveitaly/llm-ide-rules" }
 
@@ -22,7 +22,7 @@ build-backend = "uv_build"
 # module-root = ""
 
 [dependency-groups]
-dev = ["pytest>=8.3.3", "pyright[nodejs]>=1.1.380", "ruff>=0.8.0"]
+dev = ["pytest>=8.3.3", "pyright[nodejs]>=1.1.380", "ruff>=0.8.0", "pytest-mock>=3.10.0"]
 
 [tool.pyright]
 exclude = ["examples/", "playground/", "tmp/", ".venv/", "tests/"]

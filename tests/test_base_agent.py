@@ -112,8 +112,7 @@ shell = \"\"\"Fix tests\"\"\"
 """
 
     result = strip_toml_metadata(text)
-    # When closing delimiter is on same line, it won't be stripped
-    assert "Fix tests" in result
+    assert result == "Fix tests"
 
 
 def test_strip_toml_metadata_with_content_after_start():
@@ -126,6 +125,34 @@ and run them\"\"\"
     result = strip_toml_metadata(text)
     assert "Fix tests" in result
     assert "and run them" in result
+
+
+def test_strip_toml_metadata_new_format():
+    """Test extracting content from TOML prompt block."""
+    text = """description = "Fix failing tests"
+
+prompt = \"\"\"
+Fix failing tests
+
+Run pytest and fix errors
+\"\"\"
+"""
+
+    result = strip_toml_metadata(text)
+    assert result == "Fix failing tests\n\nRun pytest and fix errors"
+    assert "description =" not in result
+    assert "prompt =" not in result
+
+
+def test_strip_toml_metadata_invalid_returns_original():
+    """Test that invalid TOML returns the original text."""
+    # Invalid TOML but text we might want to preserve if it wasn't TOML to begin with
+    text = """Just some plain text
+without any toml structure"""
+    
+    result = strip_toml_metadata(text)
+    assert result == text.strip()
+
 
 
 def test_get_ordered_files():

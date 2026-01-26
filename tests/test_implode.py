@@ -386,3 +386,55 @@ Here are instructions to fix tests.
             content = f.read()
             assert "## Fix Tests" in content
             assert "Here are instructions to fix tests." in content
+
+
+def test_implode_opencode_basic_functionality():
+    """Test basic implode opencode functionality."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        # Create .opencode/commands directory with sample files
+        opencode_commands_dir = Path(".opencode/commands")
+        opencode_commands_dir.mkdir(parents=True)
+
+        with open(opencode_commands_dir / "fix-tests.md", "w") as f:
+            f.write("Here are instructions to fix tests.")
+
+        # Run implode opencode command (defaults to commands.md)
+        result = runner.invoke(app, ["implode", "opencode"])
+
+        # Check command succeeds
+        assert result.exit_code == 0
+        assert "Bundled opencode commands into commands.md" in result.stdout
+
+        # Check that output file was created
+        assert Path("commands.md").exists()
+
+        with open("commands.md", "r") as f:
+            content = f.read()
+            assert "## Fix Tests" in content
+            assert "Here are instructions to fix tests." in content
+
+
+def test_implode_opencode_help():
+    """Test that implode opencode subcommand shows help."""
+    runner = CliRunner()
+    result = runner.invoke(app, ["implode", "opencode", "--help"])
+    assert result.exit_code == 0
+    assert "Bundle OpenCode" in result.stdout
+
+
+def test_implode_opencode_missing_directory():
+    """Test implode opencode with missing .opencode/commands directory."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        # Run implode opencode command without creating commands directory
+        result = runner.invoke(app, ["implode", "opencode", "bundled.md"])
+
+        # Should fail with error
+        assert result.exit_code == 1

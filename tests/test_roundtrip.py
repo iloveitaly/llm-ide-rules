@@ -495,3 +495,40 @@ Run pytest and fix errors.
 
         assert "## Fix Tests" in roundtrip_content
         assert "Run pytest and fix errors" in roundtrip_content
+
+
+def test_roundtrip_opencode_commands():
+    """Test explode → implode opencode produces equivalent commands.md."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        instructions_content = """# Sample Instructions
+
+## Python
+
+Python rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        commands_content = """## Fix Tests
+
+Description: Fix failing tests
+
+Run pytest and fix errors.
+"""
+        Path("commands.md").write_text(commands_content)
+
+        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        assert explode_result.exit_code == 0
+
+        assert Path(".opencode/commands/fix-tests.md").exists()
+
+        implode_result = runner.invoke(app, ["implode", "opencode"])
+        assert implode_result.exit_code == 0
+
+        roundtrip_content = Path("commands.md").read_text()
+
+        assert "## Fix Tests" in roundtrip_content
+        assert "Run pytest and fix errors" in roundtrip_content

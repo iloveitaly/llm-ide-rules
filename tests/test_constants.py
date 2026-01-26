@@ -56,7 +56,7 @@ def test_load_section_globs_default():
     globs = load_section_globs()
 
     assert "Python" in globs
-    assert globs["Python"] == "**/*.py"
+    assert globs["Python"] == "**/*.py,pyproject.toml"
     assert "React" in globs
     assert globs["React"] == "**/*.tsx"
     assert "FastAPI" in globs

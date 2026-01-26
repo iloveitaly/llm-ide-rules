@@ -81,6 +81,8 @@ class GeminiAgent(BaseAgent):
         section_name: str | None = None,
     ) -> None:
         """Write a Gemini CLI command file (.toml) with TOML format."""
+        import tomli_w
+
         filepath = commands_dir / f"{filename}{self.command_extension}"
 
         description, filtered_content = extract_description_and_filter_content(
@@ -99,7 +101,15 @@ class GeminiAgent(BaseAgent):
         content_str = "".join(final_content).strip()
 
         desc = description if description else (section_name or filename)
-        output = f'name = "{filename}"\ndescription = "{desc}"\n\n[command]\nshell = """\n{content_str}\n"""\n'
+        
+        # Construct dict and dump to TOML
+        data = {
+            "description": desc,
+            "prompt": content_str + "\n"  # Ensure trailing newline in multiline string
+        }
+        
+        # tomli-w will handle escaping and multiline strings automatically
+        output = tomli_w.dumps(data)
         filepath.write_text(output)
 
     def transform_mcp_server(self, server: "McpServer") -> dict:

@@ -136,31 +136,21 @@ def strip_header(text: str) -> str:
 
 
 def strip_toml_metadata(text: str) -> str:
-    """Extract content from TOML command.shell block."""
-    lines = text.splitlines()
-    in_shell_block = False
-    content_lines = []
+    """Extract content from TOML prompt block (supports old [command] shell=... and new prompt=...)."""
+    import tomllib
 
-    for line in lines:
-        if line.strip() == "[command]":
-            in_shell_block = True
-            continue
+    try:
+        data = tomllib.loads(text)
+        # Check new format
+        if "prompt" in data:
+            return str(data["prompt"]).strip()
+        # Check legacy format
+        if "command" in data and isinstance(data["command"], dict) and "shell" in data["command"]:
+            return str(data["command"]["shell"]).strip()
+    except Exception:
+        pass
 
-        if in_shell_block:
-            if line.strip().startswith('shell = """'):
-                after_start = line.split('"""', 1)[1] if '"""' in line else ""
-                if after_start.strip():
-                    content_lines.append(after_start)
-                continue
-
-            if line.strip() == '"""' or line.strip().endswith('"""'):
-                if line.strip() != '"""':
-                    content_lines.append(line.rsplit('"""', 1)[0])
-                break
-
-            content_lines.append(line)
-
-    return "\n".join(content_lines).strip()
+    return text.strip()
 
 
 def get_ordered_files(
