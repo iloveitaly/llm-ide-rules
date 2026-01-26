@@ -158,3 +158,36 @@ def gemini(
     else:
         output_path.unlink(missing_ok=True)
         log.info("no gemini commands to bundle")
+
+
+def opencode(
+    output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
+    config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
+) -> None:
+    """Bundle OpenCode commands into commands.md."""
+
+    section_globs = load_section_globs(config)
+    agent = get_agent("opencode")
+    cwd = Path.cwd()
+
+    log.info(
+        "bundling opencode commands",
+        commands_dir=agent.commands_dir,
+        config=config,
+    )
+
+    commands_path = cwd / agent.commands_dir
+    if not commands_path.exists():
+        log.error("opencode commands directory not found", commands_dir=str(commands_path))
+        error_msg = f"OpenCode commands directory not found: {commands_path}"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
+        raise typer.Exit(1)
+
+    output_path = cwd / output
+    commands_written = agent.bundle_commands(output_path, section_globs)
+    if commands_written:
+        success_msg = f"Bundled opencode commands into {output}"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+    else:
+        output_path.unlink(missing_ok=True)
+        log.info("no opencode commands to bundle")
