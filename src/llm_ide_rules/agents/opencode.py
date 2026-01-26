@@ -23,11 +23,15 @@ class OpenCodeAgent(BaseAgent):
     mcp_project_path = "opencode.json"
     mcp_root_key = "mcp"
 
-    def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
+    def bundle_rules(
+        self, output_file: Path, section_globs: dict[str, str | None]
+    ) -> bool:
         """OpenCode doesn't support rules."""
         return False
 
-    def bundle_commands(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
+    def bundle_commands(
+        self, output_file: Path, section_globs: dict[str, str | None]
+    ) -> bool:
         """Bundle OpenCode command files (.md) into a single output file."""
         commands_path = output_file.parent / self.commands_dir
         if not commands_path.exists():

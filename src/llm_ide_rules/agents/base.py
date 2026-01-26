@@ -21,12 +21,16 @@ class BaseAgent(ABC):
     mcp_root_key: str = "mcpServers"
 
     @abstractmethod
-    def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
+    def bundle_rules(
+        self, output_file: Path, section_globs: dict[str, str | None]
+    ) -> bool:
         """Bundle rule files into a single output file."""
         ...
 
     @abstractmethod
-    def bundle_commands(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
+    def bundle_commands(
+        self, output_file: Path, section_globs: dict[str, str | None]
+    ) -> bool:
         """Bundle command files into a single output file."""
         ...
 
@@ -159,7 +163,9 @@ def strip_toml_metadata(text: str) -> str:
     return "\n".join(content_lines).strip()
 
 
-def get_ordered_files(file_list: list[Path], section_globs_keys: list[str]) -> list[Path]:
+def get_ordered_files(
+    file_list: list[Path], section_globs_keys: list[str]
+) -> list[Path]:
     """Order files based on section_globs key order, with unmapped files at the end."""
     file_dict = {f.stem: f for f in file_list}
     ordered_files = []
@@ -284,5 +290,3 @@ def extract_description_and_filter_content(
         filtered_content = trimmed_content
 
     return description, filtered_content
-
-

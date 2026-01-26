@@ -153,10 +153,16 @@ def test_header_to_filename_roundtrip():
 def test_header_to_filename_special_characters():
     """Test that header_to_filename handles spaces correctly."""
     assert header_to_filename("My Special Rule") == "my-special-rule"
-    assert header_to_filename("Rule With  Multiple  Spaces") == "rule-with--multiple--spaces"
+    assert (
+        header_to_filename("Rule With  Multiple  Spaces")
+        == "rule-with--multiple--spaces"
+    )
 
 
 def test_filename_to_header_special_characters():
     """Test that filename_to_header handles dashes correctly."""
     assert filename_to_header("my-special-rule") == "My Special Rule"
-    assert filename_to_header("rule-with--multiple--dashes") == "Rule With  Multiple  Dashes"
+    assert (
+        filename_to_header("rule-with--multiple--dashes")
+        == "Rule With  Multiple  Dashes"
+    )

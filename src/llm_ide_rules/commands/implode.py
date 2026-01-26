@@ -11,8 +11,13 @@ from llm_ide_rules.log import log
 
 
 def cursor(
-    output: Annotated[str, typer.Argument(help="Output file for rules")] = "instructions.md",
-    config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
+    output: Annotated[
+        str, typer.Argument(help="Output file for rules")
+    ] = "instructions.md",
+    config: Annotated[
+        str | None,
+        typer.Option("--config", "-c", help="Custom configuration file path"),
+    ] = None,
 ) -> None:
     """Bundle Cursor rules into instructions.md and commands into commands.md."""
 
@@ -53,8 +58,13 @@ def cursor(
 
 
 def github(
-    output: Annotated[str, typer.Argument(help="Output file for instructions")] = "instructions.md",
-    config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
+    output: Annotated[
+        str, typer.Argument(help="Output file for instructions")
+    ] = "instructions.md",
+    config: Annotated[
+        str | None,
+        typer.Option("--config", "-c", help="Custom configuration file path"),
+    ] = None,
 ) -> None:
     """Bundle GitHub instructions into instructions.md and prompts into commands.md."""
 
@@ -71,7 +81,9 @@ def github(
 
     rules_path = cwd / agent.rules_dir
     if not rules_path.exists():
-        log.error("github instructions directory not found", instructions_dir=str(rules_path))
+        log.error(
+            "github instructions directory not found", instructions_dir=str(rules_path)
+        )
         error_msg = f"GitHub instructions directory not found: {rules_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
@@ -96,7 +108,10 @@ def github(
 
 def claude(
     output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
-    config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
+    config: Annotated[
+        str | None,
+        typer.Option("--config", "-c", help="Custom configuration file path"),
+    ] = None,
 ) -> None:
     """Bundle Claude Code commands into commands.md."""
 
@@ -112,7 +127,9 @@ def claude(
 
     commands_path = cwd / agent.commands_dir
     if not commands_path.exists():
-        log.error("claude code commands directory not found", commands_dir=str(commands_path))
+        log.error(
+            "claude code commands directory not found", commands_dir=str(commands_path)
+        )
         error_msg = f"Claude Code commands directory not found: {commands_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
@@ -129,7 +146,10 @@ def claude(
 
 def gemini(
     output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
-    config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
+    config: Annotated[
+        str | None,
+        typer.Option("--config", "-c", help="Custom configuration file path"),
+    ] = None,
 ) -> None:
     """Bundle Gemini CLI commands into commands.md."""
 
@@ -145,7 +165,9 @@ def gemini(
 
     commands_path = cwd / agent.commands_dir
     if not commands_path.exists():
-        log.error("gemini cli commands directory not found", commands_dir=str(commands_path))
+        log.error(
+            "gemini cli commands directory not found", commands_dir=str(commands_path)
+        )
         error_msg = f"Gemini CLI commands directory not found: {commands_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
@@ -162,7 +184,10 @@ def gemini(
 
 def opencode(
     output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
-    config: Annotated[str | None, typer.Option("--config", "-c", help="Custom configuration file path")] = None,
+    config: Annotated[
+        str | None,
+        typer.Option("--config", "-c", help="Custom configuration file path"),
+    ] = None,
 ) -> None:
     """Bundle OpenCode commands into commands.md."""
 
@@ -178,7 +203,9 @@ def opencode(
 
     commands_path = cwd / agent.commands_dir
     if not commands_path.exists():
-        log.error("opencode commands directory not found", commands_dir=str(commands_path))
+        log.error(
+            "opencode commands directory not found", commands_dir=str(commands_path)
+        )
         error_msg = f"OpenCode commands directory not found: {commands_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)

@@ -178,7 +178,7 @@ def test_mcp_explode_with_json_comments(tmp_path, monkeypatch):
     """Test explode handles JSON with // comments via json5."""
     monkeypatch.chdir(tmp_path)
 
-    mcp_content = '''{"servers": {"test": {"command": "npx", "args": ["@pkg/name"]}}}'''
+    mcp_content = """{"servers": {"test": {"command": "npx", "args": ["@pkg/name"]}}}"""
     (tmp_path / "mcp.json").write_text(mcp_content)
 
     result = runner.invoke(app, ["mcp", "explode", "mcp.json"])
@@ -189,7 +189,9 @@ def test_mcp_implode_basic(tmp_path, monkeypatch):
     """Test implode reads existing configs."""
     monkeypatch.chdir(tmp_path)
 
-    claude_config = {"mcpServers": {"test": {"command": "npx", "args": ["-y", "@pkg/name"]}}}
+    claude_config = {
+        "mcpServers": {"test": {"command": "npx", "args": ["-y", "@pkg/name"]}}
+    }
     (tmp_path / ".mcp.json").write_text(json.dumps(claude_config))
 
     result = runner.invoke(app, ["mcp", "implode", "output.json", "--source", "claude"])
@@ -309,7 +311,9 @@ def test_mcp_roundtrip(tmp_path, monkeypatch):
     result = runner.invoke(app, ["mcp", "explode", "mcp.json", "--agent", "claude"])
     assert result.exit_code == 0
 
-    result = runner.invoke(app, ["mcp", "implode", "roundtrip.json", "--source", "claude"])
+    result = runner.invoke(
+        app, ["mcp", "implode", "roundtrip.json", "--source", "claude"]
+    )
     assert result.exit_code == 0
 
     roundtrip = json.loads((tmp_path / "roundtrip.json").read_text())

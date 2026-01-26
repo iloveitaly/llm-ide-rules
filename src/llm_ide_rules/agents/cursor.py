@@ -26,7 +26,9 @@ class CursorAgent(BaseAgent):
     mcp_global_path = ".cursor/mcp.json"
     mcp_project_path = ".cursor/mcp.json"
 
-    def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
+    def bundle_rules(
+        self, output_file: Path, section_globs: dict[str, str | None]
+    ) -> bool:
         """Bundle Cursor rule files (.mdc) into a single output file."""
         rules_path = output_file.parent / self.rules_dir
         rule_files = list(rules_path.glob(f"*{self.rule_extension}"))
@@ -59,7 +61,9 @@ class CursorAgent(BaseAgent):
         output_file.write_text("".join(content_parts))
         return True
 
-    def bundle_commands(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
+    def bundle_commands(
+        self, output_file: Path, section_globs: dict[str, str | None]
+    ) -> bool:
         """Bundle Cursor command files (.md) into a single output file."""
         commands_path = output_file.parent / self.commands_dir
         if not commands_path.exists():
@@ -152,5 +156,3 @@ alwaysApply: true
 
         output_parts.extend(filtered_content)
         filepath.write_text("".join(output_parts))
-
-

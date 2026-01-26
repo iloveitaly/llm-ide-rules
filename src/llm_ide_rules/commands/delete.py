@@ -14,7 +14,7 @@ def find_files_to_delete(
     instruction_types: list[str], target_dir: Path
 ) -> tuple[list[Path], list[Path]]:
     """Find all files and directories that would be deleted.
-    
+
     Returns:
         Tuple of (directories, files) to delete
     """
@@ -57,7 +57,9 @@ def delete_main(
     ] = ".",
     yes: Annotated[
         bool,
-        typer.Option("--yes", "-y", help="Skip confirmation prompt and delete immediately"),
+        typer.Option(
+            "--yes", "-y", help="Skip confirmation prompt and delete immediately"
+        ),
     ] = False,
 ):
     """Remove downloaded LLM instruction files.

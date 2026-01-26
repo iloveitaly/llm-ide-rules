@@ -88,9 +88,9 @@ Use strict mode.
         assert set(original_sections.keys()) == set(roundtrip_sections.keys())
 
         for section_name in original_sections:
-            assert normalize_whitespace(original_sections[section_name]) == normalize_whitespace(
-                roundtrip_sections[section_name]
-            )
+            assert normalize_whitespace(
+                original_sections[section_name]
+            ) == normalize_whitespace(roundtrip_sections[section_name])
 
 
 def test_roundtrip_cursor_commands():
@@ -140,10 +140,14 @@ Create a plan for the implementation.
 
         for section_name in original_sections:
             original_normalized = normalize_whitespace(original_sections[section_name])
-            roundtrip_normalized = normalize_whitespace(roundtrip_sections[section_name])
+            roundtrip_normalized = normalize_whitespace(
+                roundtrip_sections[section_name]
+            )
 
             if section_name in ["Fix Tests", "Plan Only"]:
-                original_without_desc = re.sub(r"Description:.*\n\n?", "", original_normalized)
+                original_without_desc = re.sub(
+                    r"Description:.*\n\n?", "", original_normalized
+                )
                 assert original_without_desc.strip() in roundtrip_normalized
 
 
@@ -188,9 +192,9 @@ Use JSX syntax.
         assert set(original_sections.keys()) == set(roundtrip_sections.keys())
 
         for section_name in original_sections:
-            assert normalize_whitespace(original_sections[section_name]) == normalize_whitespace(
-                roundtrip_sections[section_name]
-            )
+            assert normalize_whitespace(
+                original_sections[section_name]
+            ) == normalize_whitespace(roundtrip_sections[section_name])
 
 
 def test_roundtrip_github_prompts():

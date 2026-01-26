@@ -22,38 +22,60 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
+
 @app.callback()
 def main_callback(
     verbose: Annotated[
-        bool, typer.Option("--verbose", "-v", help="Enable verbose logging (sets LOG_LEVEL=DEBUG)")
+        bool,
+        typer.Option(
+            "--verbose", "-v", help="Enable verbose logging (sets LOG_LEVEL=DEBUG)"
+        ),
     ] = False,
 ):
     """Global CLI options."""
     if verbose:
         os.environ["LOG_LEVEL"] = "DEBUG"
         import structlog_config
+
         structlog_config.configure_logger()
 
+
 # Add commands directly
-app.command("explode", help="Convert instruction file to separate rule files")(explode_main)
-app.command("download", help="Download LLM instruction files from GitHub repositories")(download_main)
+app.command("explode", help="Convert instruction file to separate rule files")(
+    explode_main
+)
+app.command("download", help="Download LLM instruction files from GitHub repositories")(
+    download_main
+)
 app.command("delete", help="Remove downloaded LLM instruction files")(delete_main)
 
 # Create implode sub-typer
 implode_app = typer.Typer(help="Bundle rule files into a single instruction file")
-implode_app.command("cursor", help="Bundle Cursor rules and commands into a single file")(cursor)
-implode_app.command("github", help="Bundle GitHub/Copilot instructions and prompts into a single file")(github)
-implode_app.command("claude", help="Bundle Claude Code commands into a single file")(claude)
-implode_app.command("gemini", help="Bundle Gemini CLI commands into a single file")(gemini)
-implode_app.command("opencode", help="Bundle OpenCode commands into a single file")(opencode)
+implode_app.command(
+    "cursor", help="Bundle Cursor rules and commands into a single file"
+)(cursor)
+implode_app.command(
+    "github", help="Bundle GitHub/Copilot instructions and prompts into a single file"
+)(github)
+implode_app.command("claude", help="Bundle Claude Code commands into a single file")(
+    claude
+)
+implode_app.command("gemini", help="Bundle Gemini CLI commands into a single file")(
+    gemini
+)
+implode_app.command("opencode", help="Bundle OpenCode commands into a single file")(
+    opencode
+)
 app.add_typer(implode_app, name="implode")
 
 # Add MCP configuration management
 app.add_typer(mcp_app, name="mcp")
 
+
 def main():
     """Main entry point for the CLI."""
     app()
+
 
 if __name__ == "__main__":
     main()

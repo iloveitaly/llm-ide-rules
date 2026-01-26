@@ -297,7 +297,9 @@ name: CustomSection
 Custom rules.""")
 
         # Run implode cursor command with custom config
-        result = runner.invoke(app, ["implode", "cursor", "bundled.md", "--config", "custom_config.json"])
+        result = runner.invoke(
+            app, ["implode", "cursor", "bundled.md", "--config", "custom_config.json"]
+        )
 
         # Check command succeeds
         assert result.exit_code == 0

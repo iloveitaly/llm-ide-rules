@@ -17,7 +17,7 @@ DEFAULT_BRANCH = "master"
 
 def normalize_repo(repo: str) -> str:
     """Normalize repository input to user/repo format.
-    
+
     Handles both formats:
     - user/repo (unchanged)
     - https://github.com/user/repo/ (extracts user/repo)
@@ -25,16 +25,17 @@ def normalize_repo(repo: str) -> str:
     # If it's already in user/repo format, return as-is
     if "/" in repo and not repo.startswith("http"):
         return repo
-    
+
     # Extract user/repo from GitHub URL
     github_pattern = r"https?://github\.com/([^/]+/[^/]+)/?.*"
     match = re.match(github_pattern, repo)
-    
+
     if match:
         return match.group(1)
-    
+
     # If no pattern matches, assume it's already in the correct format
     return repo
+
 
 # Define what files/directories each instruction type includes
 INSTRUCTION_TYPES = {
@@ -59,7 +60,13 @@ def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
     normalized_repo = normalize_repo(repo)
     zip_url = f"https://github.com/{normalized_repo}/archive/{branch}.zip"
 
-    log.info("downloading repository", repo=repo, normalized_repo=normalized_repo, branch=branch, url=zip_url)
+    log.info(
+        "downloading repository",
+        repo=repo,
+        normalized_repo=normalized_repo,
+        branch=branch,
+        url=zip_url,
+    )
 
     try:
         response = requests.get(zip_url, timeout=30)
@@ -157,48 +164,46 @@ def copy_recursive_files(
     repo_dir: Path, target_dir: Path, file_pattern: str
 ) -> list[str]:
     """Recursively copy files matching pattern, preserving directory structure.
-    
+
     Only copies files to locations where the target directory already exists.
     Warns and skips files where target directories don't exist.
-    
+
     Args:
         repo_dir: Source repository directory
         target_dir: Target directory to copy to
         file_pattern: File pattern to search for (e.g., "AGENTS.md")
-    
+
     Returns:
         List of copied file paths relative to target_dir
     """
     copied_items = []
-    
+
     # Find all matching files recursively
     matching_files = list(repo_dir.rglob(file_pattern))
-    
+
     for source_file in matching_files:
         # Calculate relative path from repo root
         relative_path = source_file.relative_to(repo_dir)
         target_file = target_dir / relative_path
-        
+
         # Check if target directory already exists
         target_parent = target_file.parent
         if not target_parent.exists():
             log.warning(
                 "target directory does not exist, skipping file copy",
                 target_directory=str(target_parent),
-                file=str(relative_path)
+                file=str(relative_path),
             )
             continue
 
         log.info(
-            "copying recursive file",
-            source=str(source_file),
-            target=str(target_file)
+            "copying recursive file", source=str(source_file), target=str(target_file)
         )
-        
+
         # Copy file (parent directory already exists)
         target_file.write_bytes(source_file.read_bytes())
         copied_items.append(str(relative_path))
-    
+
     return copied_items
 
 

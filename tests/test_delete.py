@@ -123,7 +123,9 @@ def test_delete_with_confirmation_yes():
         cursor_dir = temp_path / ".cursor"
         cursor_dir.mkdir()
 
-        result = runner.invoke(app, ["delete", "cursor", "--target", temp_dir], input="y\n")
+        result = runner.invoke(
+            app, ["delete", "cursor", "--target", temp_dir], input="y\n"
+        )
 
         assert result.exit_code == 0
         assert "Successfully deleted" in result.stdout
@@ -140,7 +142,9 @@ def test_delete_with_confirmation_no():
         cursor_dir = temp_path / ".cursor"
         cursor_dir.mkdir()
 
-        result = runner.invoke(app, ["delete", "cursor", "--target", temp_dir], input="n\n")
+        result = runner.invoke(
+            app, ["delete", "cursor", "--target", temp_dir], input="n\n"
+        )
 
         assert result.exit_code == 0
         assert "Deletion cancelled" in result.stdout
@@ -213,7 +217,9 @@ def test_delete_multiple_types():
         (temp_path / "GEMINI.md").write_text("test")
         (temp_path / "CLAUDE.md").write_text("test")
 
-        result = runner.invoke(app, ["delete", "cursor", "gemini", "--target", temp_dir, "--yes"])
+        result = runner.invoke(
+            app, ["delete", "cursor", "gemini", "--target", temp_dir, "--yes"]
+        )
 
         assert result.exit_code == 0
         assert not (temp_path / ".cursor").exists()

@@ -25,11 +25,15 @@ class GeminiAgent(BaseAgent):
     mcp_global_path = ".gemini/settings.json"
     mcp_project_path = ".gemini/settings.json"
 
-    def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
+    def bundle_rules(
+        self, output_file: Path, section_globs: dict[str, str | None]
+    ) -> bool:
         """Gemini CLI doesn't support rules, only commands."""
         return False
 
-    def bundle_commands(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
+    def bundle_commands(
+        self, output_file: Path, section_globs: dict[str, str | None]
+    ) -> bool:
         """Bundle Gemini CLI command files (.toml) into a single output file."""
         commands_path = output_file.parent / self.commands_dir
         if not commands_path.exists():
@@ -139,5 +143,3 @@ class GeminiAgent(BaseAgent):
 
         existing[self.mcp_root_key] = servers
         path.write_text(json.dumps(existing, indent=2))
-
-

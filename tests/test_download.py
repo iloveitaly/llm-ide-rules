@@ -118,8 +118,6 @@ def test_download_with_branch():
     assert result.exit_code == 0
 
 
-
-
 def test_download_invalid_instruction_type():
     """Test download command with invalid instruction type."""
     runner = CliRunner()
@@ -186,19 +184,28 @@ def test_download_exclude_patterns():
 def test_normalize_repo():
     """Test repository normalization functionality."""
     from llm_ide_rules.commands.download import normalize_repo
-    
+
     # Test user/repo format (should be unchanged)
     assert normalize_repo("iloveitaly/llm-ide-rules") == "iloveitaly/llm-ide-rules"
     assert normalize_repo("user/repo") == "user/repo"
-    
+
     # Test full GitHub URLs (should extract user/repo)
-    assert normalize_repo("https://github.com/iloveitaly/llm-ide-rules") == "iloveitaly/llm-ide-rules"
-    assert normalize_repo("https://github.com/iloveitaly/llm-ide-rules/") == "iloveitaly/llm-ide-rules"
+    assert (
+        normalize_repo("https://github.com/iloveitaly/llm-ide-rules")
+        == "iloveitaly/llm-ide-rules"
+    )
+    assert (
+        normalize_repo("https://github.com/iloveitaly/llm-ide-rules/")
+        == "iloveitaly/llm-ide-rules"
+    )
     assert normalize_repo("https://github.com/user/repo/") == "user/repo"
     assert normalize_repo("http://github.com/user/repo") == "user/repo"
-    
+
     # Test URLs with additional paths (should still extract user/repo)
-    assert normalize_repo("https://github.com/user/repo/blob/main/README.md") == "user/repo"
+    assert (
+        normalize_repo("https://github.com/user/repo/blob/main/README.md")
+        == "user/repo"
+    )
     assert normalize_repo("https://github.com/user/repo/tree/main") == "user/repo"
 
 
@@ -207,39 +214,43 @@ def test_normalize_repo():
 def test_download_with_full_github_url(mock_zipfile, mock_requests):
     """Test download command with full GitHub URL instead of user/repo format."""
     from llm_ide_rules.commands.download import download_and_extract_repo
-    
+
     # Mock the HTTP request
     mock_response = Mock()
     mock_response.content = b"fake zip content"
     mock_response.raise_for_status = Mock()
     mock_requests.return_value = mock_response
-    
+
     # Mock the zipfile extraction
     mock_zip_instance = Mock()
     mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
-    
+
     with tempfile.TemporaryDirectory() as temp_dir:
         # Create a fake extracted repo structure for the mock
         extracted_dir = Path(temp_dir) / "extracted/llm_ide_rules-master"
         extracted_dir.mkdir(parents=True)
-        
+
         # Mock the extraction to create these files
         def mock_extractall(path):
             pass  # Files are already created above
-        
+
         mock_zip_instance.extractall = mock_extractall
-        
+
         # Patch Path.iterdir to return our fake directory
         with patch("pathlib.Path.iterdir") as mock_iterdir:
             mock_iterdir.return_value = [extracted_dir]
-            
+
             # Test that the URL is correctly constructed with full GitHub URL
-            result = download_and_extract_repo("https://github.com/iloveitaly/llm-ide-rules/")
-            
+            result = download_and_extract_repo(
+                "https://github.com/iloveitaly/llm-ide-rules/"
+            )
+
             # Verify the correct URL was called
-            expected_url = "https://github.com/iloveitaly/llm-ide-rules/archive/master.zip"
+            expected_url = (
+                "https://github.com/iloveitaly/llm-ide-rules/archive/master.zip"
+            )
             mock_requests.assert_called_once_with(expected_url, timeout=30)
-            
+
             # Verify the result is the extracted directory
             assert result == extracted_dir
 
@@ -279,34 +290,34 @@ def test_download_agents_with_directory_structure(mock_zipfile, mock_requests):
         # Create a fake extracted repo structure for the mock
         repo_dir = Path("repo")
         repo_dir.mkdir()
-        
+
         # Create AGENTS.md files in different locations
         (repo_dir / "AGENTS.md").write_text("Root agents file")
-        
+
         subdir = repo_dir / "docs"
         subdir.mkdir()
         (subdir / "AGENTS.md").write_text("Docs agents file")
-        
+
         nested_dir = repo_dir / "project" / "config"
         nested_dir.mkdir(parents=True)
         (nested_dir / "AGENTS.md").write_text("Nested agents file")
-        
+
         # Create target directory with some existing structure
         target_dir = Path("target")
         target_dir.mkdir()
-        
+
         # Create matching directory structure in target (for successful copies)
         (target_dir / "docs").mkdir()
-        
+
         # Test the recursive file copy function directly
         copied_items = copy_recursive_files(repo_dir, target_dir, "AGENTS.md")
-        
+
         # Should copy root file and docs file, but not nested file (no matching dir)
         assert len(copied_items) == 2
         assert "AGENTS.md" in copied_items
         assert "docs/AGENTS.md" in copied_items
         assert "project/config/AGENTS.md" not in copied_items
-        
+
         # Verify files were actually copied
         assert (target_dir / "AGENTS.md").exists()
         assert (target_dir / "docs" / "AGENTS.md").exists()
@@ -332,7 +343,7 @@ def test_copy_recursive_files_warning_for_missing_directories():
         target_dir = Path("target")
         target_dir.mkdir()
 
-        with patch('llm_ide_rules.commands.download.log') as mock_log:
+        with patch("llm_ide_rules.commands.download.log") as mock_log:
             copied_items = copy_recursive_files(repo_dir, target_dir, "AGENTS.md")
 
             assert len(copied_items) == 1

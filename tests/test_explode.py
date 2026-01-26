@@ -162,7 +162,9 @@ Here are custom rules.
 
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["explode", "instructions.md", "--config", "custom_config.json"])
+        result = runner.invoke(
+            app, ["explode", "instructions.md", "--config", "custom_config.json"]
+        )
 
         assert result.exit_code == 0
 
@@ -180,5 +182,3 @@ def test_explode_nonexistent_file():
         result = runner.invoke(app, ["explode", "nonexistent.md"])
 
         assert result.exit_code == 1
-
-

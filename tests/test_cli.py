@@ -34,15 +34,15 @@ def test_cli_invalid_command():
 def test_all_commands_accessible():
     """Test that all main commands are accessible."""
     runner = CliRunner()
-    
+
     # Test explode command
     result = runner.invoke(app, ["explode", "--help"])
     assert result.exit_code == 0
-    
+
     # Test implode command
     result = runner.invoke(app, ["implode", "--help"])
     assert result.exit_code == 0
-    
+
     # Test download command
     result = runner.invoke(app, ["download", "--help"])
     assert result.exit_code == 0
@@ -51,11 +51,11 @@ def test_all_commands_accessible():
 def test_implode_subcommands():
     """Test that implode subcommands are accessible."""
     runner = CliRunner()
-    
+
     # Test implode cursor subcommand
     result = runner.invoke(app, ["implode", "cursor", "--help"])
     assert result.exit_code == 0
-    
+
     # Test implode github subcommand
     result = runner.invoke(app, ["implode", "github", "--help"])
     assert result.exit_code == 0
@@ -64,12 +64,12 @@ def test_implode_subcommands():
 def test_cli_completion():
     """Test that CLI supports completion."""
     runner = CliRunner()
-    
+
     # Test show completion - this may fail in test environment due to shell detection
     result = runner.invoke(app, ["--show-completion"])
     # Exit code 1 is expected when shell detection fails in test environment
     assert result.exit_code in [0, 1]
-    
+
     # Test install completion help
     result = runner.invoke(app, ["--install-completion", "--help"])
     assert result.exit_code == 0

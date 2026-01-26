@@ -16,8 +16,15 @@ mcp_app = typer.Typer(help="MCP configuration management")
 @mcp_app.command()
 def explode(
     input_file: str = typer.Argument("mcp.json", help="Input unified MCP config file"),
-    scope: str = typer.Option("project", "--scope", "-s", help="Scope: project, global, or both"),
-    agent: str = typer.Option("all", "--agent", "-a", help="Agent: claude, cursor, gemini, opencode, copilot, or all"),
+    scope: str = typer.Option(
+        "project", "--scope", "-s", help="Scope: project, global, or both"
+    ),
+    agent: str = typer.Option(
+        "all",
+        "--agent",
+        "-a",
+        help="Agent: claude, cursor, gemini, opencode, copilot, or all",
+    ),
 ) -> None:
     """Convert unified mcp.json to platform-specific configs."""
     input_path = Path(input_file)
@@ -36,7 +43,9 @@ def explode(
         if not ag.mcp_project_path:
             continue
 
-        servers = {name: ag.transform_mcp_server(s) for name, s in config.servers.items()}
+        servers = {
+            name: ag.transform_mcp_server(s) for name, s in config.servers.items()
+        }
 
         if scope in ("project", "both"):
             project_path = Path.cwd() / ag.mcp_project_path
@@ -51,9 +60,15 @@ def explode(
 
 @mcp_app.command()
 def implode(
-    output_file: str = typer.Argument("mcp.json", help="Output unified MCP config file"),
-    source: str = typer.Option(None, "--source", help="Source agent to read from (e.g., claude, cursor)"),
-    scope: str = typer.Option("project", "--scope", "-s", help="Scope: project or global"),
+    output_file: str = typer.Argument(
+        "mcp.json", help="Output unified MCP config file"
+    ),
+    source: str = typer.Option(
+        None, "--source", help="Source agent to read from (e.g., claude, cursor)"
+    ),
+    scope: str = typer.Option(
+        "project", "--scope", "-s", help="Scope: project or global"
+    ),
 ) -> None:
     """Merge platform-specific MCP configs into unified mcp.json."""
     if not source:
@@ -85,5 +100,10 @@ def implode(
     output_path = Path(output_file)
 
     import json
-    output_path.write_text(json.dumps(config.model_dump(exclude_none=True, exclude_defaults=True), indent=2))
+
+    output_path.write_text(
+        json.dumps(
+            config.model_dump(exclude_none=True, exclude_defaults=True), indent=2
+        )
+    )
     log.info("wrote unified config", path=str(output_path))

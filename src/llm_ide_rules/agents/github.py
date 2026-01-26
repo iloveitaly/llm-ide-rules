@@ -26,7 +26,9 @@ class GitHubAgent(BaseAgent):
     mcp_global_path = ".copilot/mcp-config.json"
     mcp_project_path = ".copilot/mcp-config.json"
 
-    def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
+    def bundle_rules(
+        self, output_file: Path, section_globs: dict[str, str | None]
+    ) -> bool:
         """Bundle GitHub instruction files into a single output file."""
         base_dir = output_file.parent
         instructions_path = base_dir / self.rules_dir
@@ -63,7 +65,9 @@ class GitHubAgent(BaseAgent):
         output_file.write_text("".join(content_parts))
         return True
 
-    def bundle_commands(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
+    def bundle_commands(
+        self, output_file: Path, section_globs: dict[str, str | None]
+    ) -> bool:
         """Bundle GitHub prompt files into a single output file."""
         prompts_path = output_file.parent / self.commands_dir
         if not prompts_path.exists():
@@ -145,7 +149,9 @@ applyTo: "{glob_pattern}"
         frontmatter = f"---\nmode: 'agent'\ndescription: '{description}'\n---\n"
         filepath.write_text(frontmatter + "".join(filtered_content))
 
-    def write_general_instructions(self, content_lines: list[str], base_dir: Path) -> None:
+    def write_general_instructions(
+        self, content_lines: list[str], base_dir: Path
+    ) -> None:
         """Write the general copilot-instructions.md file (no frontmatter)."""
         filepath = base_dir / ".github" / "copilot-instructions.md"
         write_rule_file(filepath, "", content_lines)
@@ -183,4 +189,3 @@ applyTo: "{glob_pattern}"
             args=config.get("args", []),
             env=config.get("env"),
         )
-
