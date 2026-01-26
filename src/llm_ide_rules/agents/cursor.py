@@ -23,6 +23,9 @@ class CursorAgent(BaseAgent):
     rule_extension = ".mdc"
     command_extension = ".md"
 
+    mcp_global_path = ".cursor/mcp.json"
+    mcp_project_path = ".cursor/mcp.json"
+
     def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
         """Bundle Cursor rule files (.mdc) into a single output file."""
         rules_path = output_file.parent / self.rules_dir

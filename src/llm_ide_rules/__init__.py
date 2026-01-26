@@ -12,6 +12,7 @@ from llm_ide_rules.commands.explode import explode_main
 from llm_ide_rules.commands.implode import cursor, github, claude, gemini
 from llm_ide_rules.commands.download import download_main
 from llm_ide_rules.commands.delete import delete_main
+from llm_ide_rules.commands.mcp import mcp_app
 
 __version__ = "0.5.0"
 
@@ -45,6 +46,9 @@ implode_app.command("github", help="Bundle GitHub/Copilot instructions and promp
 implode_app.command("claude", help="Bundle Claude Code commands into a single file")(claude)
 implode_app.command("gemini", help="Bundle Gemini CLI commands into a single file")(gemini)
 app.add_typer(implode_app, name="implode")
+
+# Add MCP configuration management
+app.add_typer(mcp_app, name="mcp")
 
 def main():
     """Main entry point for the CLI."""

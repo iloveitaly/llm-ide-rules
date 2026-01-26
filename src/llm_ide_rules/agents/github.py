@@ -23,6 +23,9 @@ class GitHubAgent(BaseAgent):
     rule_extension = ".instructions.md"
     command_extension = ".prompt.md"
 
+    mcp_global_path = ".copilot/mcp-config.json"
+    mcp_project_path = ".copilot/mcp-config.json"
+
     def bundle_rules(self, output_file: Path, section_globs: dict[str, str | None]) -> bool:
         """Bundle GitHub instruction files into a single output file."""
         base_dir = output_file.parent
@@ -146,4 +149,38 @@ applyTo: "{glob_pattern}"
         """Write the general copilot-instructions.md file (no frontmatter)."""
         filepath = base_dir / ".github" / "copilot-instructions.md"
         write_rule_file(filepath, "", content_lines)
+
+    def transform_mcp_server(self, server: "McpServer") -> dict:
+        """Transform unified server to GitHub Copilot format (adds type and tools)."""
+        from llm_ide_rules.mcp import McpServer
+
+        base = {"tools": ["*"]}
+        if server.env:
+            base["env"] = server.env
+
+        if server.url:
+            return {"type": "http", "url": server.url, **base}
+
+        return {
+            "type": "local",
+            "command": server.command,
+            "args": server.args or [],
+            **base,
+        }
+
+    def reverse_transform_mcp_server(self, name: str, config: dict) -> "McpServer":
+        """Transform GitHub Copilot config back to unified format."""
+        from llm_ide_rules.mcp import McpServer
+
+        if config.get("type") == "http":
+            return McpServer(
+                url=config["url"],
+                env=config.get("env"),
+            )
+
+        return McpServer(
+            command=config["command"],
+            args=config.get("args", []),
+            env=config.get("env"),
+        )
 
