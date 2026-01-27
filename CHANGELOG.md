@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.7.0...v0.8.0) (2026-01-27)
+
+
+### Features
+
+* add agents agent and update AGENTS.md handling ([f95c713](https://github.com/iloveitaly/llm-ide-rules/commit/f95c713a441218161f28610a4f04c80de04a2214))
+
+
+### Bug Fixes
+
+* **download:** display expected files when none are found ([6a0d90f](https://github.com/iloveitaly/llm-ide-rules/commit/6a0d90ffcb689a0cadc51fa7e50df5300ba14ea7))
+
 ## [0.7.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.6.0...v0.7.0) (2026-01-27)
 
 
