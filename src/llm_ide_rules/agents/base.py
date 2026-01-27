@@ -23,14 +23,14 @@ class BaseAgent(ABC):
 
     @abstractmethod
     def bundle_rules(
-        self, output_file: Path, section_globs: dict[str, str | None]
+        self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
         """Bundle rule files into a single output file."""
         ...
 
     @abstractmethod
     def bundle_commands(
-        self, output_file: Path, section_globs: dict[str, str | None]
+        self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
         """Bundle command files into a single output file."""
         ...
@@ -63,7 +63,6 @@ class BaseAgent(ABC):
         rules_sections: dict[str, list[str]],
         command_sections: dict[str, list[str]],
         output_dir: Path,
-        section_globs: dict[str, str | None],
     ) -> None:
         """Generate a root documentation file (e.g. CLAUDE.md) if supported."""
         pass
@@ -72,7 +71,6 @@ class BaseAgent(ABC):
         self,
         general_lines: list[str],
         rules_sections: dict[str, list[str]],
-        section_globs: dict[str, str | None],
     ) -> str:
         """Build the content string for a root documentation file by aggregating rules."""
         content = []
@@ -84,24 +82,12 @@ class BaseAgent(ABC):
                 content.extend(trimmed)
                 content.append("\n\n")
 
-        # Add mapped sections in order
-        for section_name in section_globs:
-            if section_name in rules_sections:
-                lines = rules_sections[section_name]
-                # Fix casing
-                lines = replace_header_with_proper_casing(list(lines), section_name)
-                trimmed = trim_content(lines)
-                if trimmed:
-                    content.extend(trimmed)
-                    content.append("\n\n")
-
-        # Add unmapped sections
+        # Add sections in document order (dict maintains insertion order in Python 3.7+)
         for section_name, lines in rules_sections.items():
-            if section_name not in section_globs:
-                trimmed = trim_content(lines)
-                if trimmed:
-                    content.extend(trimmed)
-                    content.append("\n\n")
+            trimmed = trim_content(lines)
+            if trimmed:
+                content.extend(trimmed)
+                content.append("\n\n")
 
         return "".join(content).strip() + "\n" if content else ""
 
@@ -203,9 +189,15 @@ def strip_toml_metadata(text: str) -> str:
 
 
 def get_ordered_files(
-    file_list: list[Path], section_globs_keys: list[str]
+    file_list: list[Path], section_globs_keys: list[str] | None = None
 ) -> list[Path]:
-    """Order files based on section_globs key order, with unmapped files at the end."""
+    """Order files based on section_globs key order, with unmapped files at the end.
+
+    If section_globs_keys is None, returns files sorted alphabetically.
+    """
+    if not section_globs_keys:
+        return sorted(file_list, key=lambda p: p.name)
+
     file_dict = {f.stem: f for f in file_list}
     ordered_files = []
 
@@ -222,9 +214,15 @@ def get_ordered_files(
 
 
 def get_ordered_files_github(
-    file_list: list[Path], section_globs_keys: list[str]
+    file_list: list[Path], section_globs_keys: list[str] | None = None
 ) -> list[Path]:
-    """Order GitHub instruction files, handling .instructions suffix."""
+    """Order GitHub instruction files, handling .instructions suffix.
+
+    If section_globs_keys is None, returns files sorted alphabetically.
+    """
+    if not section_globs_keys:
+        return sorted(file_list, key=lambda p: p.name)
+
     file_dict = {}
     for f in file_list:
         base_stem = f.stem.replace(".instructions", "")

@@ -27,7 +27,7 @@ class CursorAgent(BaseAgent):
     mcp_project_path = ".cursor/mcp.json"
 
     def bundle_rules(
-        self, output_file: Path, section_globs: dict[str, str | None]
+        self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
         """Bundle Cursor rule files (.mdc) into a single output file."""
         rules_dir = self.rules_dir
@@ -45,18 +45,35 @@ class CursorAgent(BaseAgent):
         general = [f for f in rule_files if f.stem == "general"]
         others = [f for f in rule_files if f.stem != "general"]
 
-        ordered_others = get_ordered_files(others, list(section_globs.keys()))
+        ordered_others = get_ordered_files(
+            others, list(section_globs.keys()) if section_globs else None
+        )
         ordered = general + ordered_others
 
         content_parts: list[str] = []
         for rule_file in ordered:
-            content = rule_file.read_text().strip()
-            if not content:
+            file_content = rule_file.read_text().strip()
+            if not file_content:
                 continue
 
-            content = strip_yaml_frontmatter(content)
+            # Extract header from file content before stripping it
+            lines = file_content.splitlines()
+            extracted_header = None
+            for line in lines:
+                if line.startswith("## "):
+                    extracted_header = line[3:].strip()
+                    break
+
+            content = strip_yaml_frontmatter(file_content)
             content = strip_header(content)
-            header = resolve_header_from_stem(rule_file.stem, section_globs)
+
+            # Use extracted header if available, otherwise resolve from filename
+            if extracted_header:
+                header = extracted_header
+            else:
+                header = resolve_header_from_stem(
+                    rule_file.stem, section_globs if section_globs else {}
+                )
 
             if rule_file.stem != "general":
                 content_parts.append(f"## {header}\n\n")
@@ -71,7 +88,7 @@ class CursorAgent(BaseAgent):
         return True
 
     def bundle_commands(
-        self, output_file: Path, section_globs: dict[str, str | None]
+        self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
         """Bundle Cursor command files (.md) into a single output file."""
         commands_dir = self.commands_dir
@@ -90,7 +107,9 @@ class CursorAgent(BaseAgent):
         if not command_files:
             return False
 
-        ordered_commands = get_ordered_files(command_files, list(section_globs.keys()))
+        ordered_commands = get_ordered_files(
+            command_files, list(section_globs.keys()) if section_globs else None
+        )
 
         content_parts: list[str] = []
         for command_file in ordered_commands:
@@ -98,7 +117,9 @@ class CursorAgent(BaseAgent):
             if not content:
                 continue
 
-            header = resolve_header_from_stem(command_file.stem, section_globs)
+            header = resolve_header_from_stem(
+                command_file.stem, section_globs if section_globs else {}
+            )
             content_parts.append(f"## {header}\n\n")
             content_parts.append(content)
             content_parts.append("\n\n")

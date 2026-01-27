@@ -10,7 +10,6 @@ from llm_ide_rules.agents.base import (
     strip_toml_metadata,
     trim_content,
     extract_description_and_filter_content,
-    replace_header_with_proper_casing,
 )
 from llm_ide_rules.mcp import McpServer
 
@@ -28,13 +27,13 @@ class GeminiAgent(BaseAgent):
     mcp_project_path = ".gemini/settings.json"
 
     def bundle_rules(
-        self, output_file: Path, section_globs: dict[str, str | None]
+        self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
         """Gemini CLI doesn't support rules, only commands."""
         return False
 
     def bundle_commands(
-        self, output_file: Path, section_globs: dict[str, str | None]
+        self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
         """Bundle Gemini CLI command files (.toml) into a single output file."""
         commands_dir = self.commands_dir
@@ -53,7 +52,9 @@ class GeminiAgent(BaseAgent):
         if not command_files:
             return False
 
-        ordered_commands = get_ordered_files(command_files, list(section_globs.keys()))
+        ordered_commands = get_ordered_files(
+            command_files, list(section_globs.keys()) if section_globs else None
+        )
 
         content_parts: list[str] = []
         for command_file in ordered_commands:
@@ -62,7 +63,9 @@ class GeminiAgent(BaseAgent):
                 continue
 
             content = strip_toml_metadata(content)
-            header = resolve_header_from_stem(command_file.stem, section_globs)
+            header = resolve_header_from_stem(
+                command_file.stem, section_globs if section_globs else {}
+            )
             content_parts.append(f"## {header}\n\n")
             content_parts.append(content)
             content_parts.append("\n\n")
@@ -167,11 +170,8 @@ class GeminiAgent(BaseAgent):
         rules_sections: dict[str, list[str]],
         command_sections: dict[str, list[str]],
         output_dir: Path,
-        section_globs: dict[str, str | None],
     ) -> None:
         """Generate GEMINI.md from rules."""
-        content = self.build_root_doc_content(
-            general_lines, rules_sections, section_globs
-        )
+        content = self.build_root_doc_content(general_lines, rules_sections)
         if content.strip():
             (output_dir / "GEMINI.md").write_text(content)

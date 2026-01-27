@@ -155,7 +155,15 @@ def test_download_instruction_types_configuration():
     from llm_ide_rules.commands.download import DEFAULT_TYPES, INSTRUCTION_TYPES
 
     # Check that all expected types are present
-    expected_types = ["cursor", "github", "gemini", "claude", "opencode", "agent", "agents"]
+    expected_types = [
+        "cursor",
+        "github",
+        "gemini",
+        "claude",
+        "opencode",
+        "agent",
+        "agents",
+    ]
     assert all(t in INSTRUCTION_TYPES for t in expected_types)
 
     # Check that DEFAULT_TYPES uses the keys from INSTRUCTION_TYPES

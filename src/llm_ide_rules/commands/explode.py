@@ -12,7 +12,7 @@ from llm_ide_rules.agents.base import (
     write_rule_file,
 )
 from llm_ide_rules.log import log
-from llm_ide_rules.constants import load_section_globs, header_to_filename, VALID_AGENTS
+from llm_ide_rules.constants import header_to_filename, VALID_AGENTS
 from llm_ide_rules.markdown_parser import parse_sections
 
 
@@ -61,24 +61,14 @@ def process_unmapped_as_always_apply(
     return True
 
 
-def explode_main(
-    input_file: Annotated[
-        str, typer.Argument(help="Input markdown file")
-    ] = "instructions.md",
-    config: Annotated[
-        str | None,
-        typer.Option("--config", "-c", help="Custom configuration file path"),
-    ] = None,
-    agent: Annotated[
-        str,
-        typer.Option(
-            "--agent",
-            "-a",
-            help="Agent to explode for (cursor, github, claude, gemini, or all)",
-        ),
-    ] = "all",
+def explode_implementation(
+    input_file: str = "instructions.md",
+    agent: str = "all",
+    working_dir: Path | None = None,
 ) -> None:
-    """Convert instruction file to separate rule files."""
+    """Core implementation of explode command."""
+    if working_dir is None:
+        working_dir = Path.cwd()
 
     if agent not in VALID_AGENTS:
         log.error("invalid agent", agent=agent, valid_agents=VALID_AGENTS)
@@ -88,13 +78,12 @@ def explode_main(
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
-    section_globs = load_section_globs(config)
-
     log.info(
-        "starting explode operation", input_file=input_file, agent=agent, config=config
+        "starting explode operation",
+        input_file=input_file,
+        agent=agent,
+        working_dir=str(working_dir),
     )
-
-    cwd = Path.cwd()
 
     # Initialize only the agents we need
     agents_to_process = []
@@ -112,18 +101,18 @@ def explode_main(
 
         if agent_name in ["cursor", "github"]:
             # These agents have both rules and commands
-            rules_dir = cwd / agent_instances[agent_name].rules_dir
-            commands_dir = cwd / agent_instances[agent_name].commands_dir
+            rules_dir = working_dir / agent_instances[agent_name].rules_dir
+            commands_dir = working_dir / agent_instances[agent_name].commands_dir
             rules_dir.mkdir(parents=True, exist_ok=True)
             commands_dir.mkdir(parents=True, exist_ok=True)
             agent_dirs[agent_name] = {"rules": rules_dir, "commands": commands_dir}
         else:
             # claude, gemini, and opencode only have commands
-            commands_dir = cwd / agent_instances[agent_name].commands_dir
+            commands_dir = working_dir / agent_instances[agent_name].commands_dir
             commands_dir.mkdir(parents=True, exist_ok=True)
             agent_dirs[agent_name] = {"commands": commands_dir}
 
-    input_path = cwd / input_file
+    input_path = working_dir / input_file
 
     try:
         input_text = input_path.read_text()
@@ -155,29 +144,52 @@ alwaysApply: true
                 agent_dirs["cursor"]["rules"] / "general.mdc", general_header, general
             )
         if "github" in agent_instances:
-            agent_instances["github"].write_general_instructions(general, cwd)
+            agent_instances["github"].write_general_instructions(general, working_dir)
 
-    # Process mapped sections for agents that support rules
-    found_sections = set()
+    # Process sections for agents that support rules
     rules_sections: dict[str, list[str]] = {}
+    section_globs: dict[str, str | None] = {}
 
-    for section_name, glob_pattern in section_globs.items():
-        # Look for section (case-insensitive search in parsed sections)
-        matched_section_content = None
-        for parsed_header, content in instruction_sections.items():
-            if parsed_header.lower() == section_name.lower():
-                matched_section_content = content
-                break
-        
-        if matched_section_content and any(line.strip() for line in matched_section_content):
-            found_sections.add(section_name)
-            rules_sections[section_name] = matched_section_content
-            filename = header_to_filename(section_name)
+    for section_name, section_data in instruction_sections.items():
+        content = section_data.content
+        glob_pattern = section_data.glob_pattern
 
-            section_content = replace_header_with_proper_casing(
-                matched_section_content, section_name
-            )
+        if not any(line.strip() for line in content):
+            continue
 
+        rules_sections[section_name] = content
+        section_globs[section_name] = glob_pattern
+        filename = header_to_filename(section_name)
+
+        section_content = replace_header_with_proper_casing(content, section_name)
+
+        if glob_pattern is None:
+            # No directive = alwaysApply
+            if "cursor" in agent_instances and "github" in agent_instances:
+                process_unmapped_as_always_apply(
+                    section_name,
+                    section_content,
+                    agent_instances["cursor"],
+                    agent_instances["github"],
+                    agent_dirs["cursor"]["rules"],
+                    agent_dirs["github"]["rules"],
+                )
+            elif "cursor" in agent_instances:
+                agent_instances["cursor"].write_rule(
+                    section_content,
+                    filename,
+                    agent_dirs["cursor"]["rules"],
+                    glob_pattern=None,
+                )
+            elif "github" in agent_instances:
+                agent_instances["github"].write_rule(
+                    section_content,
+                    filename,
+                    agent_dirs["github"]["rules"],
+                    glob_pattern=None,
+                )
+        elif glob_pattern != "manual":
+            # Has glob pattern = file-specific rule
             if "cursor" in agent_instances:
                 agent_instances["cursor"].write_rule(
                     section_content,
@@ -193,72 +205,21 @@ alwaysApply: true
                     glob_pattern,
                 )
 
-    for section_name in section_globs:
-        if section_name not in found_sections:
-            log.warning("section not found in file", section=section_name)
-
-    # Process unmapped sections for agents that support rules
-    for parsed_header, content in instruction_sections.items():
-        # Check if this header was already processed as a mapped section
-        is_mapped = False
-        for section_name in section_globs:
-            if parsed_header.lower() == section_name.lower():
-                is_mapped = True
-                break
-        
-        if not is_mapped:
-            log.warning(
-                "unmapped section in instructions.md, treating as always-apply rule",
-                section=parsed_header,
-            )
-            if any(line.strip() for line in content):
-                rules_sections[parsed_header] = content
-
-                if "cursor" in agent_instances and "github" in agent_instances:
-                    process_unmapped_as_always_apply(
-                        parsed_header,
-                        content,
-                        agent_instances["cursor"],
-                        agent_instances["github"],
-                        agent_dirs["cursor"]["rules"],
-                        agent_dirs["github"]["rules"],
-                    )
-                elif "cursor" in agent_instances:
-                    # Only cursor - write just cursor rules
-                    filename = header_to_filename(parsed_header)
-                    section_content = replace_header_with_proper_casing(
-                        content, parsed_header
-                    )
-                    agent_instances["cursor"].write_rule(
-                        section_content,
-                        filename,
-                        agent_dirs["cursor"]["rules"],
-                        glob_pattern=None,
-                    )
-                elif "github" in agent_instances:
-                    # Only github - write just github rules
-                    filename = header_to_filename(parsed_header)
-                    section_content = replace_header_with_proper_casing(
-                        content, parsed_header
-                    )
-                    agent_instances["github"].write_rule(
-                        section_content,
-                        filename,
-                        agent_dirs["github"]["rules"],
-                        glob_pattern=None,
-                    )
-
     # Process commands for all agents
+    command_sections_data = {}
     command_sections = {}
     if commands_text:
-        _, command_sections = parse_sections(commands_text)
+        _, command_sections_data = parse_sections(commands_text)
         agents = [agent_instances[name] for name in agents_to_process]
         command_dirs = {
             name: agent_dirs[name]["commands"] for name in agents_to_process
         }
 
-        for section_name, section_content in command_sections.items():
-            process_command_section(section_name, section_content, agents, command_dirs)
+        for section_name, section_data in command_sections_data.items():
+            command_sections[section_name] = section_data.content
+            process_command_section(
+                section_name, section_data.content, agents, command_dirs
+            )
 
     # Generate root documentation (CLAUDE.md, GEMINI.md, etc.)
     for agent_name, agent_inst in agent_instances.items():
@@ -266,8 +227,7 @@ alwaysApply: true
             general,
             rules_sections,
             command_sections,
-            cwd,
-            section_globs,
+            working_dir,
         )
 
     # Build log message and user output based on processed agents
@@ -289,3 +249,20 @@ alwaysApply: true
     else:
         success_msg = f"Created files in {', '.join(created_dirs)} directories"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+
+
+def explode_main(
+    input_file: Annotated[
+        str, typer.Argument(help="Input markdown file")
+    ] = "instructions.md",
+    agent: Annotated[
+        str,
+        typer.Option(
+            "--agent",
+            "-a",
+            help="Agent to explode for (cursor, github, claude, gemini, or all)",
+        ),
+    ] = "all",
+) -> None:
+    """Convert instruction file to separate rule files."""
+    explode_implementation(input_file, agent, Path.cwd())

@@ -25,13 +25,13 @@ class OpenCodeAgent(BaseAgent):
     mcp_root_key = "mcp"
 
     def bundle_rules(
-        self, output_file: Path, section_globs: dict[str, str | None]
+        self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
         """OpenCode doesn't support rules."""
         return False
 
     def bundle_commands(
-        self, output_file: Path, section_globs: dict[str, str | None]
+        self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
         """Bundle OpenCode command files (.md) into a single output file."""
         commands_dir = self.commands_dir
@@ -50,7 +50,9 @@ class OpenCodeAgent(BaseAgent):
         if not command_files:
             return False
 
-        ordered_commands = get_ordered_files(command_files, list(section_globs.keys()))
+        ordered_commands = get_ordered_files(
+            command_files, list(section_globs.keys()) if section_globs else None
+        )
 
         content_parts: list[str] = []
         for command_file in ordered_commands:
@@ -58,7 +60,9 @@ class OpenCodeAgent(BaseAgent):
             if not content:
                 continue
 
-            header = resolve_header_from_stem(command_file.stem, section_globs)
+            header = resolve_header_from_stem(
+                command_file.stem, section_globs if section_globs else {}
+            )
             content_parts.append(f"## {header}\n\n")
             content_parts.append(content)
             content_parts.append("\n\n")

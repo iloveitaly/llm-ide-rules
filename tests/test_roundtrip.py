@@ -332,54 +332,6 @@ It should be treated as always-apply.
         ) == normalize_whitespace(roundtrip_sections["Custom Unmapped Section"])
 
 
-def test_roundtrip_with_custom_config():
-    """Test round-trip with custom configuration file."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        custom_config = """{
-  "section_globs": {
-    "Python": "**/*.py",
-    "CustomSection": "**/*.custom"
-  }
-}"""
-        Path("custom_config.json").write_text(custom_config)
-
-        original_content = """# Sample Instructions
-
-## Python
-
-Python rules.
-
-## CustomSection
-
-Custom section rules.
-"""
-
-        Path("instructions.md").write_text(original_content)
-
-        explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--config", "custom_config.json"]
-        )
-        assert explode_result.exit_code == 0
-
-        implode_result = runner.invoke(
-            app, ["implode", "cursor", "roundtrip.md", "--config", "custom_config.json"]
-        )
-        assert implode_result.exit_code == 0
-
-        roundtrip_content = Path("roundtrip.md").read_text()
-
-        orig_sections = extract_sections(original_content)
-        roundtrip_sections = extract_sections(roundtrip_content)
-
-        # Verify sections are preserved
-        assert len(orig_sections) == len(roundtrip_sections)
-        assert set(orig_sections.keys()) == set(roundtrip_sections.keys())
-
-
 def test_roundtrip_preserves_multiline_content():
     """Test that round-trip preserves multi-line and formatted content."""
     runner = CliRunner()

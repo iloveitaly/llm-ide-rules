@@ -15,7 +15,7 @@ def test_explode_help():
     result = runner.invoke(app, ["explode", "--help"])
     assert result.exit_code == 0
     assert "Convert instruction file to separate rule files" in result.stdout
-    assert "config" in result.stdout
+    assert "agent" in result.stdout
 
 
 def test_explode_basic_functionality():
@@ -58,7 +58,7 @@ Here are React rules for frontend development.
 
         content = Path(".cursor/rules/python.mdc").read_text()
         assert "Here are Python rules for development" in content
-        assert "**/*.py" in content
+        assert "alwaysApply: true" in content
 
 
 def test_explode_with_commands_file():
@@ -134,42 +134,42 @@ This section is not in sections.json so it should be treated as always-apply.
         assert "This section is not in sections.json" in content
 
 
-def test_explode_with_custom_config():
-    """Test explode with custom configuration file."""
+def test_explode_with_inline_globs():
+    """Test explode with inline glob directives."""
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
 
-        custom_config = """{
-  "section_globs": {
-    "Python": "**/*.py",
-    "CustomSection": "**/*.custom"
-  }
-}"""
-        Path("custom_config.json").write_text(custom_config)
-
         instructions_content = """# Sample Instructions
 
 ## Python
+globs: **/*.py
 
 Here are Python rules.
 
 ## CustomSection
+globs: **/*.custom
 
 Here are custom rules.
 """
 
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(
-            app, ["explode", "instructions.md", "--config", "custom_config.json"]
-        )
+        result = runner.invoke(app, ["explode", "instructions.md"])
 
         assert result.exit_code == 0
 
         assert Path(".cursor/rules/python.mdc").exists()
         assert Path(".cursor/rules/customsection.mdc").exists()
+
+        python_content = Path(".cursor/rules/python.mdc").read_text()
+        assert "**/*.py" in python_content
+        assert "Here are Python rules" in python_content
+
+        custom_content = Path(".cursor/rules/customsection.mdc").read_text()
+        assert "**/*.custom" in custom_content
+        assert "Here are custom rules" in custom_content
 
 
 def test_explode_nonexistent_file():
@@ -182,6 +182,7 @@ def test_explode_nonexistent_file():
         result = runner.invoke(app, ["explode", "nonexistent.md"])
 
         assert result.exit_code == 1
+
 
 def test_explode_generates_root_docs():
     """Test that explode generates CLAUDE.md and GEMINI.md."""
@@ -205,7 +206,7 @@ Here are unmapped rules.
         result = runner.invoke(app, ["explode", "instructions.md"])
 
         assert result.exit_code == 0
-        
+
         # Check CLAUDE.md
         claude_md = Path("CLAUDE.md")
         assert claude_md.exists()
@@ -214,7 +215,7 @@ Here are unmapped rules.
         assert "Here are Python rules." in claude_content
         assert "## Unmapped" in claude_content
         assert "Here are unmapped rules." in claude_content
-        
+
         # Check GEMINI.md
         gemini_md = Path("GEMINI.md")
         assert gemini_md.exists()

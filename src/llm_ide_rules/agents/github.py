@@ -28,7 +28,7 @@ class GitHubAgent(BaseAgent):
     mcp_project_path = ".copilot/mcp-config.json"
 
     def bundle_rules(
-        self, output_file: Path, section_globs: dict[str, str | None]
+        self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
         """Bundle GitHub instruction files into a single output file."""
         rules_dir = self.rules_dir
@@ -46,7 +46,7 @@ class GitHubAgent(BaseAgent):
         instr_files = list(instructions_path.glob(f"*{rule_ext}"))
 
         ordered_instructions = get_ordered_files_github(
-            instr_files, list(section_globs.keys())
+            instr_files, list(section_globs.keys()) if section_globs else None
         )
 
         content_parts: list[str] = []
@@ -64,7 +64,9 @@ class GitHubAgent(BaseAgent):
             content = strip_yaml_frontmatter(content)
             content = strip_header(content)
             base_stem = instr_file.stem.replace(".instructions", "")
-            header = resolve_header_from_stem(base_stem, section_globs)
+            header = resolve_header_from_stem(
+                base_stem, section_globs if section_globs else {}
+            )
             content_parts.append(f"## {header}\n\n")
             content_parts.append(content)
             content_parts.append("\n\n")
@@ -76,7 +78,7 @@ class GitHubAgent(BaseAgent):
         return True
 
     def bundle_commands(
-        self, output_file: Path, section_globs: dict[str, str | None]
+        self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
         """Bundle GitHub prompt files into a single output file."""
         commands_dir = self.commands_dir
@@ -101,11 +103,12 @@ class GitHubAgent(BaseAgent):
             prompt_dict[base_stem] = f
 
         ordered_prompts = []
-        for section_name in section_globs.keys():
-            filename = header_to_filename(section_name)
-            if filename in prompt_dict:
-                ordered_prompts.append(prompt_dict[filename])
-                del prompt_dict[filename]
+        if section_globs:
+            for section_name in section_globs.keys():
+                filename = header_to_filename(section_name)
+                if filename in prompt_dict:
+                    ordered_prompts.append(prompt_dict[filename])
+                    del prompt_dict[filename]
 
         remaining_prompts = sorted(prompt_dict.values(), key=lambda p: p.name)
         ordered_prompts.extend(remaining_prompts)
@@ -119,7 +122,9 @@ class GitHubAgent(BaseAgent):
             content = strip_yaml_frontmatter(content)
             content = strip_header(content)
             base_stem = prompt_file.stem.replace(".prompt", "")
-            header = resolve_header_from_stem(base_stem, section_globs)
+            header = resolve_header_from_stem(
+                base_stem, section_globs if section_globs else {}
+            )
             content_parts.append(f"## {header}\n\n")
             content_parts.append(content)
             content_parts.append("\n\n")

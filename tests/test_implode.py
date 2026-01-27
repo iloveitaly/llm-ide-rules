@@ -22,7 +22,6 @@ def test_implode_cursor_help():
     result = runner.invoke(app, ["implode", "cursor", "--help"])
     assert result.exit_code == 0
     assert "Bundle Cursor rules" in result.stdout
-    assert "config" in result.stdout
 
 
 def test_implode_github_help():
@@ -31,7 +30,6 @@ def test_implode_github_help():
     result = runner.invoke(app, ["implode", "github", "--help"])
     assert result.exit_code == 0
     assert "Bundle GitHub" in result.stdout
-    assert "config" in result.stdout
 
 
 def test_implode_cursor_basic_functionality():
@@ -259,56 +257,6 @@ def test_implode_github_missing_directory():
 
         # Should fail with error
         assert result.exit_code == 1
-
-
-def test_implode_with_custom_config():
-    """Test implode cursor with custom configuration file."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        # Create custom config JSON
-        custom_config = """{
-  "section_globs": {
-    "Python": "**/*.py",
-    "CustomSection": "**/*.custom"
-  }
-}"""
-        with open("custom_config.json", "w") as f:
-            f.write(custom_config)
-
-        # Create .cursor/rules directory with sample files
-        cursor_rules_dir = Path(".cursor/rules")
-        cursor_rules_dir.mkdir(parents=True)
-
-        with open(cursor_rules_dir / "python.mdc", "w") as f:
-            f.write("""---
-name: Python
----
-
-Python rules.""")
-
-        with open(cursor_rules_dir / "customsection.mdc", "w") as f:
-            f.write("""---
-name: CustomSection
----
-
-Custom rules.""")
-
-        # Run implode cursor command with custom config
-        result = runner.invoke(
-            app, ["implode", "cursor", "bundled.md", "--config", "custom_config.json"]
-        )
-
-        # Check command succeeds
-        assert result.exit_code == 0
-
-        # Check that output file contains sections in the correct order
-        with open("bundled.md", "r") as f:
-            content = f.read()
-            assert "## Python" in content
-            assert "## CustomSection" in content
 
 
 def test_implode_main_no_args():

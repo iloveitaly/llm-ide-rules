@@ -1,13 +1,8 @@
 """Test constants module functionality."""
 
-import json
-import tempfile
-from pathlib import Path
-
 from llm_ide_rules.constants import (
     filename_to_header,
     header_to_filename,
-    load_section_globs,
 )
 
 
@@ -49,93 +44,6 @@ def test_filename_to_header_already_capitalized():
     """Test converting already capitalized filenames."""
     assert filename_to_header("Python") == "Python"
     assert filename_to_header("FastAPI") == "Fastapi"
-
-
-def test_load_section_globs_default():
-    """Test loading section globs from default config."""
-    globs = load_section_globs()
-
-    assert "Python" in globs
-    assert globs["Python"] == "**/*.py,pyproject.toml"
-    assert "React" in globs
-    assert globs["React"] == "**/*.tsx"
-    assert "FastAPI" in globs
-    assert "TypeScript" in globs
-    assert "Shell" in globs
-
-
-def test_load_section_globs_preserves_capitalization():
-    """Test that section_globs preserves special capitalization."""
-    globs = load_section_globs()
-
-    assert "FastAPI" in globs
-    assert "React Router" in globs
-    assert "Python App" in globs
-
-
-def test_load_section_globs_custom_config():
-    """Test loading section globs from custom configuration file."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        custom_config = {
-            "section_globs": {
-                "Python": "**/*.py",
-                "CustomSection": "**/*.custom",
-                "Another Section": "**/*.another",
-            }
-        }
-
-        config_path = Path(temp_dir) / "custom_config.json"
-        config_path.write_text(json.dumps(custom_config))
-
-        globs = load_section_globs(str(config_path))
-
-        assert len(globs) == 3
-        assert globs["Python"] == "**/*.py"
-        assert globs["CustomSection"] == "**/*.custom"
-        assert globs["Another Section"] == "**/*.another"
-
-
-def test_load_section_globs_custom_config_overrides_default():
-    """Test that custom config completely overrides default."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        custom_config = {"section_globs": {"OnlyThis": "**/*.only"}}
-
-        config_path = Path(temp_dir) / "custom_config.json"
-        config_path.write_text(json.dumps(custom_config))
-
-        globs = load_section_globs(str(config_path))
-
-        assert len(globs) == 1
-        assert "OnlyThis" in globs
-        assert "Python" not in globs
-        assert "React" not in globs
-
-
-def test_load_section_globs_nonexistent_custom_config():
-    """Test loading with nonexistent custom config falls back to default."""
-    globs = load_section_globs("/nonexistent/path.json")
-
-    assert "Python" in globs
-    assert "React" in globs
-
-
-def test_load_section_globs_with_none_values():
-    """Test that section globs can have None values for prompts."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        custom_config = {
-            "section_globs": {
-                "Python": "**/*.py",
-                "SomePrompt": None,
-            }
-        }
-
-        config_path = Path(temp_dir) / "custom_config.json"
-        config_path.write_text(json.dumps(custom_config))
-
-        globs = load_section_globs(str(config_path))
-
-        assert globs["Python"] == "**/*.py"
-        assert globs["SomePrompt"] is None
 
 
 def test_header_to_filename_roundtrip():

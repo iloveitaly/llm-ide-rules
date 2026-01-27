@@ -9,6 +9,8 @@ import requests
 import typer
 from typing_extensions import Annotated
 
+from llm_ide_rules.commands.explode import explode_implementation
+from llm_ide_rules.constants import VALID_AGENTS
 from llm_ide_rules.log import log
 
 DEFAULT_REPO = "iloveitaly/llm-ide-rules"
@@ -38,31 +40,34 @@ def normalize_repo(repo: str) -> str:
 
 
 # Define what files/directories each instruction type includes
+# For agents supported by 'explode' (cursor, github, gemini, claude, opencode),
+# we don't download specific directories anymore. Instead, we download the source
+# files (instructions.md, commands.md) and generate them locally using explode.
 INSTRUCTION_TYPES = {
     "cursor": {
-        "directories": [".cursor/rules", ".cursor/commands"],
+        "directories": [],
         "files": [],
-        "include_patterns": ["*.mdc", "*.md"],
+        "include_patterns": [],
     },
     "github": {
-        "directories": [".github/instructions", ".github/prompts"],
-        "files": [".github/copilot-instructions.md"],
-        "include_patterns": ["*.instructions.md", "*.prompt.md"],
+        "directories": [],
+        "files": [],
+        "include_patterns": [],
     },
     "gemini": {
-        "directories": [".gemini/commands"],
+        "directories": [],
         "files": [],
-        "include_patterns": ["*.toml"],
+        "include_patterns": [],
     },
     "claude": {
-        "directories": [".claude/commands"],
+        "directories": [],
         "files": [],
-        "include_patterns": ["*.md"],
+        "include_patterns": [],
     },
     "opencode": {
-        "directories": [".opencode/commands"],
+        "directories": [],
         "files": [],
-        "include_patterns": ["*.md"],
+        "include_patterns": [],
     },
     "agent": {"directories": [], "files": ["AGENT.md"]},
     "agents": {"directories": [], "files": [], "recursive_files": ["AGENTS.md"]},
@@ -267,7 +272,10 @@ def copy_directory_contents(
                         break
 
                 if not matched_include:
-                    log.debug("skipping file (not matched in include_patterns)", file=relative_str)
+                    log.debug(
+                        "skipping file (not matched in include_patterns)",
+                        file=relative_str,
+                    )
                     continue
 
             target_file = target_dir / relative_path
@@ -348,13 +356,58 @@ def download_main(
         # Copy instruction files
         copied_items = copy_instruction_files(repo_dir, instruction_types, target_path)
 
+        # Check for source files (instructions.md, commands.md) and copy them if available
+        # These are needed for 'explode' logic
+        source_files = ["instructions.md", "commands.md"]
+        sources_copied = False
+
+        # Only copy source files if we have at least one agent that uses explode
+        has_explode_agent = any(t in VALID_AGENTS for t in instruction_types)
+
+        if has_explode_agent:
+            for source_file in source_files:
+                src = repo_dir / source_file
+                dst = target_path / source_file
+                if src.exists():
+                    log.info("copying source file", source=str(src), target=str(dst))
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    dst.write_bytes(src.read_bytes())
+                    copied_items.append(source_file)
+                    sources_copied = True
+
+        # Generate rule files locally for supported agents
+        explodable_agents = [t for t in instruction_types if t in VALID_AGENTS]
+
+        if explodable_agents:
+            if not sources_copied:
+                # Check if they existed in target already?
+                if not (target_path / "instructions.md").exists():
+                    log.warning(
+                        "source file instructions.md missing, generation might fail"
+                    )
+
+            for agent in explodable_agents:
+                log.info("generating rules locally", agent=agent)
+                try:
+                    explode_implementation(
+                        input_file="instructions.md",
+                        agent=agent,
+                        working_dir=target_path,
+                    )
+                    copied_items.append(f"(generated) {agent} rules")
+                except Exception as e:
+                    log.error("failed to generate rules", agent=agent, error=str(e))
+                    typer.echo(
+                        f"Warning: Failed to generate rules for {agent}: {e}", err=True
+                    )
+
         if copied_items:
-            success_msg = f"Downloaded {len(copied_items)} items to {target_path}:"
+            success_msg = f"Downloaded/Generated items in {target_path}:"
             typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
             for item in copied_items:
                 typer.echo(f"  - {item}")
         else:
-            log.warning("no files were copied")
+            log.warning("no files were copied or generated")
             typer.echo("No matching instruction files found in the repository.")
 
     finally:
