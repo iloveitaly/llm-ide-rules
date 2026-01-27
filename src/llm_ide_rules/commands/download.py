@@ -71,7 +71,7 @@ INSTRUCTION_TYPES = {
         "include_patterns": [],
     },
     "agent": {"directories": [], "files": ["AGENT.md"]},
-    "agents": {"directories": [], "files": [], "recursive_files": ["AGENTS.md"]},
+    "agents": {"directories": [], "files": ["AGENTS.md"]},
 }
 
 # Default types to download when no specific types are specified

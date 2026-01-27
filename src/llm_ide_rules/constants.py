@@ -1,6 +1,6 @@
 """Shared constants for explode and implode functionality."""
 
-VALID_AGENTS = ["cursor", "github", "claude", "gemini", "opencode", "all"]
+VALID_AGENTS = ["cursor", "github", "claude", "gemini", "opencode", "agents", "all"]
 
 
 def header_to_filename(header: str) -> str:

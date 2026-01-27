@@ -106,11 +106,14 @@ def explode_implementation(
             rules_dir.mkdir(parents=True, exist_ok=True)
             commands_dir.mkdir(parents=True, exist_ok=True)
             agent_dirs[agent_name] = {"rules": rules_dir, "commands": commands_dir}
-        else:
+        elif agent_instances[agent_name].commands_dir:
             # claude, gemini, and opencode only have commands
             commands_dir = working_dir / agent_instances[agent_name].commands_dir
             commands_dir.mkdir(parents=True, exist_ok=True)
             agent_dirs[agent_name] = {"commands": commands_dir}
+        else:
+            # agents has neither rules nor commands dirs (only generates root doc)
+            agent_dirs[agent_name] = {}
 
     input_path = working_dir / input_file
 
@@ -239,15 +242,22 @@ alwaysApply: true
             log_data[f"{agent_name}_rules"] = str(agent_dirs[agent_name]["rules"])
             log_data[f"{agent_name}_commands"] = str(agent_dirs[agent_name]["commands"])
             created_dirs.append(f".{agent_name}/")
-        else:
+        elif agent_dirs[agent_name]:
+            # Has commands directory
             log_data[f"{agent_name}_commands"] = str(agent_dirs[agent_name]["commands"])
             created_dirs.append(f".{agent_name}/")
+        # else: agent has no directories (e.g., agents which only generates root doc)
 
-    if len(created_dirs) == 1:
-        success_msg = f"Created files in {created_dirs[0]} directory"
-        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+    if created_dirs:
+        if len(created_dirs) == 1:
+            success_msg = f"Created files in {created_dirs[0]} directory"
+            typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+        else:
+            success_msg = f"Created files in {', '.join(created_dirs)} directories"
+            typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
-        success_msg = f"Created files in {', '.join(created_dirs)} directories"
+        # No directories created (e.g., agents that only generate root docs)
+        success_msg = "Created root documentation files"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
 
 

@@ -56,21 +56,18 @@ def test_find_files_to_delete_gemini():
         assert files[0] == gemini_file
 
 
-def test_find_files_to_delete_agents_recursive():
-    """Test finding AGENTS.md files recursively."""
+def test_find_files_to_delete_agents():
+    """Test finding AGENTS.md file."""
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
 
         (temp_path / "AGENTS.md").write_text("root")
-        subdir = temp_path / "subdir"
-        subdir.mkdir()
-        (subdir / "AGENTS.md").write_text("nested")
 
         dirs, files = find_files_to_delete(["agents"], temp_path)
 
         assert len(dirs) == 0
-        assert len(files) == 2
-        assert all(f.name == "AGENTS.md" for f in files)
+        assert len(files) == 1
+        assert files[0] == temp_path / "AGENTS.md"
 
 
 def test_find_files_to_delete_nonexistent():

@@ -288,70 +288,13 @@ def test_download_with_full_github_url(mock_zipfile, mock_requests):
 
 
 def test_agents_instruction_type_configuration():
-    """Test that agents instruction type has recursive_files configured."""
+    """Test that agents instruction type works like other explode agents."""
     from llm_ide_rules.commands.download import INSTRUCTION_TYPES
 
     agents_config = INSTRUCTION_TYPES["agents"]
-    assert "recursive_files" in agents_config
-    assert "AGENTS.md" in agents_config["recursive_files"]
     assert agents_config["directories"] == []
-    assert agents_config["files"] == []
-
-
-@patch("llm_ide_rules.commands.download.requests.get")
-@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
-def test_download_agents_with_directory_structure(mock_zipfile, mock_requests):
-    """Test downloading AGENTS.md files with preserved directory structure."""
-    from llm_ide_rules.commands.download import copy_recursive_files
-
-    # Mock the HTTP request
-    mock_response = Mock()
-    mock_response.content = b"fake zip content"
-    mock_response.raise_for_status = Mock()
-    mock_requests.return_value = mock_response
-
-    # Mock the zipfile extraction
-    mock_zip_instance = Mock()
-    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        # Create a fake extracted repo structure for the mock
-        repo_dir = Path("repo")
-        repo_dir.mkdir()
-
-        # Create AGENTS.md files in different locations
-        (repo_dir / "AGENTS.md").write_text("Root agents file")
-
-        subdir = repo_dir / "docs"
-        subdir.mkdir()
-        (subdir / "AGENTS.md").write_text("Docs agents file")
-
-        nested_dir = repo_dir / "project" / "config"
-        nested_dir.mkdir(parents=True)
-        (nested_dir / "AGENTS.md").write_text("Nested agents file")
-
-        # Create target directory with some existing structure
-        target_dir = Path("target")
-        target_dir.mkdir()
-
-        # Create matching directory structure in target (for successful copies)
-        (target_dir / "docs").mkdir()
-
-        # Test the recursive file copy function directly
-        copied_items = copy_recursive_files(repo_dir, target_dir, "AGENTS.md")
-
-        # Should copy root file and docs file, but not nested file (no matching dir)
-        assert len(copied_items) == 2
-        assert "AGENTS.md" in copied_items
-        assert "docs/AGENTS.md" in copied_items
-        assert "project/config/AGENTS.md" not in copied_items
-
-        # Verify files were actually copied
-        assert (target_dir / "AGENTS.md").exists()
-        assert (target_dir / "docs" / "AGENTS.md").exists()
-        assert not (target_dir / "project" / "config" / "AGENTS.md").exists()
+    assert agents_config["files"] == ["AGENTS.md"]
+    assert "recursive_files" not in agents_config
 
 
 def test_copy_recursive_files_warning_for_missing_directories():
