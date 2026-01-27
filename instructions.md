@@ -48,6 +48,7 @@ Pay careful attention to these instructions when running tests, generating datab
 Look at @local.md
 
 ## Python
+globs: **/*.py,pyproject.toml
 
 When writing Python:
 
@@ -106,6 +107,7 @@ params = f.compact({"city": city, "stateCode": stateCode})
 * DateTime mutation should explicitly opt in to a specific timezone `SystemDateTime.now().add(days=-7)`
 
 ## Python App
+globs: **/*.py
 
 - `app/lib/` is for code that is not specified to this application and with some effort could extracted into a external package.
 - `app/helpers` is for larger reusable modules that if they weren't specific to this application, could be extracted into their own package.
@@ -178,6 +180,7 @@ class Distribution(
 ```
 
 ## Pytest Integration Tests
+globs: tests/integration/**/*.py
 
 - Look to tests/factories.py to generate any required database state
   - Here's an example of how to create + persist a factory `DistributionFactory.build(domain=PYTHON_TEST_SERVER_HOST).save()`
@@ -196,6 +199,7 @@ class Distribution(
 - Prefer simple locators. If a `filter`, `or_`, etc is required to capture a button in multiple states it indicates something is wrong in the code.
 
 ## Pytest Tests
+globs: tests/**/*.py
 
 - Look to @tests/factories.py to generate any required database state
   - For example, to create and persist a `Distribution` record `DistributionFactory.save()`
@@ -209,12 +213,14 @@ class Distribution(
 - Omit obvious docstrings and comments.
 
 ## Python Route Tests
+globs: tests/routes/**/*.py
 
 - Polyfactory is the [factory](tests/factories.py) library in use. `ModelNameFactory.build()` is how you generate factories.
 - Use `assert_status(response)` instead of `assert response.status_code == status.HTTP_200_OK`
 - Do not reference routes by raw strings. Instead of `client.get("/the/route/path")` use `client.get(api_app.url_path_for("route_method_name"))`
 
 ## Alembic Migrations
+globs: migrations/versions/*.py
 
 ### Default Content for New Non-Nullable Columns
 
@@ -263,6 +269,7 @@ op.execute(
 ```
 
 ## FastAPI
+globs: app/routes/**/*.py
 
 - When throwing a `HTTPException`, do not add a `detail=` and use a named status code (`status.HTTP_400_BAD_REQUEST`)
 - Do not return a `dict`, instead create a `class RouteNameResponse`
@@ -272,6 +279,7 @@ op.execute(
 - Use `model_id: Annotated[TypeIDType, Path()]` to represent a model ID as a URL path parameter
 
 ## React
+globs: **/*.tsx
 
 - You are using the latest version of React (v19)
 - Do not write any backend code. Just frontend logic.
@@ -373,6 +381,7 @@ return (
 * Use `text-blue-link` for styling any simple `<a>` tags
 
 ## React Router
+globs: web/app/routes/**/*.tsx
 
 - You are using the latest version of React Router (v7).
 - Always include the suffix `Page` when naming the default export of a route.
@@ -462,10 +471,12 @@ function TheComponent() {
 ```
 
 ## Shell
+globs: **/*.sh
 
 - Assume zsh for any shell scripts. The latest version of modern utilities like ripgrep (rg), fdfind (fd), bat, httpie (http), zq (zed), jq, procs, rsync are installed and you can request I install additional utilities.
 
 ## TypeScript
+globs: **/*.ts,**/*.tsx
 
 - Use `pnpm` or `pnpx` and not `npm` or `npx`.
   - Use `just js_shadcn`, `just pnpm`, and `just js_lint` instead of executing these operations exactly. @just/javascript.just
