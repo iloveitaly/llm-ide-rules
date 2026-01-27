@@ -3,6 +3,7 @@ applyTo: "**/*.py"
 ---
 ## Python App
 
+
 - `app/lib/` is for code that is not specified to this application and with some effort could extracted into a external package.
 - `app/helpers` is for larger reusable modules that if they weren't specific to this application, could be extracted into their own package.
 - `app/utils` are small helper functions that are specific to a particular page or area of the application.

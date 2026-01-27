@@ -3,6 +3,7 @@ applyTo: "**/*.py"
 ---
 ## Python
 
+
 When writing Python:
 
 * Assume the latest python, version 3.13.

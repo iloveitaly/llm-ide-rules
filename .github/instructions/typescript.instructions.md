@@ -1,7 +1,8 @@
 ---
 applyTo: "**/*.ts,**/*.tsx"
 ---
-## TypeScript
+## Typescript
+
 
 - Use `pnpm` or `pnpx` and not `npm` or `npx`.
   - Use `just js_shadcn`, `just pnpm`, and `just js_lint` instead of executing these operations exactly. @just/javascript.just

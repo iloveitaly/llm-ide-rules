@@ -1,9 +1,10 @@
 ---
 description:
-globs: **/*.py,pyproject.toml
+globs: **/*.py
 alwaysApply: false
 ---
 ## Python
+
 
 When writing Python:
 
