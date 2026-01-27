@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.7.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.6.0...v0.7.0) (2026-01-27)
+
+
+### Features
+
+* **download:** support include_patterns for instruction files ([a899d00](https://github.com/iloveitaly/llm-ide-rules/commit/a899d00cf1ab919228209eaf9637325cf69e52b0))
+* generate agent-specific root docs and parse markdown sections ([963b9e4](https://github.com/iloveitaly/llm-ide-rules/commit/963b9e4aa3e3082f5d663f6bd60d7f9b9ecadcff))
+
+
+### Bug Fixes
+
+* **markdown_parser:** handle glob directive case and spacing ([29af02a](https://github.com/iloveitaly/llm-ide-rules/commit/29af02a05725ca13b08d997207f89275be2234f0))
+
+
+### Documentation
+
+* add globs info for language and test sections ([5867c83](https://github.com/iloveitaly/llm-ide-rules/commit/5867c83de13c271adacce449c18bdddf35f06db0))
+* move db/orm instructions from python to python-app docs ([9284040](https://github.com/iloveitaly/llm-ide-rules/commit/928404077e04c37bfd4f644ae9655b106b31c6a0))
+* reorganize and clarify python app directory guidance ([d85611c](https://github.com/iloveitaly/llm-ide-rules/commit/d85611c3f9f8f605a85837ab53160a350ea11db1))
+
 ## [0.6.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.5.0...v0.6.0) (2026-01-26)
 
 
