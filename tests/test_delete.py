@@ -51,7 +51,7 @@ def test_find_files_to_delete_gemini():
         dirs, files = find_files_to_delete(["gemini"], temp_path)
 
         assert len(dirs) == 1
-        assert dirs[0] == gemini_dir
+        assert dirs[0] == temp_path / ".gemini"  # Deletes parent directory
         assert len(files) == 1
         assert files[0] == gemini_file
 
@@ -190,7 +190,8 @@ def test_delete_default_types():
         temp_path = Path(temp_dir)
 
         (temp_path / ".cursor").mkdir()
-        (temp_path / ".github").mkdir()
+        (temp_path / ".github" / "instructions").mkdir(parents=True)
+        (temp_path / ".github" / "prompts").mkdir(parents=True)
         (temp_path / "GEMINI.md").write_text("test")
         (temp_path / "CLAUDE.md").write_text("test")
         (temp_path / "AGENT.md").write_text("test")
@@ -200,7 +201,8 @@ def test_delete_default_types():
         assert result.exit_code == 0
         assert "Successfully deleted" in result.stdout
         assert not (temp_path / ".cursor").exists()
-        assert not (temp_path / ".github").exists()
+        assert not (temp_path / ".github" / "instructions").exists()
+        assert not (temp_path / ".github" / "prompts").exists()
         assert not (temp_path / "GEMINI.md").exists()
         assert not (temp_path / "CLAUDE.md").exists()
         assert not (temp_path / "AGENT.md").exists()

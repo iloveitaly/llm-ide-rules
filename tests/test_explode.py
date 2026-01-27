@@ -172,6 +172,73 @@ Here are custom rules.
         assert "Here are custom rules" in custom_content
 
 
+def test_explode_glob_directive_parsing():
+    """Test glob directive parsing with various formats."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        instructions_content = """# Sample Instructions
+
+## Python
+globs: **/*.py
+
+Here are Python rules.
+
+## React
+Globs: **/*.tsx
+
+Here are React rules (uppercase G).
+
+## TypeScript
+GLOBS: **/*.ts
+
+Here are TypeScript rules (all caps).
+
+## NoSpace
+globs:**/*.nospace
+
+This should NOT be parsed as a glob (missing space).
+
+## ExtraWhitespace
+globs:   **/*.whitespace
+
+This should work with extra whitespace after colon.
+"""
+
+        Path("instructions.md").write_text(instructions_content)
+
+        result = runner.invoke(app, ["explode", "instructions.md"])
+
+        assert result.exit_code == 0
+
+        # Test lowercase "globs:"
+        python_content = Path(".cursor/rules/python.mdc").read_text()
+        assert "**/*.py" in python_content
+        assert "Here are Python rules" in python_content
+
+        # Test uppercase "Globs:"
+        react_content = Path(".cursor/rules/react.mdc").read_text()
+        assert "**/*.tsx" in react_content
+        assert "Here are React rules" in react_content
+
+        # Test all caps "GLOBS:"
+        typescript_content = Path(".cursor/rules/typescript.mdc").read_text()
+        assert "**/*.ts" in typescript_content
+        assert "Here are TypeScript rules" in typescript_content
+
+        # Test missing space - should be treated as alwaysApply (no glob pattern)
+        nospace_content = Path(".cursor/rules/nospace.mdc").read_text()
+        assert "alwaysApply: true" in nospace_content
+        assert "globs:**/*.nospace" in nospace_content  # Should keep the malformed line
+
+        # Test extra whitespace - should still parse correctly
+        whitespace_content = Path(".cursor/rules/extrawhitespace.mdc").read_text()
+        assert "**/*.whitespace" in whitespace_content
+        assert "This should work with extra whitespace" in whitespace_content
+
+
 def test_explode_nonexistent_file():
     """Test explode command with nonexistent input file."""
     runner = CliRunner()

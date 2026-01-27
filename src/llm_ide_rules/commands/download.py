@@ -43,29 +43,30 @@ def normalize_repo(repo: str) -> str:
 # For agents supported by 'explode' (cursor, github, gemini, claude, opencode),
 # we don't download specific directories anymore. Instead, we download the source
 # files (instructions.md, commands.md) and generate them locally using explode.
+# The directories listed here are what gets created by explode and what delete removes.
 INSTRUCTION_TYPES = {
     "cursor": {
-        "directories": [],
+        "directories": [".cursor"],
         "files": [],
         "include_patterns": [],
     },
     "github": {
-        "directories": [],
-        "files": [],
+        "directories": [".github/instructions", ".github/prompts"],
+        "files": [".github/copilot-instructions.md"],
         "include_patterns": [],
     },
     "gemini": {
-        "directories": [],
-        "files": [],
+        "directories": [".gemini"],
+        "files": ["GEMINI.md"],
         "include_patterns": [],
     },
     "claude": {
-        "directories": [],
-        "files": [],
+        "directories": [".claude"],
+        "files": ["CLAUDE.md"],
         "include_patterns": [],
     },
     "opencode": {
-        "directories": [],
+        "directories": [".opencode"],
         "files": [],
         "include_patterns": [],
     },

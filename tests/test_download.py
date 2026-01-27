@@ -180,17 +180,6 @@ def test_download_instruction_types_configuration():
             assert isinstance(config["recursive_files"], list)
 
 
-def test_download_include_patterns_configuration():
-    """Test that instruction types have proper include_patterns configured."""
-    from llm_ide_rules.commands.download import INSTRUCTION_TYPES
-
-    assert "*.mdc" in INSTRUCTION_TYPES["cursor"]["include_patterns"]
-    assert "*.instructions.md" in INSTRUCTION_TYPES["github"]["include_patterns"]
-    assert "*.toml" in INSTRUCTION_TYPES["gemini"]["include_patterns"]
-    assert "*.md" in INSTRUCTION_TYPES["claude"]["include_patterns"]
-    assert "*.md" in INSTRUCTION_TYPES["opencode"]["include_patterns"]
-
-
 def test_copy_directory_contents_with_include_patterns():
     """Test that copy_directory_contents correctly filters files using include_patterns."""
     from llm_ide_rules.commands.download import copy_directory_contents

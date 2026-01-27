@@ -44,8 +44,8 @@ def extract_glob_directive(
         if not line:
             continue
 
-        if line.startswith("globs:"):
-            glob_value = line[6:].strip()
+        if line.lower().startswith("globs: "):
+            glob_value = line[7:].strip()
             filtered_content = content_lines[:i] + content_lines[i + 1 :]
             return filtered_content, glob_value
 
