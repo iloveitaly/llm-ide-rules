@@ -161,7 +161,6 @@ def test_download_instruction_types_configuration():
         "gemini",
         "claude",
         "opencode",
-        "agent",
         "agents",
     ]
     assert all(t in INSTRUCTION_TYPES for t in expected_types)
