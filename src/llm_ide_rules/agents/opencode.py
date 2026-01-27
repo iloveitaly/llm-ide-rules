@@ -95,6 +95,7 @@ class OpenCodeAgent(BaseAgent):
         filepath = commands_dir / f"{filename}{extension}"
 
         trimmed = trim_content(content_lines)
+        filepath.parent.mkdir(parents=True, exist_ok=True)
         filepath.write_text("".join(trimmed))
 
     def transform_mcp_server(self, server: McpServer) -> dict:

@@ -56,18 +56,20 @@ class CursorAgent(BaseAgent):
             if not file_content:
                 continue
 
-            # Extract header from file content before stripping it
             lines = file_content.splitlines()
             extracted_header = None
+            glob_pattern = None
+
             for line in lines:
                 if line.startswith("## "):
                     extracted_header = line[3:].strip()
                     break
 
+            glob_pattern = self._extract_glob_from_frontmatter(file_content)
+
             content = strip_yaml_frontmatter(file_content)
             content = strip_header(content)
 
-            # Use extracted header if available, otherwise resolve from filename
             if extracted_header:
                 header = extracted_header
             else:
@@ -77,6 +79,8 @@ class CursorAgent(BaseAgent):
 
             if rule_file.stem != "general":
                 content_parts.append(f"## {header}\n\n")
+                if glob_pattern:
+                    content_parts.append(f"globs: {glob_pattern}\n\n")
 
             content_parts.append(content)
             content_parts.append("\n\n")
@@ -86,6 +90,21 @@ class CursorAgent(BaseAgent):
 
         output_file.write_text("".join(content_parts))
         return True
+
+    def _extract_glob_from_frontmatter(self, content: str) -> str | None:
+        """Extract glob pattern from YAML frontmatter."""
+        lines = content.splitlines()
+        if not lines or lines[0].strip() != "---":
+            return None
+
+        for i in range(1, len(lines)):
+            if lines[i].strip() == "---":
+                break
+            if lines[i].startswith("globs:"):
+                glob_value = lines[i][6:].strip()
+                return glob_value if glob_value else None
+
+        return None
 
     def bundle_commands(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
@@ -174,6 +193,7 @@ alwaysApply: true
         filepath = commands_dir / f"{filename}{extension}"
 
         trimmed = trim_content(content_lines)
+        filepath.parent.mkdir(parents=True, exist_ok=True)
         filepath.write_text("".join(trimmed))
 
     def write_prompt(

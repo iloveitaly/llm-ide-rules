@@ -124,6 +124,7 @@ class GeminiAgent(BaseAgent):
 
         # tomli-w will handle escaping and multiline strings automatically
         output = tomli_w.dumps(data)
+        filepath.parent.mkdir(parents=True, exist_ok=True)
         filepath.write_text(output)
 
     def transform_mcp_server(self, server: McpServer) -> dict:

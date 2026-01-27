@@ -278,6 +278,7 @@ def write_rule_file(path: Path, header_yaml: str, content_lines: list[str]) -> N
     """Write a rule file with front matter and content."""
     trimmed_content = trim_content(content_lines)
     output = header_yaml.strip() + "\n" + "".join(trimmed_content)
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(output)
 
 

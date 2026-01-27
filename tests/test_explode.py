@@ -44,11 +44,11 @@ Here are React rules for frontend development.
         assert "Created files in" in result.stdout
 
         assert Path(".cursor/rules").exists()
-        assert Path(".cursor/commands").exists()
+        assert not Path(".cursor/commands").exists()
         assert Path(".github/instructions").exists()
-        assert Path(".github/prompts").exists()
-        assert Path(".claude/commands").exists()
-        assert Path(".gemini/commands").exists()
+        assert not Path(".github/prompts").exists()
+        assert not Path(".claude/commands").exists()
+        assert not Path(".gemini/commands").exists()
 
         assert Path(".cursor/rules/python.mdc").exists()
         assert Path(".cursor/rules/react.mdc").exists()

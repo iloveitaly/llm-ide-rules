@@ -103,13 +103,10 @@ def explode_implementation(
             # These agents have both rules and commands
             rules_dir = working_dir / agent_instances[agent_name].rules_dir
             commands_dir = working_dir / agent_instances[agent_name].commands_dir
-            rules_dir.mkdir(parents=True, exist_ok=True)
-            commands_dir.mkdir(parents=True, exist_ok=True)
             agent_dirs[agent_name] = {"rules": rules_dir, "commands": commands_dir}
         elif agent_instances[agent_name].commands_dir:
             # claude, gemini, and opencode only have commands
             commands_dir = working_dir / agent_instances[agent_name].commands_dir
-            commands_dir.mkdir(parents=True, exist_ok=True)
             agent_dirs[agent_name] = {"commands": commands_dir}
         else:
             # agents has neither rules nor commands dirs (only generates root doc)

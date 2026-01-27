@@ -57,17 +57,21 @@ class GitHubAgent(BaseAgent):
                 content_parts.append("\n\n")
 
         for instr_file in ordered_instructions:
-            content = instr_file.read_text().strip()
-            if not content:
+            file_content = instr_file.read_text().strip()
+            if not file_content:
                 continue
 
-            content = strip_yaml_frontmatter(content)
+            apply_to_pattern = self._extract_apply_to_from_frontmatter(file_content)
+
+            content = strip_yaml_frontmatter(file_content)
             content = strip_header(content)
             base_stem = instr_file.stem.replace(".instructions", "")
             header = resolve_header_from_stem(
                 base_stem, section_globs if section_globs else {}
             )
             content_parts.append(f"## {header}\n\n")
+            if apply_to_pattern:
+                content_parts.append(f"globs: {apply_to_pattern}\n\n")
             content_parts.append(content)
             content_parts.append("\n\n")
 
@@ -76,6 +80,21 @@ class GitHubAgent(BaseAgent):
 
         output_file.write_text("".join(content_parts))
         return True
+
+    def _extract_apply_to_from_frontmatter(self, content: str) -> str | None:
+        """Extract applyTo pattern from YAML frontmatter."""
+        lines = content.splitlines()
+        if not lines or lines[0].strip() != "---":
+            return None
+
+        for i in range(1, len(lines)):
+            if lines[i].strip() == "---":
+                break
+            if lines[i].startswith("applyTo:"):
+                apply_to_value = lines[i][8:].strip().strip('"').strip("'")
+                return apply_to_value if apply_to_value else None
+
+        return None
 
     def bundle_commands(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
@@ -172,6 +191,7 @@ applyTo: "{glob_pattern}"
         )
 
         frontmatter = f"---\nmode: 'agent'\ndescription: '{description}'\n---\n"
+        filepath.parent.mkdir(parents=True, exist_ok=True)
         filepath.write_text(frontmatter + "".join(filtered_content))
 
     def write_general_instructions(

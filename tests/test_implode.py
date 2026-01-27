@@ -386,3 +386,152 @@ def test_implode_opencode_missing_directory():
 
         # Should fail with error
         assert result.exit_code == 1
+
+
+def test_implode_claude_from_subdirectory():
+    """Test that implode claude works when run from within the .claude directory."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        project_root = Path(temp_dir)
+
+        claude_commands_dir = project_root / ".claude" / "commands"
+        claude_commands_dir.mkdir(parents=True)
+
+        with open(claude_commands_dir / "fix-tests.md", "w") as f:
+            f.write("Here are instructions to fix tests.")
+
+        os.chdir(str(project_root / ".claude"))
+
+        result = runner.invoke(app, ["implode", "claude"])
+
+        assert result.exit_code == 0
+        assert "Bundled claude commands into commands.md" in result.stdout
+
+        output_file = project_root / "commands.md"
+        assert output_file.exists()
+
+        with open(output_file, "r") as f:
+            content = f.read()
+            assert "## Fix Tests" in content
+            assert "Here are instructions to fix tests." in content
+
+
+def test_implode_cursor_preserves_globs():
+    """Test that implode cursor preserves glob patterns from frontmatter."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        cursor_rules_dir = Path(".cursor/rules")
+        cursor_rules_dir.mkdir(parents=True)
+
+        with open(cursor_rules_dir / "python.mdc", "w") as f:
+            f.write("""---
+description: Python rules
+globs: "**/*.py"
+alwaysApply: false
+---
+
+## Python
+
+Here are Python rules for development.""")
+
+        with open(cursor_rules_dir / "typescript.mdc", "w") as f:
+            f.write("""---
+description: TypeScript rules
+globs: "**/*.ts"
+alwaysApply: false
+---
+
+## TypeScript
+
+Here are TypeScript rules for development.""")
+
+        result = runner.invoke(app, ["implode", "cursor", "bundled.md"])
+
+        assert result.exit_code == 0
+
+        with open("bundled.md", "r") as f:
+            content = f.read()
+            assert "## Python" in content
+            assert 'globs: "**/*.py"' in content or "globs: **/*.py" in content
+            assert "## TypeScript" in content
+            assert 'globs: "**/*.ts"' in content or "globs: **/*.ts" in content
+
+
+def test_implode_github_preserves_globs():
+    """Test that implode github preserves applyTo patterns from frontmatter."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        github_instructions_dir = Path(".github/instructions")
+        github_instructions_dir.mkdir(parents=True)
+
+        with open(github_instructions_dir / "python.instructions.md", "w") as f:
+            f.write("""---
+applyTo: "**/*.py"
+---
+
+## Python
+
+Here are Python instructions for development.""")
+
+        with open(github_instructions_dir / "javascript.instructions.md", "w") as f:
+            f.write("""---
+applyTo: "**/*.js"
+---
+
+## JavaScript
+
+Here are JavaScript instructions for development.""")
+
+        result = runner.invoke(app, ["implode", "github", "bundled-github.md"])
+
+        assert result.exit_code == 0
+
+        with open("bundled-github.md", "r") as f:
+            content = f.read()
+            assert "## Python" in content
+            assert "globs: **/*.py" in content
+            assert "## Javascript" in content
+            assert "globs: **/*.js" in content
+
+
+def test_explode_implode_roundtrip_preserves_globs():
+    """Test that globs are preserved through explode->implode roundtrip."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        original_content = """## Python
+
+globs: **/*.py
+
+Here are Python rules for development.
+
+## TypeScript
+
+globs: **/*.ts
+
+Here are TypeScript rules for development."""
+
+        with open("instructions.md", "w") as f:
+            f.write(original_content)
+
+        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
+        assert explode_result.exit_code == 0
+
+        implode_result = runner.invoke(app, ["implode", "cursor", "bundled.md"])
+        assert implode_result.exit_code == 0
+
+        with open("bundled.md", "r") as f:
+            bundled_content = f.read()
+            assert "## Python" in bundled_content
+            assert "globs: **/*.py" in bundled_content
+            assert "## TypeScript" in bundled_content
+            assert "globs: **/*.ts" in bundled_content

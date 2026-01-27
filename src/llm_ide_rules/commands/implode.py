@@ -9,6 +9,30 @@ from llm_ide_rules.agents import get_agent
 from llm_ide_rules.log import log
 
 
+def _find_base_dir(start_dir: Path, target_path: str) -> Path:
+    """Find the base directory by searching upward for the target path.
+
+    If we're currently in a subdirectory of the target path, return the appropriate parent.
+    Otherwise, return start_dir.
+    """
+    target_parts = Path(target_path).parts
+
+    if not target_parts:
+        return start_dir
+
+    current = start_dir
+    for _ in range(len(start_dir.parts)):
+        test_path = current / target_path
+        if test_path.exists():
+            return current
+
+        if current == current.parent:
+            break
+        current = current.parent
+
+    return start_dir
+
+
 def cursor(
     output: Annotated[
         str, typer.Argument(help="Output file for rules")
@@ -24,20 +48,22 @@ def cursor(
         log.error("cursor rules directory not configured")
         raise typer.Exit(1)
 
+    base_dir = _find_base_dir(cwd, rules_dir)
+
     log.info(
         "bundling cursor rules and commands",
         rules_dir=rules_dir,
         commands_dir=agent.commands_dir,
     )
 
-    rules_path = cwd / rules_dir
+    rules_path = base_dir / rules_dir
     if not rules_path.exists():
         log.error("cursor rules directory not found", rules_dir=str(rules_path))
         error_msg = f"Cursor rules directory not found: {rules_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
-    output_path = cwd / output
+    output_path = base_dir / output
     rules_written = agent.bundle_rules(output_path)
     if rules_written:
         success_msg = f"Bundled cursor rules into {output}"
@@ -46,7 +72,7 @@ def cursor(
         output_path.unlink(missing_ok=True)
         log.info("no cursor rules to bundle")
 
-    commands_output_path = cwd / "commands.md"
+    commands_output_path = base_dir / "commands.md"
     commands_written = agent.bundle_commands(commands_output_path)
     if commands_written:
         success_msg = "Bundled cursor commands into commands.md"
@@ -70,13 +96,15 @@ def github(
         log.error("github rules directory not configured")
         raise typer.Exit(1)
 
+    base_dir = _find_base_dir(cwd, rules_dir)
+
     log.info(
         "bundling github instructions and prompts",
         instructions_dir=rules_dir,
         prompts_dir=agent.commands_dir,
     )
 
-    rules_path = cwd / rules_dir
+    rules_path = base_dir / rules_dir
     if not rules_path.exists():
         log.error(
             "github instructions directory not found", instructions_dir=str(rules_path)
@@ -85,7 +113,7 @@ def github(
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
-    output_path = cwd / output
+    output_path = base_dir / output
     instructions_written = agent.bundle_rules(output_path)
     if instructions_written:
         success_msg = f"Bundled github instructions into {output}"
@@ -94,7 +122,7 @@ def github(
         output_path.unlink(missing_ok=True)
         log.info("no github instructions to bundle")
 
-    commands_output_path = cwd / "commands.md"
+    commands_output_path = base_dir / "commands.md"
     prompts_written = agent.bundle_commands(commands_output_path)
     if prompts_written:
         success_msg = "Bundled github prompts into commands.md"
@@ -116,12 +144,14 @@ def claude(
         log.error("claude code commands directory not configured")
         raise typer.Exit(1)
 
+    base_dir = _find_base_dir(cwd, commands_dir)
+
     log.info(
         "bundling claude code commands",
         commands_dir=commands_dir,
     )
 
-    commands_path = cwd / commands_dir
+    commands_path = base_dir / commands_dir
     if not commands_path.exists():
         log.error(
             "claude code commands directory not found", commands_dir=str(commands_path)
@@ -130,7 +160,7 @@ def claude(
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
-    output_path = cwd / output
+    output_path = base_dir / output
     commands_written = agent.bundle_commands(output_path)
     if commands_written:
         success_msg = f"Bundled claude commands into {output}"
@@ -153,12 +183,14 @@ def gemini(
         log.error("gemini cli commands directory not configured")
         raise typer.Exit(1)
 
+    base_dir = _find_base_dir(cwd, commands_dir)
+
     log.info(
         "bundling gemini cli commands",
         commands_dir=commands_dir,
     )
 
-    commands_path = cwd / commands_dir
+    commands_path = base_dir / commands_dir
     if not commands_path.exists():
         log.error(
             "gemini cli commands directory not found", commands_dir=str(commands_path)
@@ -167,7 +199,7 @@ def gemini(
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
-    output_path = cwd / output
+    output_path = base_dir / output
     commands_written = agent.bundle_commands(output_path)
     if commands_written:
         success_msg = f"Bundled gemini commands into {output}"
@@ -190,12 +222,14 @@ def opencode(
         log.error("opencode commands directory not configured")
         raise typer.Exit(1)
 
+    base_dir = _find_base_dir(cwd, commands_dir)
+
     log.info(
         "bundling opencode commands",
         commands_dir=commands_dir,
     )
 
-    commands_path = cwd / commands_dir
+    commands_path = base_dir / commands_dir
     if not commands_path.exists():
         log.error(
             "opencode commands directory not found", commands_dir=str(commands_path)
@@ -204,7 +238,7 @@ def opencode(
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
-    output_path = cwd / output
+    output_path = base_dir / output
     commands_written = agent.bundle_commands(output_path)
     if commands_written:
         success_msg = f"Bundled opencode commands into {output}"
