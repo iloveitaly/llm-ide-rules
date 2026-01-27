@@ -57,6 +57,10 @@ class BaseAgent(ABC):
         """Write a single command file."""
         ...
 
+    def configure_agents_md(self, base_dir: Path) -> None:
+        """Configure the agent to use AGENTS.md as context (default: no-op)."""
+        pass
+
     def generate_root_doc(
         self,
         general_lines: list[str],

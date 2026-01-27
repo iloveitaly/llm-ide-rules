@@ -176,3 +176,16 @@ class GeminiAgent(BaseAgent):
         content = self.build_root_doc_content(general_lines, rules_sections)
         if content.strip():
             (output_dir / "GEMINI.md").write_text(content)
+
+    def configure_agents_md(self, base_dir: Path) -> None:
+        """Configure Gemini CLI to use AGENTS.md."""
+        from llm_ide_rules.utils import modify_json_file
+
+        settings_path = base_dir / ".gemini" / "settings.json"
+        
+        # Based on research, generic context setting might be:
+        updates = {
+            "agent.instructionFile": "AGENTS.md"
+        }
+        
+        modify_json_file(settings_path, updates)

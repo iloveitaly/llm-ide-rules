@@ -230,3 +230,16 @@ applyTo: "{glob_pattern}"
             args=config.get("args", []),
             env=config.get("env"),
         )
+
+    def configure_agents_md(self, base_dir: Path) -> None:
+        """Configure VS Code to use AGENTS.md."""
+        from llm_ide_rules.utils import modify_json_file
+
+        settings_path = base_dir / ".vscode" / "settings.json"
+        
+        updates = {
+            "chat.useAgentsMdFile": True,
+            "chat.useNestedAgentsMdFiles": True
+        }
+        
+        modify_json_file(settings_path, updates)

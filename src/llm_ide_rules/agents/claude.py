@@ -107,3 +107,17 @@ class ClaudeAgent(BaseAgent):
         content = self.build_root_doc_content(general_lines, rules_sections)
         if content.strip():
             (output_dir / "CLAUDE.md").write_text(content)
+
+    def configure_agents_md(self, base_dir: Path) -> None:
+        """Create or update CLAUDE.md to include @AGENTS.md."""
+        claude_md = base_dir / "CLAUDE.md"
+        reference = "@AGENTS.md"
+        
+        if not claude_md.exists():
+            claude_md.write_text(f"{reference}\n")
+        else:
+            content = claude_md.read_text()
+            if reference not in content:
+                # Append to the end, ensuring newline
+                new_content = content.rstrip() + f"\n\n{reference}\n"
+                claude_md.write_text(new_content)

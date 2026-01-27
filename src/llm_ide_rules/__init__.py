@@ -12,6 +12,7 @@ from llm_ide_rules.commands.explode import explode_main
 from llm_ide_rules.commands.implode import cursor, github, claude, gemini, opencode
 from llm_ide_rules.commands.download import download_main
 from llm_ide_rules.commands.delete import delete_main
+from llm_ide_rules.commands.config import config_main
 from llm_ide_rules.commands.mcp import mcp_app
 
 __version__ = "0.7.0"
@@ -48,6 +49,7 @@ app.command("download", help="Download LLM instruction files from GitHub reposit
     download_main
 )
 app.command("delete", help="Remove downloaded LLM instruction files")(delete_main)
+app.command("config", help="Configure agents to use AGENTS.md")(config_main)
 
 # Create implode sub-typer
 implode_app = typer.Typer(help="Bundle rule files into a single instruction file")
