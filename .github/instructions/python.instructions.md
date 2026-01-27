@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.py,pyproject.toml"
+applyTo: "**/*.py"
 ---
 ## Python
 
