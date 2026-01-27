@@ -14,7 +14,7 @@ from llm_ide_rules.commands.download import download_main
 from llm_ide_rules.commands.delete import delete_main
 from llm_ide_rules.commands.mcp import mcp_app
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 app = typer.Typer(
     name="llm_ide_rules",
