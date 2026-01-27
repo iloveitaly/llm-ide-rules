@@ -103,7 +103,9 @@ def test_delete_with_yes_flag():
         cursor_dir.mkdir()
         (cursor_dir / "test.txt").write_text("test")
 
-        result = runner.invoke(app, ["delete", "cursor", "--target", temp_dir, "--yes"])
+        result = runner.invoke(
+            app, ["delete", "cursor", "--target", temp_dir, "--yes", "--everything"]
+        )
 
         assert result.exit_code == 0
         assert "Successfully deleted" in result.stdout
@@ -191,7 +193,7 @@ def test_delete_default_types():
         (temp_path / ".github" / "prompts").mkdir(parents=True)
         (temp_path / "GEMINI.md").write_text("test")
         (temp_path / "CLAUDE.md").write_text("test")
-        (temp_path / "AGENT.md").write_text("test")
+        (temp_path / "AGENTS.md").write_text("test")
 
         result = runner.invoke(app, ["delete", "--target", temp_dir, "--yes"])
 
@@ -202,7 +204,7 @@ def test_delete_default_types():
         assert not (temp_path / ".github" / "prompts").exists()
         assert not (temp_path / "GEMINI.md").exists()
         assert not (temp_path / "CLAUDE.md").exists()
-        assert not (temp_path / "AGENT.md").exists()
+        assert not (temp_path / "AGENTS.md").exists()
 
 
 def test_delete_multiple_types():

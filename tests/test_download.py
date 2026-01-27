@@ -58,7 +58,7 @@ def test_download_basic_functionality(mock_zipfile, mock_requests):
 
         (extracted_dir / "GEMINI.md").write_text("Gemini instructions")
         (extracted_dir / "CLAUDE.md").write_text("Claude instructions")
-        (extracted_dir / "AGENT.md").write_text("Agent instructions")
+        (extracted_dir / "AGENTS.md").write_text("Agents instructions")
 
         # Mock the extraction to create these files
         def mock_extractall(path):

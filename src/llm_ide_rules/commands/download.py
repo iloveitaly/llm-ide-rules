@@ -70,7 +70,6 @@ INSTRUCTION_TYPES = {
         "files": [],
         "include_patterns": [],
     },
-    "agent": {"directories": [], "files": ["AGENT.md"]},
     "agents": {"directories": [], "files": ["AGENTS.md"]},
 }
 
@@ -288,7 +287,7 @@ def download_main(
     instruction_types: Annotated[
         list[str] | None,
         typer.Argument(
-            help="Types of instructions to download (cursor, github, gemini, claude, agent, agents). Downloads everything by default."
+            help="Types of instructions to download (cursor, github, gemini, claude, opencode, agents). Downloads everything by default."
         ),
     ] = None,
     repo: Annotated[
