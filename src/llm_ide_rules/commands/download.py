@@ -408,8 +408,23 @@ def download_main(
             for item in copied_items:
                 typer.echo(f"  - {item}")
         else:
-            log.warning("no files were copied or generated")
-            typer.echo("No matching instruction files found in the repository.")
+            log.info("no files were copied or generated")
+
+            # Build list of expected files
+            expected_files = []
+            for inst_type in instruction_types:
+                config = INSTRUCTION_TYPES[inst_type]
+                expected_files.extend(config.get("directories", []))
+                expected_files.extend(config.get("files", []))
+                expected_files.extend(config.get("recursive_files", []))
+
+            error_msg = "No matching instruction files found in the repository."
+            typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
+
+            if expected_files:
+                typer.echo("\nExpected files/directories:", err=True)
+                for expected in expected_files:
+                    typer.echo(f"  - {expected}", err=True)
 
     finally:
         # Clean up temporary directory
