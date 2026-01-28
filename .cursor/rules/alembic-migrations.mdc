@@ -1,5 +1,5 @@
 ---
-description:
+description: Alembic Migrations
 globs: migrations/versions/*.py
 alwaysApply: false
 ---

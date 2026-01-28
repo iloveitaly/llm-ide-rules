@@ -1,5 +1,5 @@
 ---
-description:
+description: Fastapi
 globs: app/routes/**/*.py
 alwaysApply: false
 ---

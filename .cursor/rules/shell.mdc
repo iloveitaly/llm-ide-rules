@@ -1,5 +1,5 @@
 ---
-description:
+description: Shell
 globs: **/*.sh
 alwaysApply: false
 ---

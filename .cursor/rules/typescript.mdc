@@ -1,5 +1,5 @@
 ---
-description:
+description: Typescript
 globs: **/*.ts,**/*.tsx
 alwaysApply: false
 ---

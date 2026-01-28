@@ -1,5 +1,5 @@
 ---
-description:
+description: Pytest Integration Tests
 globs: tests/integration/**/*.py
 alwaysApply: false
 ---

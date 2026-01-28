@@ -1,5 +1,5 @@
 ---
-description:
+description: Pytest Tests
 globs: tests/**/*.py
 alwaysApply: false
 ---

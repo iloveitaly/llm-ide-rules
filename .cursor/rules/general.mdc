@@ -1,5 +1,6 @@
 ---
-description:
+description: General Instructions
+globs: 
 alwaysApply: true
 ---
 Coding instructions for all programming languages:

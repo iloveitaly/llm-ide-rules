@@ -1,5 +1,5 @@
 ---
-description:
+description: React Router
 globs: web/app/routes/**/*.tsx
 alwaysApply: false
 ---

@@ -1,5 +1,5 @@
 ---
-description:
+description: React
 globs: **/*.tsx
 alwaysApply: false
 ---
