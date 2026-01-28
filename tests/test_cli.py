@@ -16,6 +16,22 @@ def test_cli_help():
     assert "download" in result.stdout
 
 
+def test_cli_version():
+    """Test that CLI shows version."""
+    runner = CliRunner()
+    result = runner.invoke(app, ["--version"])
+    assert result.exit_code == 0
+    assert "llm-ide-rules version" in result.stdout
+
+
+def test_cli_version_eager():
+    """Test that CLI shows version and exits even with other commands."""
+    runner = CliRunner()
+    result = runner.invoke(app, ["--version", "explode"])
+    assert result.exit_code == 0
+    assert "llm-ide-rules version" in result.stdout
+
+
 def test_cli_no_args():
     """Test that CLI with no arguments shows help."""
     runner = CliRunner()

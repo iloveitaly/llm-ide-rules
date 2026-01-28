@@ -17,6 +17,14 @@ from llm_ide_rules.commands.mcp import mcp_app
 
 __version__ = "0.7.0"
 
+
+def version_callback(value: bool):
+    """Callback to display the version and exit."""
+    if value:
+        print(f"llm-ide-rules version {__version__}")
+        raise typer.Exit()
+
+
 app = typer.Typer(
     name="llm_ide_rules",
     help="CLI tool for managing LLM IDE prompts and rules",
@@ -32,6 +40,15 @@ def main_callback(
             "--verbose", "-v", help="Enable verbose logging (sets LOG_LEVEL=DEBUG)"
         ),
     ] = False,
+    version: Annotated[
+        bool | None,
+        typer.Option(
+            "--version",
+            help="Show the version and exit",
+            callback=version_callback,
+            is_eager=True,
+        ),
+    ] = None,
 ):
     """Global CLI options."""
     if verbose:
