@@ -9,30 +9,6 @@ from llm_ide_rules.agents import get_agent
 from llm_ide_rules.log import log
 
 
-def _find_base_dir(start_dir: Path, target_path: str) -> Path:
-    """Find the base directory by searching upward for the target path.
-
-    If we're currently in a subdirectory of the target path, return the appropriate parent.
-    Otherwise, return start_dir.
-    """
-    target_parts = Path(target_path).parts
-
-    if not target_parts:
-        return start_dir
-
-    current = start_dir
-    for _ in range(len(start_dir.parts)):
-        test_path = current / target_path
-        if test_path.exists():
-            return current
-
-        if current == current.parent:
-            break
-        current = current.parent
-
-    return start_dir
-
-
 def cursor(
     output: Annotated[
         str, typer.Argument(help="Output file for rules")
@@ -41,14 +17,12 @@ def cursor(
     """Bundle Cursor rules into instructions.md and commands into commands.md."""
 
     agent = get_agent("cursor")
-    cwd = Path.cwd()
+    base_dir = Path.cwd()
 
     rules_dir = agent.rules_dir
     if not rules_dir:
         log.error("cursor rules directory not configured")
         raise typer.Exit(1)
-
-    base_dir = _find_base_dir(cwd, rules_dir)
 
     log.info(
         "bundling cursor rules and commands",
@@ -89,14 +63,12 @@ def github(
     """Bundle GitHub instructions into instructions.md and prompts into commands.md."""
 
     agent = get_agent("github")
-    cwd = Path.cwd()
+    base_dir = Path.cwd()
 
     rules_dir = agent.rules_dir
     if not rules_dir:
         log.error("github rules directory not configured")
         raise typer.Exit(1)
-
-    base_dir = _find_base_dir(cwd, rules_dir)
 
     log.info(
         "bundling github instructions and prompts",
@@ -137,14 +109,12 @@ def claude(
     """Bundle Claude Code commands into commands.md."""
 
     agent = get_agent("claude")
-    cwd = Path.cwd()
+    base_dir = Path.cwd()
 
     commands_dir = agent.commands_dir
     if not commands_dir:
         log.error("claude code commands directory not configured")
         raise typer.Exit(1)
-
-    base_dir = _find_base_dir(cwd, commands_dir)
 
     log.info(
         "bundling claude code commands",
@@ -176,14 +146,12 @@ def gemini(
     """Bundle Gemini CLI commands into commands.md."""
 
     agent = get_agent("gemini")
-    cwd = Path.cwd()
+    base_dir = Path.cwd()
 
     commands_dir = agent.commands_dir
     if not commands_dir:
         log.error("gemini cli commands directory not configured")
         raise typer.Exit(1)
-
-    base_dir = _find_base_dir(cwd, commands_dir)
 
     log.info(
         "bundling gemini cli commands",
@@ -215,14 +183,12 @@ def opencode(
     """Bundle OpenCode commands into commands.md."""
 
     agent = get_agent("opencode")
-    cwd = Path.cwd()
+    base_dir = Path.cwd()
 
     commands_dir = agent.commands_dir
     if not commands_dir:
         log.error("opencode commands directory not configured")
         raise typer.Exit(1)
-
-    base_dir = _find_base_dir(cwd, commands_dir)
 
     log.info(
         "bundling opencode commands",

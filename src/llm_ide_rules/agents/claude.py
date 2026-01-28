@@ -108,16 +108,12 @@ class ClaudeAgent(BaseAgent):
         if content.strip():
             (output_dir / "CLAUDE.md").write_text(content)
 
-    def configure_agents_md(self, base_dir: Path) -> None:
-        """Create or update CLAUDE.md to include @AGENTS.md."""
+    def configure_agents_md(self, base_dir: Path) -> bool:
+        """Create CLAUDE.md pointing to AGENTS.md if AGENTS.md exists and CLAUDE.md doesn't."""
+        agents_md = base_dir / "AGENTS.md"
         claude_md = base_dir / "CLAUDE.md"
-        reference = "@AGENTS.md"
         
-        if not claude_md.exists():
-            claude_md.write_text(f"{reference}\n")
-        else:
-            content = claude_md.read_text()
-            if reference not in content:
-                # Append to the end, ensuring newline
-                new_content = content.rstrip() + f"\n\n{reference}\n"
-                claude_md.write_text(new_content)
+        if agents_md.exists() and not claude_md.exists():
+            claude_md.write_text("@./AGENTS.md\n")
+            return True
+        return False

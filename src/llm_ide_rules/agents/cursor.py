@@ -218,22 +218,6 @@ alwaysApply: true
         output_parts.extend(filtered_content)
         filepath.write_text("".join(output_parts))
 
-    def configure_agents_md(self, base_dir: Path) -> None:
-        """Link AGENTS.md to .cursor/rules/global.md."""
-        rules_dir = base_dir / ".cursor" / "rules"
-        rules_dir.mkdir(parents=True, exist_ok=True)
-        
-        target_link = rules_dir / "global.md"
-        source_file = Path("../../AGENTS.md")
-        
-        if target_link.is_symlink():
-            target_link.unlink()
-        
-        if not target_link.exists():
-            try:
-                target_link.symlink_to(source_file)
-            except OSError:
-                pass  # Symlinks might fail on Windows without admin
-        elif not target_link.is_symlink():
-            # It's a real file, don't overwrite
-            pass
+    def configure_agents_md(self, base_dir: Path) -> bool:
+        """Cursor doesn't require explicit configuration for AGENTS.md."""
+        return False

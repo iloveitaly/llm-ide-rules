@@ -1,0 +1,192 @@
+"""Test JSON/JSONC preservation with complex realistic fixture."""
+
+import json
+from pathlib import Path
+from textwrap import dedent
+import pytest
+from llm_ide_rules.utils import modify_json_file
+
+def test_modify_json_file_with_complex_fixture(tmp_path):
+    """Test that modifying a complex settings.json preserves everything correctly."""
+    
+    settings_file = tmp_path / "settings.json"
+    
+    original_content = r'''{
+  "editor.renderControlCharacters": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+
+  // favor words that are close to the cursor when suggesting completions
+  "editor.suggest.localityBonus": true,
+
+  // gen imports by default, new feature
+  "editor.pasteAs.preferences": ["text.updateImports"],
+
+  // css
+  "tailwind-raw-reorder.tailwindConfigPath": "./web/tailwind.config.ts",
+
+  // typescript / web projects
+  // the workspace typescript version does *not* seem to be used by default, you need to configure this
+  "typescript.tsdk": "web/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  // TODO is this picking the exact right typescript version from the repo?
+  "typescript.preferGoToSourceDefinition": true,
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "typescript.surveys.enabled": false,
+  "typescript.experimental.updateImportsOnPaste": true,
+
+  // TODO unsure if this really works: https://stackoverflow.com/questions/53113031/how-to-see-a-fully-expanded-typescript-type-without-n-more-and
+  "typescript.experimental.expandableHover": true,
+
+  "prettier.prettierPath": "web/node_modules/prettier",
+  "prettier.ignorePath": "web/.prettierignore",
+
+  "[typescript][typescriptreact][javascript][javascriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnPaste": false
+  },
+
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "editor.tabSize": 4
+  },
+  // don't remove unused imports on save, this can be done later by a linting script
+  "ruff.lint.ignore": ["F401"],
+
+  "[toml]": {
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4
+  },
+  "python.analysis.autoFormatStrings": true,
+
+  // for import autosuggest
+  "python.analysis.indexing": true,
+  "python.analysis.autoImportCompletions": true,
+
+  // TODO need to figure out the env stuff before enabling
+  "python.testing.pytestEnabled": false,
+  "python.envFile": "${workspaceFolder}/.env",
+
+  // TODO I had issues with develop = True imports, but it was fixed :/
+  // "python.analysis.extraPaths": [
+  //   "~/Projects/python"
+  // ],
+
+  // TODO I have a feeling this is causing my python intellisense to run extremely slowly
+  // I need to investigate this further and see if the functionality here has changed
+  // new feature, should be the default in the future
+  // "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.packageIndexDepths": [
+    // {
+    //   "name": "",
+    //   "depth": 5,
+    //   "includeAllSymbols": true
+    // }
+    // TODO packages are not being indexed, can't find fastapi symbols in the symbol search but can in the import analysis...
+    // {"name":"pdf2image", "depth":3, "includeAllSymbols": true},
+    // {"name":"decouple", "depth":3, "includeAllSymbols": true},
+
+    { "name": "celery", "depth": 2, "includeAllSymbols": true },
+    { "name": "fastapi", "depth": 2, "includeAllSymbols": true },
+    { "name": "pydantic", "depth": 2, "includeAllSymbols": true },
+    { "name": "sqlmodel", "depth": 2, "includeAllSymbols": true },
+    { "name": "activemodel", "depth": 3, "includeAllSymbols": true }
+  ],
+
+  // TODO cursor now uses a separate python extension, needs its own config...
+
+  // in web, prettier is used by default, but we want it to be used outside that directly
+  "[json][jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["railpack.json"],
+      "url": "https://schema.railpack.com"
+    }
+  ],
+
+  "files.associations": {
+    // Procfile's don't have a default file association, but are essentially yaml files
+    "Procfile*": "yaml",
+    ".tool-versions": "shellscript",
+    ".envrc": "shellscript",
+    "env/*": "shellscript",
+    "TODO*": "markdown",
+    "*.mdc": "markdown",
+    "app/templates/**/*.md": "jinja-md",
+    "app/templates/**/*.html": "jinja-html"
+  },
+
+  "files.exclude": {
+    "web/node_modules": true,
+    ".ruff_cache": true,
+    ".pytest_cache": true,
+    ".venv": true,
+    // TODO I don't think this works
+    "*env*": false
+  },
+
+  "[justfile]": {
+    "editor.insertSpaces": false,
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "editor.trimAutoWhitespace": true,
+    "editor.formatOnSave": true
+    // "editor.defaultFormatter": "nefrob.vscode-just-syntax",
+  },
+
+  // this is important, as we want to make sure the plain old zsh is used (not tmux) for automation/agent terminals
+  "terminal.integrated.automationProfile.osx": {
+    "path": "/opt/homebrew/bin/zsh",
+    "args": ["-i"]
+  },
+
+  // copilot config https://code.visualstudio.com/docs/copilot/copilot-customization
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "chat.sendElementsToChat.enabled": true,
+
+  // I like bare URLs sometimes
+  "markdownlint.config": {
+    "MD034": false
+  },
+
+  // cursor specific config :/
+  "cursorpyright.analysis.autoImportCompletions": true
+
+  // terminal profiles are really important! Make sure you configure these properly based on your zsh config:
+  // https://github.com/iloveitaly/dotfiles/blob/master/.vscode/settings.json
+}'''
+    
+    settings_file.write_text(original_content)
+    
+    updates = {
+        "chat.useAgentsMdFile": True,
+        "chat.useNestedAgentsMdFiles": True
+    }
+    
+    # Verify that existing keys are correctly NOT updated
+    # In the fixture, chat.useAgentsMdFile was NOT present, but we added it.
+    # Let's verify a case where it WAS present.
+    
+    # We will modify the fixture to have one of our target keys already set to false
+    original_with_key = original_content.replace(
+        '"github.copilot.chat.codeGeneration.useInstructionFiles": true',
+        '"github.copilot.chat.codeGeneration.useInstructionFiles": true,\n  "chat.useAgentsMdFile": false'
+    )
+    settings_file.write_text(original_with_key)
+    
+    modify_json_file(settings_file, updates)
+    
+    final_content = settings_file.read_text()
+    # It should still be false
+    assert '"chat.useAgentsMdFile": false' in final_content
+    # But the OTHER key (useNestedAgentsMdFiles) which was missing should be added
+    assert '"chat.useNestedAgentsMdFiles": true' in final_content

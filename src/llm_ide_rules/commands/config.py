@@ -33,8 +33,12 @@ def config_main(
             continue
             
         try:
-            agent_inst.configure_agents_md(base_dir)
-            typer.echo(f"Configured {agent_inst.name}")
+            configured = agent_inst.configure_agents_md(base_dir)
+            if configured:
+                typer.echo(typer.style(f"Configured {agent_inst.name}", fg=typer.colors.GREEN))
+            else:
+                msg = f"Skipped {agent_inst.name} (no changes needed or not applicable)"
+                typer.echo(typer.style(msg, fg=typer.colors.YELLOW))
         except Exception as e:
             typer.echo(f"Failed to configure {agent_inst.name}: {e}", err=True)
 

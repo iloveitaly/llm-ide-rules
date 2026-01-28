@@ -177,7 +177,7 @@ class GeminiAgent(BaseAgent):
         if content.strip():
             (output_dir / "GEMINI.md").write_text(content)
 
-    def configure_agents_md(self, base_dir: Path) -> None:
+    def configure_agents_md(self, base_dir: Path) -> bool:
         """Configure Gemini CLI to use AGENTS.md."""
         from llm_ide_rules.utils import modify_json_file
 
@@ -189,3 +189,4 @@ class GeminiAgent(BaseAgent):
         }
         
         modify_json_file(settings_path, updates)
+        return True

@@ -231,7 +231,7 @@ applyTo: "{glob_pattern}"
             env=config.get("env"),
         )
 
-    def configure_agents_md(self, base_dir: Path) -> None:
+    def configure_agents_md(self, base_dir: Path) -> bool:
         """Configure VS Code to use AGENTS.md."""
         from llm_ide_rules.utils import modify_json_file
 
@@ -243,3 +243,4 @@ applyTo: "{glob_pattern}"
         }
         
         modify_json_file(settings_path, updates)
+        return True
