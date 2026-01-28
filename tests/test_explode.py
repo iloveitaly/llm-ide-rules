@@ -290,3 +290,13 @@ Here are unmapped rules.
         assert "## Python" in gemini_content
         assert "Here are Python rules." in gemini_content
         assert "## Unmapped" in gemini_content
+        assert "Here are unmapped rules." in gemini_content
+
+        # Check AGENTS.md
+        agents_md = Path("AGENTS.md")
+        assert agents_md.exists()
+        agents_content = agents_md.read_text()
+        assert "## Python" in agents_content
+        assert "Here are Python rules." in agents_content
+        assert "## Unmapped" in agents_content
+        assert "Here are unmapped rules." in agents_content

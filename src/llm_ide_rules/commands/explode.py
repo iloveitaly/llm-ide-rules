@@ -88,7 +88,7 @@ def explode_implementation(
     # Initialize only the agents we need
     agents_to_process = []
     if agent == "all":
-        agents_to_process = ["cursor", "github", "claude", "gemini", "opencode"]
+        agents_to_process = ["cursor", "github", "claude", "gemini", "opencode", "agents"]
     else:
         agents_to_process = [agent]
 
@@ -210,15 +210,21 @@ alwaysApply: true
     command_sections = {}
     if commands_text:
         _, command_sections_data = parse_sections(commands_text)
-        agents = [agent_instances[name] for name in agents_to_process]
+        agents_with_commands = [
+            agent_instances[name]
+            for name in agents_to_process
+            if agent_instances[name].commands_dir
+        ]
         command_dirs = {
-            name: agent_dirs[name]["commands"] for name in agents_to_process
+            name: agent_dirs[name]["commands"]
+            for name in agents_to_process
+            if "commands" in agent_dirs[name]
         }
 
         for section_name, section_data in command_sections_data.items():
             command_sections[section_name] = section_data.content
             process_command_section(
-                section_name, section_data.content, agents, command_dirs
+                section_name, section_data.content, agents_with_commands, command_dirs
             )
 
     # Generate root documentation (CLAUDE.md, GEMINI.md, etc.)
