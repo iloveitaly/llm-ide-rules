@@ -165,18 +165,6 @@ class GeminiAgent(BaseAgent):
         existing[self.mcp_root_key] = servers
         path.write_text(json.dumps(existing, indent=2))
 
-    def generate_root_doc(
-        self,
-        general_lines: list[str],
-        rules_sections: dict[str, list[str]],
-        command_sections: dict[str, list[str]],
-        output_dir: Path,
-    ) -> None:
-        """Generate GEMINI.md from rules."""
-        content = self.build_root_doc_content(general_lines, rules_sections)
-        if content.strip():
-            (output_dir / "GEMINI.md").write_text(content)
-
     def configure_agents_md(self, base_dir: Path) -> bool:
         """Configure Gemini CLI to use AGENTS.md."""
         from llm_ide_rules.utils import modify_json_file
@@ -189,3 +177,15 @@ class GeminiAgent(BaseAgent):
         }
         
         return modify_json_file(settings_path, updates)
+
+    def check_agents_md_config(self, base_dir: Path) -> bool:
+        """Check if Gemini CLI is configured to use AGENTS.md."""
+        settings_path = base_dir / ".gemini" / "settings.json"
+        if not settings_path.exists():
+            return False
+
+        try:
+            data = json.loads(settings_path.read_text())
+            return data.get("agent.instructionFile") == "AGENTS.md"
+        except Exception:
+            return False

@@ -354,7 +354,10 @@ def download_main(
 
     try:
         # Copy instruction files
-        copied_items = copy_instruction_files(repo_dir, instruction_types, target_path)
+        copied_items = [
+            f"Downloaded: {item}"
+            for item in copy_instruction_files(repo_dir, instruction_types, target_path)
+        ]
 
         # Check for source files (instructions.md, commands.md) and copy them if available
         # These are needed for 'explode' logic
@@ -372,7 +375,7 @@ def download_main(
                     log.info("copying source file", source=str(src), target=str(dst))
                     dst.parent.mkdir(parents=True, exist_ok=True)
                     dst.write_bytes(src.read_bytes())
-                    copied_items.append(source_file)
+                    copied_items.append(f"Downloaded: {source_file}")
                     sources_copied = True
 
         # Generate rule files locally for supported agents
@@ -394,7 +397,7 @@ def download_main(
                         agent=agent,
                         working_dir=target_path,
                     )
-                    copied_items.append(f"(generated) {agent} rules")
+                    copied_items.append(f"Generated: {agent} rules")
                 except Exception as e:
                     log.error("failed to generate rules", agent=agent, error=str(e))
                     typer.echo(

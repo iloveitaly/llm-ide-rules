@@ -251,6 +251,21 @@ alwaysApply: true
             created_dirs.append(f".{agent_name}/")
         # else: agent has no directories (e.g., agents which only generates root doc)
 
+    if "gemini" in agent_instances:
+        if not agent_instances["gemini"].check_agents_md_config(working_dir):
+            typer.secho(
+                "Warning: Gemini CLI configuration missing for AGENTS.md.",
+                fg=typer.colors.YELLOW,
+            )
+            typer.secho(
+                "Run this command to configure it:",
+                fg=typer.colors.YELLOW,
+            )
+            typer.secho(
+                "  gemini config set agent.instructionFile AGENTS.md",
+                fg=typer.colors.YELLOW,
+            )
+
     if created_dirs:
         if len(created_dirs) == 1:
             success_msg = f"Created files in {created_dirs[0]} directory"

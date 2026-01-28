@@ -103,10 +103,8 @@ class ClaudeAgent(BaseAgent):
         command_sections: dict[str, list[str]],
         output_dir: Path,
     ) -> None:
-        """Generate CLAUDE.md from rules."""
-        content = self.build_root_doc_content(general_lines, rules_sections)
-        if content.strip():
-            (output_dir / "CLAUDE.md").write_text(content)
+        """Generate CLAUDE.md that references AGENTS.md."""
+        (output_dir / "CLAUDE.md").write_text("@./AGENTS.md\n")
 
     def configure_agents_md(self, base_dir: Path) -> bool:
         """Create CLAUDE.md pointing to AGENTS.md if AGENTS.md exists and CLAUDE.md doesn't."""
