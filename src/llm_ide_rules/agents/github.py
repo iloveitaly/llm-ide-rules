@@ -160,6 +160,7 @@ class GitHubAgent(BaseAgent):
         filename: str,
         rules_dir: Path,
         glob_pattern: str | None = None,
+        description: str | None = None,
     ) -> None:
         """Write a GitHub instruction file (.instructions.md) with YAML frontmatter."""
         extension = self.rule_extension or ".instructions.md"

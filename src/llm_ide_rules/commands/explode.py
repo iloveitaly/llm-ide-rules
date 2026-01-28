@@ -54,9 +54,19 @@ def process_unmapped_as_always_apply(
     section_content = replace_header_with_proper_casing(section_content, section_name)
 
     cursor_agent.write_rule(
-        section_content, filename, cursor_rules_dir, glob_pattern=None
+        section_content,
+        filename,
+        cursor_rules_dir,
+        glob_pattern=None,
+        description=section_name,
     )
-    github_agent.write_rule(section_content, filename, copilot_dir, glob_pattern=None)
+    github_agent.write_rule(
+        section_content,
+        filename,
+        copilot_dir,
+        glob_pattern=None,
+        description=section_name,
+    )
 
     return True
 
@@ -135,7 +145,8 @@ def explode_implementation(
     if any(line.strip() for line in general):
         general_header = """
 ---
-description:
+description: General Instructions
+globs: 
 alwaysApply: true
 ---
 """
@@ -180,6 +191,7 @@ alwaysApply: true
                     filename,
                     agent_dirs["cursor"]["rules"],
                     glob_pattern=None,
+                    description=section_name,
                 )
             elif "github" in agent_instances:
                 agent_instances["github"].write_rule(
@@ -187,6 +199,7 @@ alwaysApply: true
                     filename,
                     agent_dirs["github"]["rules"],
                     glob_pattern=None,
+                    description=section_name,
                 )
         elif glob_pattern != "manual":
             # Has glob pattern = file-specific rule
@@ -196,6 +209,7 @@ alwaysApply: true
                     filename,
                     agent_dirs["cursor"]["rules"],
                     glob_pattern,
+                    description=section_name,
                 )
             if "github" in agent_instances:
                 agent_instances["github"].write_rule(
@@ -203,6 +217,7 @@ alwaysApply: true
                     filename,
                     agent_dirs["github"]["rules"],
                     glob_pattern,
+                    description=section_name,
                 )
 
     # Process commands for all agents

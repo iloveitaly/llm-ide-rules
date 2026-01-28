@@ -42,6 +42,7 @@ class BaseAgent(ABC):
         filename: str,
         rules_dir: Path,
         glob_pattern: str | None = None,
+        description: str | None = None,
     ) -> None:
         """Write a single rule file."""
         ...

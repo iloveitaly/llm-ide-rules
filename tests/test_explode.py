@@ -59,6 +59,8 @@ Here are React rules for frontend development.
         content = Path(".cursor/rules/python.mdc").read_text()
         assert "Here are Python rules for development" in content
         assert "alwaysApply: true" in content
+        assert "globs: \n" in content
+        assert "description: Python" in content
 
 
 def test_explode_with_commands_file():
@@ -131,6 +133,8 @@ This section is not in sections.json so it should be treated as always-apply.
 
         content = Path(".cursor/rules/custom-unmapped-section.mdc").read_text()
         assert "alwaysApply: true" in content
+        assert "globs: \n" in content
+        assert "description: Custom Unmapped Section" in content
         assert "This section is not in sections.json" in content
 
 
@@ -165,10 +169,12 @@ Here are custom rules.
 
         python_content = Path(".cursor/rules/python.mdc").read_text()
         assert "**/*.py" in python_content
+        assert "description: Python" in python_content
         assert "Here are Python rules" in python_content
 
         custom_content = Path(".cursor/rules/customsection.mdc").read_text()
         assert "**/*.custom" in custom_content
+        assert "description: CustomSection" in custom_content
         assert "Here are custom rules" in custom_content
 
 
@@ -216,26 +222,31 @@ This should work with extra whitespace after colon.
         # Test lowercase "globs:"
         python_content = Path(".cursor/rules/python.mdc").read_text()
         assert "**/*.py" in python_content
+        assert "description: Python" in python_content
         assert "Here are Python rules" in python_content
 
         # Test uppercase "Globs:"
         react_content = Path(".cursor/rules/react.mdc").read_text()
         assert "**/*.tsx" in react_content
+        assert "description: React" in react_content
         assert "Here are React rules" in react_content
 
         # Test all caps "GLOBS:"
         typescript_content = Path(".cursor/rules/typescript.mdc").read_text()
         assert "**/*.ts" in typescript_content
+        assert "description: TypeScript" in typescript_content
         assert "Here are TypeScript rules" in typescript_content
 
         # Test missing space - should be treated as alwaysApply (no glob pattern)
         nospace_content = Path(".cursor/rules/nospace.mdc").read_text()
         assert "alwaysApply: true" in nospace_content
+        assert "description: NoSpace" in nospace_content
         assert "globs:**/*.nospace" in nospace_content  # Should keep the malformed line
 
         # Test extra whitespace - should still parse correctly
         whitespace_content = Path(".cursor/rules/extrawhitespace.mdc").read_text()
         assert "**/*.whitespace" in whitespace_content
+        assert "description: ExtraWhitespace" in whitespace_content
         assert "This should work with extra whitespace" in whitespace_content
 
 
