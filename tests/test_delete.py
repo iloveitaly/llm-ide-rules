@@ -25,14 +25,14 @@ def test_find_files_to_delete_cursor():
         temp_path = Path(temp_dir)
 
         cursor_dir = temp_path / ".cursor"
-        cursor_dir.mkdir()
-        (cursor_dir / "rules").mkdir()
-        (cursor_dir / "rules" / "test.mdc").write_text("test")
+        rules_dir = cursor_dir / "rules"
+        rules_dir.mkdir(parents=True)
+        (rules_dir / "test.mdc").write_text("test")
 
         dirs, files = find_files_to_delete(["cursor"], temp_path)
 
         assert len(dirs) == 1
-        assert dirs[0] == cursor_dir
+        assert dirs[0] == rules_dir
         assert len(files) == 0
 
 
@@ -41,9 +41,10 @@ def test_find_files_to_delete_gemini():
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
 
-        gemini_dir = temp_path / ".gemini" / "commands"
-        gemini_dir.mkdir(parents=True)
-        (gemini_dir / "test.toml").write_text("test")
+        gemini_dir = temp_path / ".gemini"
+        commands_dir = gemini_dir / "commands"
+        commands_dir.mkdir(parents=True)
+        (commands_dir / "test.toml").write_text("test")
 
         gemini_file = temp_path / "GEMINI.md"
         gemini_file.write_text("test")
@@ -51,7 +52,7 @@ def test_find_files_to_delete_gemini():
         dirs, files = find_files_to_delete(["gemini"], temp_path)
 
         assert len(dirs) == 1
-        assert dirs[0] == temp_path / ".gemini"  # Deletes parent directory
+        assert dirs[0] == commands_dir
         assert len(files) == 1
         assert files[0] == gemini_file
 
@@ -100,8 +101,9 @@ def test_delete_with_yes_flag():
         temp_path = Path(temp_dir)
 
         cursor_dir = temp_path / ".cursor"
-        cursor_dir.mkdir()
-        (cursor_dir / "test.txt").write_text("test")
+        rules_dir = cursor_dir / "rules"
+        rules_dir.mkdir(parents=True)
+        (rules_dir / "test.mdc").write_text("test")
 
         result = runner.invoke(
             app, ["delete", "cursor", "--target", temp_dir, "--yes", "--everything"]
@@ -109,7 +111,7 @@ def test_delete_with_yes_flag():
 
         assert result.exit_code == 0
         assert "Successfully deleted" in result.stdout
-        assert not cursor_dir.exists()
+        assert not rules_dir.exists()
 
 
 def test_delete_with_confirmation_yes():
@@ -120,7 +122,8 @@ def test_delete_with_confirmation_yes():
         temp_path = Path(temp_dir)
 
         cursor_dir = temp_path / ".cursor"
-        cursor_dir.mkdir()
+        rules_dir = cursor_dir / "rules"
+        rules_dir.mkdir(parents=True)
 
         result = runner.invoke(
             app, ["delete", "cursor", "--target", temp_dir, "--everything"], input="y\n"
@@ -128,7 +131,7 @@ def test_delete_with_confirmation_yes():
 
         assert result.exit_code == 0
         assert "Successfully deleted" in result.stdout
-        assert not cursor_dir.exists()
+        assert not rules_dir.exists()
 
 
 def test_delete_with_confirmation_no():
@@ -139,7 +142,8 @@ def test_delete_with_confirmation_no():
         temp_path = Path(temp_dir)
 
         cursor_dir = temp_path / ".cursor"
-        cursor_dir.mkdir()
+        rules_dir = cursor_dir / "rules"
+        rules_dir.mkdir(parents=True)
 
         result = runner.invoke(
             app, ["delete", "cursor", "--target", temp_dir, "--everything"], input="n\n"
@@ -147,7 +151,7 @@ def test_delete_with_confirmation_no():
 
         assert result.exit_code == 0
         assert "Deletion cancelled" in result.stdout
-        assert cursor_dir.exists()
+        assert rules_dir.exists()
 
 
 def test_delete_invalid_instruction_type():
@@ -188,7 +192,7 @@ def test_delete_default_types():
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
 
-        (temp_path / ".cursor").mkdir()
+        (temp_path / ".cursor" / "rules").mkdir(parents=True)
         (temp_path / ".github" / "instructions").mkdir(parents=True)
         (temp_path / ".github" / "prompts").mkdir(parents=True)
         (temp_path / "GEMINI.md").write_text("test")
@@ -199,7 +203,7 @@ def test_delete_default_types():
 
         assert result.exit_code == 0
         assert "Successfully deleted" in result.stdout
-        assert not (temp_path / ".cursor").exists()
+        assert not (temp_path / ".cursor" / "rules").exists()
         assert not (temp_path / ".github" / "instructions").exists()
         assert not (temp_path / ".github" / "prompts").exists()
         assert not (temp_path / "GEMINI.md").exists()
@@ -214,7 +218,7 @@ def test_delete_multiple_types():
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
 
-        (temp_path / ".cursor").mkdir()
+        (temp_path / ".cursor" / "rules").mkdir(parents=True)
         (temp_path / "GEMINI.md").write_text("test")
         (temp_path / "CLAUDE.md").write_text("test")
 
@@ -223,7 +227,7 @@ def test_delete_multiple_types():
         )
 
         assert result.exit_code == 0
-        assert not (temp_path / ".cursor").exists()
+        assert not (temp_path / ".cursor" / "rules").exists()
         assert not (temp_path / "GEMINI.md").exists()
         assert (temp_path / "CLAUDE.md").exists()
 
@@ -244,4 +248,4 @@ def test_delete_directory_with_subdirectories():
         result = runner.invoke(app, ["delete", "cursor", "--target", temp_dir, "--yes", "--everything"])
 
         assert result.exit_code == 0
-        assert not cursor_dir.exists()
+        assert not rules_dir.exists()
