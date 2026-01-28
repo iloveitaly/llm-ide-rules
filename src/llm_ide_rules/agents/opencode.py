@@ -129,3 +129,7 @@ class OpenCodeAgent(BaseAgent):
             args=command_array[1:] if len(command_array) > 1 else [],
             env=config.get("environment"),
         )
+
+    def configure_agents_md(self, base_dir: Path) -> bool:
+        """OpenCode has native support, no configuration needed."""
+        return False

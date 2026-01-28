@@ -242,5 +242,4 @@ applyTo: "{glob_pattern}"
             "chat.useNestedAgentsMdFiles": True
         }
         
-        modify_json_file(settings_path, updates)
-        return True
+        return modify_json_file(settings_path, updates)

@@ -188,5 +188,4 @@ class GeminiAgent(BaseAgent):
             "agent.instructionFile": "AGENTS.md"
         }
         
-        modify_json_file(settings_path, updates)
-        return True
+        return modify_json_file(settings_path, updates)

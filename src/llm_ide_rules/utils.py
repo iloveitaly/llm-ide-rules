@@ -4,15 +4,19 @@ import re
 from pathlib import Path
 
 
-def modify_json_file(file_path: Path, updates: dict[str, any]) -> None:
-    """Modify a JSON/JSONC file by adding MISSING keys using string manipulation to preserve comments."""
+def modify_json_file(file_path: Path, updates: dict[str, any]) -> bool:
+    """Modify a JSON/JSONC file by adding MISSING keys using string manipulation to preserve comments.
+    
+    Returns:
+        bool: True if changes were written to the file, False otherwise.
+    """
     if not file_path.exists():
         # Create new file with standard JSON if it doesn't exist
         import json
 
         file_path.parent.mkdir(parents=True, exist_ok=True)
         file_path.write_text(json.dumps(updates, indent=2))
-        return
+        return True
 
     original_content = file_path.read_text()
     content = original_content
@@ -78,5 +82,14 @@ def modify_json_file(file_path: Path, updates: dict[str, any]) -> None:
                         + content[insertion_point:]
                     )
 
-    if content != original_content:
-        file_path.write_text(content)
+        if content != original_content:
+
+            file_path.write_text(content)
+
+            return True
+
+        
+
+        return False
+
+    

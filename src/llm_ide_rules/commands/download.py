@@ -46,31 +46,31 @@ def normalize_repo(repo: str) -> str:
 # The directories listed here are what gets created by explode and what delete removes.
 INSTRUCTION_TYPES = {
     "cursor": {
-        "directories": [".cursor"],
+        "directories": [],
         "files": [],
         "include_patterns": [],
     },
     "github": {
-        "directories": [".github/instructions", ".github/prompts"],
-        "files": [".github/copilot-instructions.md"],
-        "include_patterns": [],
-    },
-    "gemini": {
-        "directories": [".gemini"],
-        "files": ["GEMINI.md"],
-        "include_patterns": [],
-    },
-    "claude": {
-        "directories": [".claude"],
-        "files": ["CLAUDE.md"],
-        "include_patterns": [],
-    },
-    "opencode": {
-        "directories": [".opencode"],
+        "directories": [],
         "files": [],
         "include_patterns": [],
     },
-    "agents": {"directories": [], "files": ["AGENTS.md"]},
+    "gemini": {
+        "directories": [],
+        "files": [],
+        "include_patterns": [],
+    },
+    "claude": {
+        "directories": [],
+        "files": [],
+        "include_patterns": [],
+    },
+    "opencode": {
+        "directories": [],
+        "files": [],
+        "include_patterns": [],
+    },
+    "agents": {"directories": [], "files": []},
 }
 
 # Default types to download when no specific types are specified
