@@ -293,10 +293,7 @@ Here are unmapped rules.
 
         # Check GEMINI.md
         gemini_md = Path("GEMINI.md")
-        assert gemini_md.exists()
-        gemini_content = gemini_md.read_text()
-        assert "## Python" in gemini_content
-        assert "Here are Python rules." in gemini_content
+        assert not gemini_md.exists()
 
         # Check AGENTS.md
         agents_md = Path("AGENTS.md")

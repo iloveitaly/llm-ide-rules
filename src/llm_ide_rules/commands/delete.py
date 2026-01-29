@@ -27,12 +27,12 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(target_dir / ".cursor/rules/general.mdc")
                 generated.add(target_dir / ".github/copilot-instructions.md")
                 generated.add(target_dir / "CLAUDE.md")
-                generated.add(target_dir / "GEMINI.md")
+
 
             # If any sections exist, root docs are definitely generated
             if sections:
                 generated.add(target_dir / "CLAUDE.md")
-                generated.add(target_dir / "GEMINI.md")
+
 
             # Section specific files
             for header in sections:

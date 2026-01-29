@@ -53,8 +53,9 @@ def test_find_files_to_delete_gemini():
 
         assert len(dirs) == 1
         assert dirs[0] == commands_dir
-        assert len(files) == 1
-        assert files[0] == gemini_file
+        assert len(files) == 0
+        # GEMINI.md is no longer managed by gemini agent
+        assert gemini_file not in files
 
 
 def test_find_files_to_delete_agents():
@@ -206,7 +207,7 @@ def test_delete_default_types():
         assert not (temp_path / ".cursor" / "rules").exists()
         assert not (temp_path / ".github" / "instructions").exists()
         assert not (temp_path / ".github" / "prompts").exists()
-        assert not (temp_path / "GEMINI.md").exists()
+        assert (temp_path / "GEMINI.md").exists()
         assert not (temp_path / "CLAUDE.md").exists()
         assert not (temp_path / "AGENTS.md").exists()
 
@@ -228,7 +229,7 @@ def test_delete_multiple_types():
 
         assert result.exit_code == 0
         assert not (temp_path / ".cursor" / "rules").exists()
-        assert not (temp_path / "GEMINI.md").exists()
+        assert (temp_path / "GEMINI.md").exists()
         assert (temp_path / "CLAUDE.md").exists()
 
 

@@ -1,6 +1,6 @@
 # Copilot, Cursor, Claude, Gemini, etc LLM Instructions
 
-This project makes it easy to download prompts and implode/explode them so they can be used by various providers.
+This project makes it easy to download prompts and implode/explode them so they can be used by various providers. It's completely vibe coded, but it works.
 
 I don't want to be tied to a specific IDE and it's a pain to have to edit instructions for various languages across a ton of different files.
 
@@ -22,7 +22,7 @@ Different AI coding assistants use different formats for instructions and comman
 | **GitHub Copilot** | instructions | `.github/copilot-instructions.md` | Single markdown file |
 | **GitHub Copilot** | instructions | `.github/instructions/*.instructions.md` | Multiple instruction files |
 | **GitHub Copilot** | prompts | `.github/prompts/*.prompt.md` | YAML frontmatter with `mode: 'agent'` |
-| **Gemini CLI** | instructions | `GEMINI.md` | Single markdown file at root |
+| **Gemini CLI** | instructions | `AGENTS.md` | Single markdown file at root |
 | **Gemini CLI** | commands | `.gemini/commands/*.toml` | TOML format, supports `{{args}}` and shell commands |
 | **OpenCode** | commands | `.opencode/commands/*.md` | Plain markdown, no frontmatter |
 

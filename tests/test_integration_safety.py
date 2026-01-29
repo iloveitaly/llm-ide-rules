@@ -78,5 +78,4 @@ def test_integration_delete_safety_with_external_repo():
         assert not instructions_dir.exists(), ".github/instructions should be deleted"
         assert not cursor_rules_dir.exists(), ".cursor/rules should be deleted"
         
-        # Also check for root files like GEMINI.md if they were there
-        assert not (temp_path / "GEMINI.md").exists(), "GEMINI.md should be deleted"
+
