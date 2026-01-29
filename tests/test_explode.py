@@ -291,6 +291,13 @@ Here are unmapped rules.
         claude_content = claude_md.read_text()
         assert "@./AGENTS.md" in claude_content
 
+        # Check GEMINI.md
+        gemini_md = Path("GEMINI.md")
+        assert gemini_md.exists()
+        gemini_content = gemini_md.read_text()
+        assert "## Python" in gemini_content
+        assert "Here are Python rules." in gemini_content
+
         # Check AGENTS.md
         agents_md = Path("AGENTS.md")
         assert agents_md.exists()
