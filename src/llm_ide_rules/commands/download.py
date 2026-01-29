@@ -57,12 +57,14 @@ INSTRUCTION_TYPES = {
     },
     "gemini": {
         "directories": [".gemini/commands"],
-        "files": ["GEMINI.md"],
+        "files": [],
+        "generated_files": ["GEMINI.md"],
         "include_patterns": [],
     },
     "claude": {
         "directories": [".claude/commands"],
-        "files": ["CLAUDE.md"],
+        "files": [],
+        "generated_files": ["CLAUDE.md"],
         "include_patterns": [],
     },
     "opencode": {
@@ -70,7 +72,7 @@ INSTRUCTION_TYPES = {
         "files": [],
         "include_patterns": [],
     },
-    "agents": {"directories": [], "files": ["AGENTS.md"]},
+    "agents": {"directories": [], "files": [], "generated_files": ["AGENTS.md"]},
 }
 
 # Default types to download when no specific types are specified

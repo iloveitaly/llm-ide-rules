@@ -292,7 +292,8 @@ def test_agents_instruction_type_configuration():
 
     agents_config = INSTRUCTION_TYPES["agents"]
     assert agents_config["directories"] == []
-    assert agents_config["files"] == ["AGENTS.md"]
+    assert agents_config["files"] == []
+    assert agents_config["generated_files"] == ["AGENTS.md"]
     assert "recursive_files" not in agents_config
 
 

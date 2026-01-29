@@ -91,6 +91,11 @@ def find_files_to_delete(
             if file_path.exists() and file_path.is_file():
                 files_to_delete.append(file_path)
 
+        for file_name in config.get("generated_files", []):
+            file_path = target_dir / file_name
+            if file_path.exists() and file_path.is_file():
+                files_to_delete.append(file_path)
+
         for file_pattern in config.get("recursive_files", []):
             matching_files = list(target_dir.rglob(file_pattern))
             files_to_delete.extend([f for f in matching_files if f.is_file()])
