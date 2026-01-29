@@ -7,6 +7,7 @@ import typer
 
 from llm_ide_rules.agents import get_agent
 from llm_ide_rules.log import log
+from llm_ide_rules.utils import find_project_root
 
 
 def cursor(
@@ -17,7 +18,7 @@ def cursor(
     """Bundle Cursor rules into instructions.md and commands into commands.md."""
 
     agent = get_agent("cursor")
-    base_dir = Path.cwd()
+    base_dir = find_project_root()
 
     rules_dir = agent.rules_dir
     if not rules_dir:
@@ -63,7 +64,7 @@ def github(
     """Bundle GitHub instructions into instructions.md and prompts into commands.md."""
 
     agent = get_agent("github")
-    base_dir = Path.cwd()
+    base_dir = find_project_root()
 
     rules_dir = agent.rules_dir
     if not rules_dir:
@@ -109,7 +110,7 @@ def claude(
     """Bundle Claude Code commands into commands.md."""
 
     agent = get_agent("claude")
-    base_dir = Path.cwd()
+    base_dir = find_project_root()
 
     commands_dir = agent.commands_dir
     if not commands_dir:
@@ -146,7 +147,7 @@ def gemini(
     """Bundle Gemini CLI commands into commands.md."""
 
     agent = get_agent("gemini")
-    base_dir = Path.cwd()
+    base_dir = find_project_root()
 
     commands_dir = agent.commands_dir
     if not commands_dir:
@@ -183,7 +184,7 @@ def opencode(
     """Bundle OpenCode commands into commands.md."""
 
     agent = get_agent("opencode")
-    base_dir = Path.cwd()
+    base_dir = find_project_root()
 
     commands_dir = agent.commands_dir
     if not commands_dir:

@@ -182,11 +182,11 @@ def test_modify_json_file_with_complex_fixture(tmp_path):
         '"github.copilot.chat.codeGeneration.useInstructionFiles": true,\n  "chat.useAgentsMdFile": false'
     )
     settings_file.write_text(original_with_key)
-    
+
     modify_json_file(settings_file, updates)
-    
+
     final_content = settings_file.read_text()
-    # It should still be false
-    assert '"chat.useAgentsMdFile": false' in final_content
+    # It should be updated to true
+    assert '"chat.useAgentsMdFile": true' in final_content
     # But the OTHER key (useNestedAgentsMdFiles) which was missing should be added
     assert '"chat.useNestedAgentsMdFiles": true' in final_content

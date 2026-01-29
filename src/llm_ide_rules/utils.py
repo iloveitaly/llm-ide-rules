@@ -47,8 +47,12 @@ def modify_json_file(file_path: Path, updates: dict[str, any]) -> bool:
 
         match = pattern.search(content)
         if match:
-            # Key already exists, do NOT modify it per user instructions
-            continue
+            # Key exists, replace the value part
+            # full_match = match.group(0)
+            key_part = match.group(1)
+            # Replace the value part (group 2) with new value
+            new_entry = f"{key_part}{val_str}"
+            content = content[:match.start()] + new_entry + content[match.end():]
         else:
             # Insert new key
             last_brace_idx = content.rfind("}")
@@ -82,14 +86,34 @@ def modify_json_file(file_path: Path, updates: dict[str, any]) -> bool:
                         + content[insertion_point:]
                     )
 
-        if content != original_content:
+    if content != original_content:
+        file_path.write_text(content)
+        return True
 
-            file_path.write_text(content)
+    return False
 
-            return True
 
-        
+def find_project_root(start_path: Path | None = None) -> Path:
+    """Find the project root by looking for common markers."""
+    if start_path is None:
+        start_path = Path.cwd()
 
-        return False
+    path = start_path.resolve()
+    # Check current directory and parents
+    for parent in [path] + list(path.parents):
+        if (parent / ".git").exists():
+            return parent
+        if (parent / "pyproject.toml").exists():
+            return parent
+        if (parent / ".cursor").exists():
+            return parent
+        if (parent / ".claude").exists():
+            return parent
+        if (parent / ".gemini").exists():
+            return parent
+        if (parent / ".github").exists():
+            return parent
+            
+    return start_path  # Fallback to current directory
 
     
