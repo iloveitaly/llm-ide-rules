@@ -1,17 +1,14 @@
 """Test JSON/JSONC preservation with complex realistic fixture."""
 
-import json
-from pathlib import Path
-from textwrap import dedent
-import pytest
 from llm_ide_rules.utils import modify_json_file
+
 
 def test_modify_json_file_with_complex_fixture(tmp_path):
     """Test that modifying a complex settings.json preserves everything correctly."""
-    
+
     settings_file = tmp_path / "settings.json"
-    
-    original_content = r'''{
+
+    original_content = r"""{
   "editor.renderControlCharacters": true,
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
@@ -163,23 +160,20 @@ def test_modify_json_file_with_complex_fixture(tmp_path):
 
   // terminal profiles are really important! Make sure you configure these properly based on your zsh config:
   // https://github.com/iloveitaly/dotfiles/blob/master/.vscode/settings.json
-}'''
-    
+}"""
+
     settings_file.write_text(original_content)
-    
-    updates = {
-        "chat.useAgentsMdFile": True,
-        "chat.useNestedAgentsMdFiles": True
-    }
-    
+
+    updates = {"chat.useAgentsMdFile": True, "chat.useNestedAgentsMdFiles": True}
+
     # Verify that existing keys are correctly NOT updated
     # In the fixture, chat.useAgentsMdFile was NOT present, but we added it.
     # Let's verify a case where it WAS present.
-    
+
     # We will modify the fixture to have one of our target keys already set to false
     original_with_key = original_content.replace(
         '"github.copilot.chat.codeGeneration.useInstructionFiles": true',
-        '"github.copilot.chat.codeGeneration.useInstructionFiles": true,\n  "chat.useAgentsMdFile": false'
+        '"github.copilot.chat.codeGeneration.useInstructionFiles": true,\n  "chat.useAgentsMdFile": false',
     )
     settings_file.write_text(original_with_key)
 

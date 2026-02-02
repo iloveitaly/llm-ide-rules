@@ -7,17 +7,18 @@ from typing_extensions import Annotated
 
 from llm_ide_rules.agents import get_agent, get_all_agents
 
+
 def config_main(
     agent: Annotated[
-        str, 
-        typer.Option(help="Specific agent to configure (cursor, github, etc.)")
+        str | None,
+        typer.Option(help="Specific agent to configure (cursor, github, etc.)"),
     ] = None,
 ):
     """
     Configure agents to use AGENTS.md as their context source.
     """
     base_dir = Path.cwd()
-    
+
     agents_to_configure = []
     if agent:
         try:
@@ -27,18 +28,19 @@ def config_main(
             raise typer.Exit(code=1)
     else:
         agents_to_configure = get_all_agents()
-        
+
     for agent_inst in agents_to_configure:
         if agent_inst.name == "agents":
             continue
-            
+
         try:
             configured = agent_inst.configure_agents_md(base_dir)
             if configured:
-                typer.echo(typer.style(f"Configured {agent_inst.name}", fg=typer.colors.GREEN))
+                typer.echo(
+                    typer.style(f"Configured {agent_inst.name}", fg=typer.colors.GREEN)
+                )
             else:
                 msg = f"Skipped {agent_inst.name} (no changes needed or not applicable)"
                 typer.echo(typer.style(msg, fg=typer.colors.YELLOW))
         except Exception as e:
             typer.echo(f"Failed to configure {agent_inst.name}: {e}", err=True)
-

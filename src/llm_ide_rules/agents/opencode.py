@@ -79,6 +79,7 @@ class OpenCodeAgent(BaseAgent):
         filename: str,
         rules_dir: Path,
         glob_pattern: str | None = None,
+        description: str | None = None,
     ) -> None:
         """OpenCode doesn't support rules."""
         pass

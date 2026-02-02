@@ -200,7 +200,9 @@ def test_delete_default_types():
         (temp_path / "CLAUDE.md").write_text("test")
         (temp_path / "AGENTS.md").write_text("test")
 
-        result = runner.invoke(app, ["delete", "--target", temp_dir, "--yes", "--everything"])
+        result = runner.invoke(
+            app, ["delete", "--target", temp_dir, "--yes", "--everything"]
+        )
 
         assert result.exit_code == 0
         assert "Successfully deleted" in result.stdout
@@ -224,7 +226,16 @@ def test_delete_multiple_types():
         (temp_path / "CLAUDE.md").write_text("test")
 
         result = runner.invoke(
-            app, ["delete", "cursor", "gemini", "--target", temp_dir, "--yes", "--everything"]
+            app,
+            [
+                "delete",
+                "cursor",
+                "gemini",
+                "--target",
+                temp_dir,
+                "--yes",
+                "--everything",
+            ],
         )
 
         assert result.exit_code == 0
@@ -246,7 +257,9 @@ def test_delete_directory_with_subdirectories():
         (rules_dir / "python.mdc").write_text("test")
         (rules_dir / "react.mdc").write_text("test")
 
-        result = runner.invoke(app, ["delete", "cursor", "--target", temp_dir, "--yes", "--everything"])
+        result = runner.invoke(
+            app, ["delete", "cursor", "--target", temp_dir, "--yes", "--everything"]
+        )
 
         assert result.exit_code == 0
         assert not rules_dir.exists()

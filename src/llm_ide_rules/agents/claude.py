@@ -77,6 +77,7 @@ class ClaudeAgent(BaseAgent):
         filename: str,
         rules_dir: Path,
         glob_pattern: str | None = None,
+        description: str | None = None,
     ) -> None:
         """Claude Code doesn't support rules."""
         pass
@@ -102,6 +103,7 @@ class ClaudeAgent(BaseAgent):
         rules_sections: dict[str, list[str]],
         command_sections: dict[str, list[str]],
         output_dir: Path,
+        section_globs: dict[str, str | None] | None = None,
     ) -> None:
         """Generate CLAUDE.md that references AGENTS.md."""
         (output_dir / "CLAUDE.md").write_text("@./AGENTS.md\n")
@@ -110,7 +112,7 @@ class ClaudeAgent(BaseAgent):
         """Create CLAUDE.md pointing to AGENTS.md if AGENTS.md exists and CLAUDE.md doesn't."""
         agents_md = base_dir / "AGENTS.md"
         claude_md = base_dir / "CLAUDE.md"
-        
+
         if agents_md.exists() and not claude_md.exists():
             claude_md.write_text("@./AGENTS.md\n")
             return True

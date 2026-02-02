@@ -1,6 +1,7 @@
 """Agents documentation agent implementation."""
 
 from pathlib import Path
+import typer
 
 from llm_ide_rules.agents.base import BaseAgent
 
@@ -35,6 +36,7 @@ class AgentsAgent(BaseAgent):
         filename: str,
         rules_dir: Path,
         glob_pattern: str | None = None,
+        description: str | None = None,
     ) -> None:
         """Agents doesn't support writing rules."""
         pass
@@ -55,8 +57,68 @@ class AgentsAgent(BaseAgent):
         rules_sections: dict[str, list[str]],
         command_sections: dict[str, list[str]],
         output_dir: Path,
+        section_globs: dict[str, str | None] | None = None,
     ) -> None:
-        """Generate AGENTS.md from rules."""
-        content = self.build_root_doc_content(general_lines, rules_sections)
-        if content.strip():
-            (output_dir / "AGENTS.md").write_text(content)
+        """Generate AGENTS.md files, potentially distributed based on globs."""
+        if not section_globs:
+            # Fallback to single root AGENTS.md
+            content = self.build_root_doc_content(general_lines, rules_sections)
+            if content.strip():
+                (output_dir / "AGENTS.md").write_text(content)
+            return
+
+        # Group rules by target directory
+        rules_by_dir: dict[Path, dict[str, list[str]]] = {}
+
+        # Always include root directory for rules without specific directory targets
+        rules_by_dir[output_dir] = {}
+
+        for section_name, lines in rules_sections.items():
+            target_dir = output_dir
+            glob_pattern = section_globs.get(section_name)
+
+            if glob_pattern and "**" in glob_pattern:
+                # Extract path before **
+                prefix = glob_pattern.split("**")[0].strip("/")
+                potential_dir = output_dir / prefix
+
+                # Check if directory exists, if not traverse up
+                check_dir = potential_dir
+                while not check_dir.exists() and check_dir != output_dir:
+                    check_dir = check_dir.parent
+
+                if check_dir != potential_dir:
+                    # We fell back
+                    if check_dir == output_dir:
+                        # Only warn if falling back to root from a deep path
+                        pass
+
+                    # We can log this if we want, but simple traversal is fine.
+                    # The requirement says "warn to the user".
+                    rel_potential = potential_dir.relative_to(output_dir)
+                    rel_actual = check_dir.relative_to(output_dir)
+                    typer.secho(
+                        f"Warning: Directory '{rel_potential}' for section '{section_name}' does not exist. "
+                        f"Placing in '{rel_actual}' instead.",
+                        fg=typer.colors.YELLOW,
+                        err=True,
+                    )
+
+                target_dir = check_dir
+
+            if target_dir not in rules_by_dir:
+                rules_by_dir[target_dir] = {}
+
+            rules_by_dir[target_dir][section_name] = lines
+
+        # Generate AGENTS.md for each directory
+        for target_dir, sections in rules_by_dir.items():
+            if not sections:
+                continue
+
+            # Only include general instructions in the root AGENTS.md
+            current_general_lines = general_lines if target_dir == output_dir else []
+
+            content = self.build_root_doc_content(current_general_lines, sections)
+            if content.strip():
+                (target_dir / "AGENTS.md").write_text(content)

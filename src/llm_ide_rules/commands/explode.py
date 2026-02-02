@@ -98,7 +98,14 @@ def explode_implementation(
     # Initialize only the agents we need
     agents_to_process = []
     if agent == "all":
-        agents_to_process = ["cursor", "github", "claude", "gemini", "opencode", "agents"]
+        agents_to_process = [
+            "cursor",
+            "github",
+            "claude",
+            "gemini",
+            "opencode",
+            "agents",
+        ]
     else:
         agents_to_process = [agent]
 
@@ -249,6 +256,7 @@ alwaysApply: true
             rules_sections,
             command_sections,
             working_dir,
+            section_globs=section_globs,
         )
 
     # Build log message and user output based on processed agents

@@ -72,6 +72,7 @@ class BaseAgent(ABC):
         rules_sections: dict[str, list[str]],
         command_sections: dict[str, list[str]],
         output_dir: Path,
+        section_globs: dict[str, str | None] | None = None,
     ) -> None:
         """Generate a root documentation file (e.g. CLAUDE.md) if supported."""
         pass

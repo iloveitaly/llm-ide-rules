@@ -237,10 +237,7 @@ applyTo: "{glob_pattern}"
         from llm_ide_rules.utils import modify_json_file
 
         settings_path = base_dir / ".vscode" / "settings.json"
-        
-        updates = {
-            "chat.useAgentsMdFile": True,
-            "chat.useNestedAgentsMdFiles": True
-        }
-        
+
+        updates = {"chat.useAgentsMdFile": True, "chat.useNestedAgentsMdFiles": True}
+
         return modify_json_file(settings_path, updates)

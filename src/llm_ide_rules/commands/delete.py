@@ -28,11 +28,9 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(target_dir / ".github/copilot-instructions.md")
                 generated.add(target_dir / "CLAUDE.md")
 
-
             # If any sections exist, root docs are definitely generated
             if sections:
                 generated.add(target_dir / "CLAUDE.md")
-
 
             # Section specific files
             for header in sections:
@@ -203,10 +201,8 @@ def delete_main(
 
         # Filter: keep only files that are in the generated set
         # We compare resolved paths to be safe
-        files_to_delete = [
-            f for f in all_candidates if f.resolve() in generated_files
-        ]
-        
+        files_to_delete = [f for f in all_candidates if f.resolve() in generated_files]
+
         # Identify skipped files (candidates that were NOT in generated set)
         skipped_files = [
             f for f in all_candidates if f.resolve() not in generated_files

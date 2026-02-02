@@ -2,11 +2,12 @@
 
 import re
 from pathlib import Path
+from typing import Any
 
 
-def modify_json_file(file_path: Path, updates: dict[str, any]) -> bool:
+def modify_json_file(file_path: Path, updates: dict[str, Any]) -> bool:
     """Modify a JSON/JSONC file by adding MISSING keys using string manipulation to preserve comments.
-    
+
     Returns:
         bool: True if changes were written to the file, False otherwise.
     """
@@ -41,7 +42,7 @@ def modify_json_file(file_path: Path, updates: dict[str, any]) -> bool:
         escaped_key = re.escape(key)
         pattern_str = (
             rf'(["\\]?{escaped_key}["\\]?\s*:\s*)([^,\n\r}}]+?)'
-            r'(?=\s*(?:,|\n|\r|\}|\/\/|\/\*))'
+            r"(?=\s*(?:,|\n|\r|\}|\/\/|\/\*))"
         )
         pattern = re.compile(pattern_str, re.MULTILINE)
 
@@ -52,7 +53,7 @@ def modify_json_file(file_path: Path, updates: dict[str, any]) -> bool:
             key_part = match.group(1)
             # Replace the value part (group 2) with new value
             new_entry = f"{key_part}{val_str}"
-            content = content[:match.start()] + new_entry + content[match.end():]
+            content = content[: match.start()] + new_entry + content[match.end() :]
         else:
             # Insert new key
             last_brace_idx = content.rfind("}")
@@ -76,9 +77,9 @@ def modify_json_file(file_path: Path, updates: dict[str, any]) -> bool:
                     prev_char = content[prev_char_idx]
                     # If the last thing wasn't a comma or opening brace, we need a comma
                     if prev_char not in ["{", ","]:
-                        new_entry = f',\n{indent}\"{key}\": {val_str}'
+                        new_entry = f',\n{indent}"{key}": {val_str}'
                     else:
-                        new_entry = f'\n{indent}\"{key}\": {val_str}'
+                        new_entry = f'\n{indent}"{key}": {val_str}'
 
                     content = (
                         content[:insertion_point]
@@ -113,7 +114,5 @@ def find_project_root(start_path: Path | None = None) -> Path:
             return parent
         if (parent / ".github").exists():
             return parent
-            
-    return start_path  # Fallback to current directory
 
-    
+    return start_path  # Fallback to current directory

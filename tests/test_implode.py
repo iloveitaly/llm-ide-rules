@@ -523,7 +523,9 @@ Here are TypeScript rules for development."""
         with open("instructions.md", "w") as f:
             f.write(original_content)
 
-        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
+        explode_result = runner.invoke(
+            app, ["explode", "instructions.md", "--agent", "cursor"]
+        )
         assert explode_result.exit_code == 0
 
         implode_result = runner.invoke(app, ["implode", "cursor", "bundled.md"])
