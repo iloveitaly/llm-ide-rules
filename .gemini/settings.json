@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "deepwiki": {
+      "httpUrl": "https://mcp.deepwiki.com/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--isolated",
+        "--cap",
+        "visual"
+      ]
+    },
+    "chrome-mcp-server": {
+      "httpUrl": "http://127.0.0.1:12306/mcp"
+    },
+    "context7": {
+      "httpUrl": "https://mcp.context7.com/mcp"
+    },
+    "stripe": {
+      "httpUrl": "https://mcp.stripe.com"
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp@latest"
+      ]
+    },
+    "terraform": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "hashicorp/terraform-mcp-server"
+      ]
+    }
+  }
+}
