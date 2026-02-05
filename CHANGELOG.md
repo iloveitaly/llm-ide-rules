@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.8.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.7.0...v0.8.0) (2026-02-05)
+
+
+### Features
+
+* add agents agent and update AGENTS.md handling ([f95c713](https://github.com/iloveitaly/llm-ide-rules/commit/f95c713a441218161f28610a4f04c80de04a2214))
+* add config command to set up agents with AGENTS.md support ([782809c](https://github.com/iloveitaly/llm-ide-rules/commit/782809c98c374a7a79ff91bf0592c82a48ee9d39))
+* add description field to YAML frontmatter in rule files ([73ba46a](https://github.com/iloveitaly/llm-ide-rules/commit/73ba46ae6c2d9e7600e13b183a0896ca03dc230f))
+* **cli:** add --version flag with eager callback to show version ([9649a22](https://github.com/iloveitaly/llm-ide-rules/commit/9649a223a97afba482436502f7222ad9612273ff))
+* **delete:** add safe mode and --everything for file deletion ([6b3b97e](https://github.com/iloveitaly/llm-ide-rules/commit/6b3b97e90252d2d2f54d13df2a3067a74d9f06cf))
+* **gemini:** generate_root_doc writes GEMINI.md from rules ([41dd946](https://github.com/iloveitaly/llm-ide-rules/commit/41dd9468a3653ff47e560f9380b1105f3269ec51))
+* reference AGENTS.md in CLAUDE.md and add config check for Gemini ([c3181da](https://github.com/iloveitaly/llm-ide-rules/commit/c3181daa9e4d3a2edcb4318eb30f84fe3f134526))
+* **vscode:** add VSCodeAgent for mcp.json platform support ([363f0c9](https://github.com/iloveitaly/llm-ide-rules/commit/363f0c9671e13dc83f8d01b7a42d6209b0bab8d2))
+
+
+### Bug Fixes
+
+* **download:** display expected files when none are found ([6a0d90f](https://github.com/iloveitaly/llm-ide-rules/commit/6a0d90ffcb689a0cadc51fa7e50df5300ba14ea7))
+* **download:** move markdown files to generated_files in config ([47db877](https://github.com/iloveitaly/llm-ide-rules/commit/47db8771f394873eac84793f93b6bef03666540f))
+* update deletion logic for subdirs, add safety tests ([f27e882](https://github.com/iloveitaly/llm-ide-rules/commit/f27e882e1472cfd5004c8e57dc16632834546b17))
+* update json modification logic and add find_project_root ([3c90d20](https://github.com/iloveitaly/llm-ide-rules/commit/3c90d20213b25364b8ee8e50a26048cb14873075))
+
+
+### Documentation
+
+* add agent instructions and update cursor rule descriptions ([e83a9f0](https://github.com/iloveitaly/llm-ide-rules/commit/e83a9f05590928a1ff688d635c3d57c9b2a51ded))
+* add instructions to use typed fastapi route helpers ([50131e2](https://github.com/iloveitaly/llm-ide-rules/commit/50131e22c929a239d7da1ee46fe5d7824a1b828f))
+* clarify dev workflow, add just/uv usage and db error rule ([893660a](https://github.com/iloveitaly/llm-ide-rules/commit/893660aaccdaa033bd54438339b943bae8282938))
+* clarify developer workflow and agent instructions in instructions.md ([51be12a](https://github.com/iloveitaly/llm-ide-rules/commit/51be12a7ef145fe61828591d31ec7572c587fd06))
+* reorganize secret and stripe sections in instructions files ([72ad4ec](https://github.com/iloveitaly/llm-ide-rules/commit/72ad4eca50df953fba30eca0c199116fc9d93693))
+* require typed route helpers for URL generation in tests ([3bbfa73](https://github.com/iloveitaly/llm-ide-rules/commit/3bbfa73177fd0568f77116f52e072f98800b1be4))
+* update Fastapi and Typescript section headings and clarify migration instructions ([b8d383d](https://github.com/iloveitaly/llm-ide-rules/commit/b8d383d2568a7b3897e20f975b7f6dd87a48282b))
+
 ## [0.7.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.6.0...v0.7.0) (2026-01-27)
 
 
