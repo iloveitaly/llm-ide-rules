@@ -285,7 +285,7 @@ alwaysApply: true
                 fg=typer.colors.YELLOW,
             )
             typer.secho(
-                "  gemini config set agent.instructionFile AGENTS.md",
+                "  llm-ide-rules config",
                 fg=typer.colors.YELLOW,
             )
 

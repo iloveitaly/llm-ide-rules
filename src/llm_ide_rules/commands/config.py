@@ -11,7 +11,7 @@ from llm_ide_rules.agents import get_agent, get_all_agents
 def config_main(
     agent: Annotated[
         str | None,
-        typer.Option(help="Specific agent to configure (cursor, github, etc.)"),
+        typer.Argument(help="Specific agent to configure (cursor, github, etc.)"),
     ] = None,
 ):
     """
