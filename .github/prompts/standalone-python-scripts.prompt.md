@@ -30,7 +30,7 @@ DEFAULT_ENVIRONMENT_NAME = "production"
 DEFAULT_SERVICE_NAME = "Postgres"
 ```
 
-## CLI Output vs Logging
+### CLI Output and Logging
 
 - Use `structlog_config` for logging. Read the usage guide: @https://github.com/iloveitaly/structlog-config/
 - Use logging for operational/debugging info that goes to structured logs.
