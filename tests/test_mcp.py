@@ -1,4 +1,4 @@
-"""Tests for MCP configuration management."""
+"""Tests for MCP configuration management including VS Code."""
 
 import json
 import os
@@ -11,6 +11,7 @@ from llm_ide_rules.agents.claude import ClaudeAgent
 from llm_ide_rules.agents.gemini import GeminiAgent
 from llm_ide_rules.agents.github import GitHubAgent
 from llm_ide_rules.agents.opencode import OpenCodeAgent
+from llm_ide_rules.agents.vscode import VSCodeAgent
 from llm_ide_rules.mcp import McpServer
 
 runner = CliRunner()
@@ -95,6 +96,15 @@ def test_transform_mcp_server_opencode_uses_environment_key():
     assert result["environment"] == {"API_KEY": "secret"}
     assert "env" not in result
 
+def test_transform_mcp_server_vscode():
+    """Test VS Code transform."""
+    server = McpServer(command="npx", args=["-y", "@pkg/name"], env={"KEY": "val"})
+    agent = VSCodeAgent()
+    result = agent.transform_mcp_server(server)
+    assert result["command"] == "npx"
+    assert result["args"] == ["-y", "@pkg/name"]
+    assert result["env"] == {"KEY": "val"}
+
 
 # Reverse Transform Tests
 
@@ -132,6 +142,15 @@ def test_reverse_transform_mcp_server_github_http():
     result = agent.reverse_transform_mcp_server("test", config)
     assert result.url == "https://mcp.example.com"
 
+def test_reverse_transform_mcp_server_vscode():
+    """Test VS Code reverse transform."""
+    agent = VSCodeAgent()
+    config = {"command": "npx", "args": ["-y", "@pkg/name"], "env": {"KEY": "val"}}
+    result = agent.reverse_transform_mcp_server("test", config)
+    assert result.command == "npx"
+    assert result.args == ["-y", "@pkg/name"]
+    assert result.env == {"KEY": "val"}
+
 
 # CLI Integration Tests
 
@@ -156,6 +175,25 @@ def test_mcp_explode_basic(tmp_path, monkeypatch):
     assert (tmp_path / ".mcp.json").exists()
     assert (tmp_path / ".cursor/mcp.json").exists()
     assert (tmp_path / "opencode.json").exists()
+    assert (tmp_path / ".vscode/mcp.json").exists()
+
+
+def test_mcp_explode_vscode_content(tmp_path, monkeypatch):
+    """Test vscode mcp.json content structure."""
+    monkeypatch.chdir(tmp_path)
+
+    mcp_json = {"servers": {"test": {"command": "npx", "args": ["-y", "@pkg/name"]}}}
+    (tmp_path / "mcp.json").write_text(json.dumps(mcp_json))
+
+    result = runner.invoke(app, ["mcp", "explode", "mcp.json"])
+    assert result.exit_code == 0
+
+    vscode_path = tmp_path / ".vscode/mcp.json"
+    assert vscode_path.exists()
+    config = json.loads(vscode_path.read_text())
+    assert "servers" in config
+    assert "test" in config["servers"]
+    assert config["servers"]["test"]["command"] == "npx"
 
 
 def test_mcp_explode_remote_server(tmp_path, monkeypatch):
@@ -254,6 +292,9 @@ def test_mcp_explode_with_env(tmp_path, monkeypatch):
 
     opencode_config = json.loads((tmp_path / "opencode.json").read_text())
     assert opencode_config["mcp"]["test"]["environment"]["API_KEY"] == "secret"
+    
+    vscode_config = json.loads((tmp_path / ".vscode/mcp.json").read_text())
+    assert vscode_config["servers"]["test"]["env"]["API_KEY"] == "secret"
 
 
 def test_mcp_implode_missing_source(tmp_path, monkeypatch):

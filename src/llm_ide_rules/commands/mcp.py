@@ -23,7 +23,7 @@ def explode(
         "all",
         "--agent",
         "-a",
-        help="Agent: claude, cursor, gemini, opencode, copilot, or all",
+        help="Agent: claude, cursor, gemini, opencode, copilot, vscode, or all",
     ),
 ) -> None:
     """Convert unified mcp.json to platform-specific configs."""
