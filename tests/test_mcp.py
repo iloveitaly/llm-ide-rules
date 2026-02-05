@@ -96,6 +96,7 @@ def test_transform_mcp_server_opencode_uses_environment_key():
     assert result["environment"] == {"API_KEY": "secret"}
     assert "env" not in result
 
+
 def test_transform_mcp_server_vscode():
     """Test VS Code transform."""
     server = McpServer(command="npx", args=["-y", "@pkg/name"], env={"KEY": "val"})
@@ -141,6 +142,7 @@ def test_reverse_transform_mcp_server_github_http():
     config = {"type": "http", "url": "https://mcp.example.com", "tools": ["*"]}
     result = agent.reverse_transform_mcp_server("test", config)
     assert result.url == "https://mcp.example.com"
+
 
 def test_reverse_transform_mcp_server_vscode():
     """Test VS Code reverse transform."""
@@ -292,7 +294,7 @@ def test_mcp_explode_with_env(tmp_path, monkeypatch):
 
     opencode_config = json.loads((tmp_path / "opencode.json").read_text())
     assert opencode_config["mcp"]["test"]["environment"]["API_KEY"] == "secret"
-    
+
     vscode_config = json.loads((tmp_path / ".vscode/mcp.json").read_text())
     assert vscode_config["servers"]["test"]["env"]["API_KEY"] == "secret"
 
