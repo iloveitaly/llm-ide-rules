@@ -60,6 +60,15 @@ uvx llm-ide-rules delete cursor gemini            # Delete specific types
 uvx llm-ide-rules delete --yes                    # Skip confirmation prompt
 ```
 
+### Authentication
+
+To avoid GitHub API rate limits or to access private repositories, you can set the `GITHUB_TOKEN` environment variable. The `download` command will automatically use this token for authentication.
+
+```sh
+export GITHUB_TOKEN=your_token_here
+uvx llm-ide-rules download
+```
+
 ### Examples
 
 ```sh

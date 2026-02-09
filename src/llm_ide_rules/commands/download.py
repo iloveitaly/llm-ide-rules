@@ -1,5 +1,6 @@
 """Download command: Download LLM instruction files from GitHub repositories."""
 
+import os
 import re
 import tempfile
 import zipfile
@@ -92,8 +93,14 @@ def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
         url=zip_url,
     )
 
+    headers = {}
+    github_token = os.environ.get("GITHUB_TOKEN")
+    if github_token:
+        headers["Authorization"] = f"Bearer {github_token}"
+        log.debug("using GITHUB_TOKEN for authentication")
+
     try:
-        response = requests.get(zip_url, timeout=30)
+        response = requests.get(zip_url, headers=headers, timeout=30)
         response.raise_for_status()
     except requests.RequestException as e:
         log.error("failed to download repository", error=str(e), url=zip_url)

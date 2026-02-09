@@ -280,10 +280,50 @@ def test_download_with_full_github_url(mock_zipfile, mock_requests):
             expected_url = (
                 "https://github.com/iloveitaly/llm-ide-rules/archive/master.zip"
             )
-            mock_requests.assert_called_once_with(expected_url, timeout=30)
+            mock_requests.assert_called_once_with(expected_url, headers={}, timeout=30)
 
             # Verify the result is the extracted directory
             assert result == extracted_dir
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+def test_download_with_github_token(mock_zipfile, mock_requests):
+    """Test download command with GITHUB_TOKEN."""
+    from llm_ide_rules.commands.download import download_and_extract_repo
+
+    # Mock response
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    # Mock zipfile
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+    mock_zip_instance.extractall = Mock()
+
+    # Create a dummy environment with GITHUB_TOKEN
+    with patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"}):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Mock tempfile.mkdtemp to return our controlled temp dir
+            with patch("llm_ide_rules.commands.download.tempfile.mkdtemp") as mock_mkdtemp:
+                mock_mkdtemp.return_value = temp_dir
+
+                # Create the expected directory structure in the temp dir
+                extract_dir = Path(temp_dir) / "extracted"
+                extract_dir.mkdir(parents=True, exist_ok=True)
+                (extract_dir / "repo-master").mkdir()
+
+                # Call the function
+                download_and_extract_repo("user/repo")
+
+                # Verify request headers
+                mock_requests.assert_called_with(
+                    "https://github.com/user/repo/archive/master.zip",
+                    timeout=30,
+                    headers={"Authorization": "Bearer test-token"}
+                )
 
 
 def test_agents_instruction_type_configuration():
@@ -326,3 +366,52 @@ def test_copy_recursive_files_warning_for_missing_directories():
             mock_log.warning.assert_called_once()
             call_args = mock_log.warning.call_args
             assert "target directory does not exist, skipping file copy" in call_args[0]
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+@patch("llm_ide_rules.commands.download.log")
+def test_download_with_github_token(mock_log, mock_zipfile, mock_requests):
+    """Test download command with GITHUB_TOKEN."""
+    from llm_ide_rules.commands.download import download_and_extract_repo
+
+    # Mock response
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    # Mock zipfile
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+    mock_zip_instance.extractall = Mock()
+
+    # Create a dummy environment with GITHUB_TOKEN
+    with patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"}):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with patch(
+                "llm_ide_rules.commands.download.tempfile.mkdtemp"
+            ) as mock_mkdtemp:
+                mock_mkdtemp.return_value = temp_dir
+
+                # Create the expected directory structure in the temp dir
+                extract_dir = Path(temp_dir) / "extracted"
+                extract_dir.mkdir(parents=True, exist_ok=True)
+                (extract_dir / "repo-master").mkdir()
+
+                try:
+                    download_and_extract_repo("user/repo")
+                except Exception:
+                    # Ignore downstream errors, we focus on the request
+                    pass
+
+                # Verify request headers
+                mock_requests.assert_called_with(
+                    "https://github.com/user/repo/archive/master.zip",
+                    timeout=30,
+                    headers={"Authorization": "Bearer test-token"},
+                )
+
+                # Verify debug log
+                mock_log.debug.assert_any_call("using GITHUB_TOKEN for authentication")
+
