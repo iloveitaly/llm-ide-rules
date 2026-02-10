@@ -307,7 +307,9 @@ def test_download_with_github_token(mock_zipfile, mock_requests):
     with patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"}):
         with tempfile.TemporaryDirectory() as temp_dir:
             # Mock tempfile.mkdtemp to return our controlled temp dir
-            with patch("llm_ide_rules.commands.download.tempfile.mkdtemp") as mock_mkdtemp:
+            with patch(
+                "llm_ide_rules.commands.download.tempfile.mkdtemp"
+            ) as mock_mkdtemp:
                 mock_mkdtemp.return_value = temp_dir
 
                 # Create the expected directory structure in the temp dir
@@ -322,7 +324,7 @@ def test_download_with_github_token(mock_zipfile, mock_requests):
                 mock_requests.assert_called_with(
                     "https://github.com/user/repo/archive/master.zip",
                     timeout=30,
-                    headers={"Authorization": "Bearer test-token"}
+                    headers={"Authorization": "Bearer test-token"},
                 )
 
 
@@ -371,7 +373,7 @@ def test_copy_recursive_files_warning_for_missing_directories():
 @patch("llm_ide_rules.commands.download.requests.get")
 @patch("llm_ide_rules.commands.download.zipfile.ZipFile")
 @patch("llm_ide_rules.commands.download.log")
-def test_download_with_github_token(mock_log, mock_zipfile, mock_requests):
+def test_download_with_github_token_logs(mock_log, mock_zipfile, mock_requests):
     """Test download command with GITHUB_TOKEN."""
     from llm_ide_rules.commands.download import download_and_extract_repo
 
@@ -414,4 +416,3 @@ def test_download_with_github_token(mock_log, mock_zipfile, mock_requests):
 
                 # Verify debug log
                 mock_log.debug.assert_any_call("using GITHUB_TOKEN for authentication")
-
