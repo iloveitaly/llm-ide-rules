@@ -1,3 +1,8 @@
 - [ ] https://github.com/microsoft/vscode-copilot-release/issues/7145 need to implement the allowlist in some way for automatic agent execution
 - [ ] no headers on manually included instructions
 - [ ] support auto-added instructions?
+
+```
+comments that introduce a logical block should have a blank line before them (separating
+  from the previous block) but no blank line between the comment and the code it describes.
+```
