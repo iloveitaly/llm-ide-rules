@@ -33,12 +33,23 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(target_dir / "CLAUDE.md")
 
             # Section specific files
-            for header in sections:
+            for header, section_data in sections.items():
                 filename = header_to_filename(header)
                 generated.add(target_dir / f".cursor/rules/{filename}.mdc")
                 generated.add(
                     target_dir / f".github/instructions/{filename}.instructions.md"
                 )
+
+                # Add subdirectory CLAUDE.md for sections with ** glob patterns
+                glob_pattern = section_data.glob_pattern
+                if glob_pattern and "**" in glob_pattern:
+                    prefix = glob_pattern.split("**")[0].strip("/")
+                    potential_dir = target_dir / prefix
+                    check_dir = potential_dir
+                    while not check_dir.exists() and check_dir != target_dir:
+                        check_dir = check_dir.parent
+                    if check_dir != target_dir:
+                        generated.add(check_dir / "CLAUDE.md")
 
         except Exception as e:
             log.warning("failed to parse instructions.md", error=str(e))

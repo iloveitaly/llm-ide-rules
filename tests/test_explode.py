@@ -262,6 +262,43 @@ def test_explode_nonexistent_file():
         assert result.exit_code == 1
 
 
+def test_explode_claude_md_in_subdirectories():
+    """Test that CLAUDE.md is generated alongside AGENTS.md in subdirectories."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        # Create the subdirectory that the glob pattern will resolve to
+        Path("web").mkdir()
+
+        instructions_content = """# Sample Instructions
+
+## TypeScript
+globs: web/**/*.ts
+
+Here are TypeScript rules for the web directory.
+
+## Python
+
+Here are Python rules for the root.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        result = runner.invoke(app, ["explode", "instructions.md"])
+
+        assert result.exit_code == 0
+
+        # Root CLAUDE.md should exist
+        assert Path("CLAUDE.md").exists()
+        assert "@./AGENTS.md" in Path("CLAUDE.md").read_text()
+
+        # Subdirectory CLAUDE.md should exist alongside AGENTS.md
+        assert Path("web/AGENTS.md").exists()
+        assert Path("web/CLAUDE.md").exists()
+        assert "@./AGENTS.md" in Path("web/CLAUDE.md").read_text()
+
+
 def test_explode_generates_root_docs():
     """Test that explode generates CLAUDE.md and GEMINI.md."""
     runner = CliRunner()

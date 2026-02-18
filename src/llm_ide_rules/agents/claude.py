@@ -105,15 +105,36 @@ class ClaudeAgent(BaseAgent):
         output_dir: Path,
         section_globs: dict[str, str | None] | None = None,
     ) -> None:
-        """Generate CLAUDE.md that references AGENTS.md."""
-        (output_dir / "CLAUDE.md").write_text("@./AGENTS.md\n")
+        """Generate CLAUDE.md that references AGENTS.md in all target directories."""
+        if not section_globs:
+            (output_dir / "CLAUDE.md").write_text("@./AGENTS.md\n")
+            return
+
+        # Mirror AgentsAgent directory resolution to write CLAUDE.md alongside each AGENTS.md
+        target_dirs = {output_dir}
+        for section_name in rules_sections:
+            glob_pattern = section_globs.get(section_name)
+            if not glob_pattern or "**" not in glob_pattern:
+                continue
+
+            prefix = glob_pattern.split("**")[0].strip("/")
+            potential_dir = output_dir / prefix
+
+            check_dir = potential_dir
+            while not check_dir.exists() and check_dir != output_dir:
+                check_dir = check_dir.parent
+
+            target_dirs.add(check_dir)
+
+        for target_dir in target_dirs:
+            (target_dir / "CLAUDE.md").write_text("@./AGENTS.md\n")
 
     def configure_agents_md(self, base_dir: Path) -> bool:
-        """Create CLAUDE.md pointing to AGENTS.md if AGENTS.md exists and CLAUDE.md doesn't."""
-        agents_md = base_dir / "AGENTS.md"
-        claude_md = base_dir / "CLAUDE.md"
-
-        if agents_md.exists() and not claude_md.exists():
-            claude_md.write_text("@./AGENTS.md\n")
-            return True
-        return False
+        """Create CLAUDE.md pointing to AGENTS.md wherever AGENTS.md exists and CLAUDE.md doesn't."""
+        configured = False
+        for agents_md in base_dir.rglob("AGENTS.md"):
+            claude_md = agents_md.parent / "CLAUDE.md"
+            if not claude_md.exists():
+                claude_md.write_text("@./AGENTS.md\n")
+                configured = True
+        return configured
