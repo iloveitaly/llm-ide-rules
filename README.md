@@ -26,6 +26,52 @@ Different AI coding assistants use different formats for instructions and comman
 | **Gemini CLI** | commands | `.gemini/commands/*.toml` | TOML format, supports `{{args}}` and shell commands |
 | **OpenCode** | commands | `.opencode/commands/*.md` | Plain markdown, no frontmatter |
 
+### MCP Server Configuration
+
+Each IDE stores MCP server configuration in a different location and format. The `mcp.json` file in this repo is a unified format that can be exploded into per-IDE configs:
+
+| IDE | project path | global path | root key |
+|-----|-------------|-------------|----------|
+| **Claude Code** | `.mcp.json` | `~/.claude.json` | `mcpServers` |
+| **Cursor** | `.cursor/mcp.json` | `~/.cursor/mcp.json` | `mcpServers` |
+| **VS Code** | `.vscode/mcp.json` | — | `servers` |
+| **GitHub Copilot** | `.copilot/mcp-config.json` | `~/.copilot/mcp-config.json` | `mcpServers` |
+| **Gemini CLI** | `.gemini/settings.json` | `~/.gemini/settings.json` | `mcpServers` |
+| **OpenCode** | `opencode.json` | `~/.config/opencode/opencode.json` | `mcp` |
+
+The unified `mcp.json` format uses a `servers` top-level key:
+
+```json
+{
+  "servers": {
+    "my-sse-server": {
+      "url": "https://example.com/mcp"
+    },
+    "my-streamable-http-server": {
+      "type": "streamableHttp",
+      "url": "http://127.0.0.1:12306/mcp"
+    },
+    "my-stdio-server": {
+      "command": "npx",
+      "args": ["my-mcp-package@latest"],
+      "env": {
+        "API_KEY": "..."
+      }
+    },
+    "my-docker-server": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "my/mcp-image"]
+    }
+  }
+}
+```
+
+Each server entry supports:
+- `url` — for HTTP/SSE-based servers
+- `type` — optional transport hint (e.g. `streamableHttp`); omit for default SSE
+- `command` + `args` — for stdio-based servers (npx, docker, etc.)
+- `env` — optional environment variables passed to the server
+
 ## Installation
 
 ```sh
@@ -58,6 +104,14 @@ uvx llm-ide-rules download --repo other/repo      # Download from different repo
 uvx llm-ide-rules delete [instruction_types]      # Delete everything by default
 uvx llm-ide-rules delete cursor gemini            # Delete specific types
 uvx llm-ide-rules delete --yes                    # Skip confirmation prompt
+
+# Manage MCP server configurations
+uvx llm-ide-rules mcp explode [mcp.json]          # Explode unified config to per-IDE files
+uvx llm-ide-rules mcp explode --agent claude      # Explode for a specific agent only
+uvx llm-ide-rules mcp explode --scope global      # Write to global config paths
+uvx llm-ide-rules mcp explode --scope both        # Write to both project and global paths
+uvx llm-ide-rules mcp implode --source claude     # Merge agent config back to mcp.json
+uvx llm-ide-rules mcp implode --source cursor --scope global  # Read from global config
 ```
 
 ### Authentication
@@ -104,6 +158,18 @@ uvx llm-ide-rules delete cursor gemini --target ./my-project
 
 # Delete without confirmation prompt
 uvx llm-ide-rules delete --yes
+
+# Explode mcp.json to all supported IDE formats
+uvx llm-ide-rules mcp explode
+
+# Explode mcp.json to Claude Code only
+uvx llm-ide-rules mcp explode --agent claude
+
+# Explode to both project and global config paths
+uvx llm-ide-rules mcp explode --scope both
+
+# Pull Claude's project MCP config back into unified mcp.json
+uvx llm-ide-rules mcp implode --source claude
 ```
 
 ## Extracting Changes
