@@ -6,3 +6,7 @@
 comments that introduce a logical block should have a blank line before them (separating
   from the previous block) but no blank line between the comment and the code it describes.
 ```
+
+```
+ Prefer named unused variables over blank `_`
+```
