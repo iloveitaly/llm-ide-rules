@@ -248,6 +248,7 @@ When writing Python:
 
 * Assume the latest python, version 3.13.
 * Prefer Pathlib methods (including read and write methods, like `read_text`) over `os.path`, `open`, `write`, etc.
+* Prefer docstr to multi-line comments at the top of a function or file.
 * Use Pydantic models over dataclass or a typed dict.
 * Use SQLAlchemy for generating any SQL queries.
 * Use `click` for command line argument parsing.
@@ -525,3 +526,4 @@ Here's how frontend code is organized in `web/app/`:
   - `ui/` reusable ShadCN UI components (buttons, forms, etc.).
   - `shared/` components shared across multiple pages.
   - create additional folders for route- or section-specific components.
+
