@@ -94,6 +94,21 @@ def modify_json_file(file_path: Path, updates: dict[str, Any]) -> bool:
     return False
 
 
+def resolve_target_dir(base_dir: Path, glob_pattern: str | None) -> Path:
+    """Resolve the target directory for a glob pattern by finding the deepest existing directory."""
+    if not glob_pattern or "**" not in glob_pattern:
+        return base_dir
+
+    prefix = glob_pattern.split("**")[0].strip("/")
+    potential_dir = base_dir / prefix
+
+    check_dir = potential_dir
+    while not check_dir.exists() and check_dir != base_dir:
+        check_dir = check_dir.parent
+
+    return check_dir
+
+
 def find_project_root(start_path: Path | None = None) -> Path:
     """Find the project root by looking for common markers."""
     if start_path is None:

@@ -73,38 +73,24 @@ class AgentsAgent(BaseAgent):
         # Always include root directory for rules without specific directory targets
         rules_by_dir[output_dir] = {}
 
-        for section_name, lines in rules_sections.items():
-            target_dir = output_dir
-            glob_pattern = section_globs.get(section_name)
+        from llm_ide_rules.utils import resolve_target_dir
 
-            if glob_pattern and "**" in glob_pattern:
-                # Extract path before **
+        for section_name, lines in rules_sections.items():
+            glob_pattern = section_globs.get(section_name)
+            target_dir = resolve_target_dir(output_dir, glob_pattern)
+
+            if target_dir != output_dir and glob_pattern and "**" in glob_pattern:
                 prefix = glob_pattern.split("**")[0].strip("/")
                 potential_dir = output_dir / prefix
-
-                # Check if directory exists, if not traverse up
-                check_dir = potential_dir
-                while not check_dir.exists() and check_dir != output_dir:
-                    check_dir = check_dir.parent
-
-                if check_dir != potential_dir:
-                    # We fell back
-                    if check_dir == output_dir:
-                        # Only warn if falling back to root from a deep path
-                        pass
-
-                    # We can log this if we want, but simple traversal is fine.
-                    # The requirement says "warn to the user".
+                if target_dir != potential_dir:
                     rel_potential = potential_dir.relative_to(output_dir)
-                    rel_actual = check_dir.relative_to(output_dir)
+                    rel_actual = target_dir.relative_to(output_dir)
                     typer.secho(
                         f"Warning: Directory '{rel_potential}' for section '{section_name}' does not exist. "
                         f"Placing in '{rel_actual}' instead.",
                         fg=typer.colors.YELLOW,
                         err=True,
                     )
-
-                target_dir = check_dir
 
             if target_dir not in rules_by_dir:
                 rules_by_dir[target_dir] = {}

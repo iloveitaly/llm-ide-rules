@@ -27,12 +27,16 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(target_dir / ".cursor/rules/general.mdc")
                 generated.add(target_dir / ".github/copilot-instructions.md")
                 generated.add(target_dir / "CLAUDE.md")
+                generated.add(target_dir / "AGENTS.md")
 
             # If any sections exist, root docs are definitely generated
             if sections:
                 generated.add(target_dir / "CLAUDE.md")
+                generated.add(target_dir / "AGENTS.md")
 
             # Section specific files
+            from llm_ide_rules.utils import resolve_target_dir
+
             for header, section_data in sections.items():
                 filename = header_to_filename(header)
                 generated.add(target_dir / f".cursor/rules/{filename}.mdc")
@@ -40,16 +44,13 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                     target_dir / f".github/instructions/{filename}.instructions.md"
                 )
 
-                # Add subdirectory CLAUDE.md for sections with ** glob patterns
+                # Add subdirectory CLAUDE.md and AGENTS.md for sections with ** glob patterns
                 glob_pattern = section_data.glob_pattern
-                if glob_pattern and "**" in glob_pattern:
-                    prefix = glob_pattern.split("**")[0].strip("/")
-                    potential_dir = target_dir / prefix
-                    check_dir = potential_dir
-                    while not check_dir.exists() and check_dir != target_dir:
-                        check_dir = check_dir.parent
-                    if check_dir != target_dir:
-                        generated.add(check_dir / "CLAUDE.md")
+                section_target_dir = resolve_target_dir(target_dir, glob_pattern)
+                
+                if section_target_dir != target_dir:
+                    generated.add(section_target_dir / "CLAUDE.md")
+                    generated.add(section_target_dir / "AGENTS.md")
 
         except Exception as e:
             log.warning("failed to parse instructions.md", error=str(e))
@@ -108,6 +109,9 @@ def find_files_to_delete(
         for file_pattern in config.get("recursive_files", []):
             matching_files = list(target_dir.rglob(file_pattern))
             files_to_delete.extend([f for f in matching_files if f.is_file()])
+
+    # Deduplicate files to delete while preserving order
+    files_to_delete = list(dict.fromkeys(files_to_delete))
 
     return dirs_to_delete, files_to_delete
 

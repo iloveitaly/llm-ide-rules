@@ -112,19 +112,12 @@ class ClaudeAgent(BaseAgent):
 
         # Mirror AgentsAgent directory resolution to write CLAUDE.md alongside each AGENTS.md
         target_dirs = {output_dir}
+        from llm_ide_rules.utils import resolve_target_dir
+
         for section_name in rules_sections:
             glob_pattern = section_globs.get(section_name)
-            if not glob_pattern or "**" not in glob_pattern:
-                continue
-
-            prefix = glob_pattern.split("**")[0].strip("/")
-            potential_dir = output_dir / prefix
-
-            check_dir = potential_dir
-            while not check_dir.exists() and check_dir != output_dir:
-                check_dir = check_dir.parent
-
-            target_dirs.add(check_dir)
+            target_dir = resolve_target_dir(output_dir, glob_pattern)
+            target_dirs.add(target_dir)
 
         for target_dir in target_dirs:
             (target_dir / "CLAUDE.md").write_text("@./AGENTS.md\n")

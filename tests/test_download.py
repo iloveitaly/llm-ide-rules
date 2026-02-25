@@ -336,7 +336,7 @@ def test_agents_instruction_type_configuration():
     assert agents_config["directories"] == []
     assert agents_config["files"] == []
     assert agents_config["generated_files"] == ["AGENTS.md"]
-    assert "recursive_files" not in agents_config
+    assert agents_config["recursive_files"] == ["AGENTS.md"]
 
 
 def test_copy_recursive_files_warning_for_missing_directories():

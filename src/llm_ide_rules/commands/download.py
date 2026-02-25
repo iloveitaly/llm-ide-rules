@@ -66,6 +66,7 @@ INSTRUCTION_TYPES = {
         "directories": [".claude/commands"],
         "files": [],
         "generated_files": ["CLAUDE.md"],
+        "recursive_files": ["CLAUDE.md"],
         "include_patterns": [],
     },
     "opencode": {
@@ -73,7 +74,12 @@ INSTRUCTION_TYPES = {
         "files": [],
         "include_patterns": [],
     },
-    "agents": {"directories": [], "files": [], "generated_files": ["AGENTS.md"]},
+    "agents": {
+        "directories": [],
+        "files": [],
+        "generated_files": ["AGENTS.md"],
+        "recursive_files": ["AGENTS.md"],
+    },
 }
 
 # Default types to download when no specific types are specified
@@ -115,7 +121,7 @@ def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
 
     # Extract ZIP
     extract_dir = temp_dir / "extracted"
-    extract_dir.mkdir()
+    extract_dir.mkdir(exist_ok=True)
 
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
         zip_ref.extractall(extract_dir)
