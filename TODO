@@ -10,3 +10,13 @@ comments that introduce a logical block should have a blank line before them (se
 ```
  Prefer named unused variables over blank `_`
 ```
+
+for copier updates
+
+```
+I've reverted the changes to the `README.md`. 
+
+**Note for future LLMs/Engineers:** This project is managed by a **Copier** template ([iloveitaly/python-package-template](https://github.com/iloveitaly/python-package-template)). During updates, expect non-standard conflict markers (e.g., `<<<<<<< before updating`) and ensure you manually merge project-specific dependencies and recipes to prevent them from being overwritten.
+```
+
+maybe bundle this into a command?
