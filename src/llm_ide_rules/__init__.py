@@ -9,6 +9,7 @@ import typer
 from typing_extensions import Annotated
 
 from llm_ide_rules.commands.explode import explode_main
+from llm_ide_rules.commands.ignores import ignores_main
 from llm_ide_rules.commands.implode import cursor, github, claude, gemini, opencode
 from llm_ide_rules.commands.download import download_main
 from llm_ide_rules.commands.delete import delete_main
@@ -61,6 +62,9 @@ def main_callback(
 # Add commands directly
 app.command("explode", help="Convert instruction file to separate rule files")(
     explode_main
+)
+app.command("ignores", help="Generate list of files to ignore based on instructions")(
+    ignores_main
 )
 app.command("download", help="Download LLM instruction files from GitHub repositories")(
     download_main
