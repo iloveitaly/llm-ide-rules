@@ -1,6 +1,7 @@
 import os
 import pytest
 
+
 @pytest.fixture(autouse=True)
 def ensure_cwd_is_restored():
     """

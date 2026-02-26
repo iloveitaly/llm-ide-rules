@@ -47,7 +47,7 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 # Add subdirectory CLAUDE.md and AGENTS.md for sections with ** glob patterns
                 glob_pattern = section_data.glob_pattern
                 section_target_dir = resolve_target_dir(target_dir, glob_pattern)
-                
+
                 if section_target_dir != target_dir:
                     generated.add(section_target_dir / "CLAUDE.md")
                     generated.add(section_target_dir / "AGENTS.md")

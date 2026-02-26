@@ -50,11 +50,14 @@ def ignores_main(
     try:
         # We patch Path.write_text and Path.mkdir to intercept file creation calls.
         # This is a creative way to "dry run" the explode command without refactoring it.
-        with patch("pathlib.Path.write_text", autospec=True, side_effect=mock_write_text), \
-             patch("pathlib.Path.mkdir", autospec=True, side_effect=mock_mkdir), \
-             redirect_stdout(f_out), \
-             redirect_stderr(f_err):
-
+        with (
+            patch(
+                "pathlib.Path.write_text", autospec=True, side_effect=mock_write_text
+            ),
+            patch("pathlib.Path.mkdir", autospec=True, side_effect=mock_mkdir),
+            redirect_stdout(f_out),
+            redirect_stderr(f_err),
+        ):
             explode_implementation(input_file, agent, Path.cwd())
 
     except typer.Exit as e:
