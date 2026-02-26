@@ -74,4 +74,4 @@ jobs:
 
       - name: Make sure the CLI runs properly
         run: uv run llm-ide-rules --help
-      - run: uv run pytest
+      - run: just test

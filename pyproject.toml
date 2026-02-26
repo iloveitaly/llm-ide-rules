@@ -22,7 +22,7 @@ urls = { "Repository" = "https://github.com/iloveitaly/llm-ide-rules" }
 llm-ide-rules = "llm_ide_rules:main"
 
 [build-system]
-requires = ["uv_build>=0.9.0,<0.10.0"]
+requires = ["uv_build>=0.10.0"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -31,14 +31,27 @@ module-root = "src"
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.3",
-    "pyright[nodejs]>=1.1.380",
-    "ruff>=0.8.0",
+    "pytest>=8.3.4",
+    "pyright[nodejs]>=1.1.408",
+    "ruff>=0.15.0",
     "pytest-mock>=3.10.0",
+    "coverage>=7.13.4",
+    "pytest-cov>=7.0.0",
+    "covdefaults>=2.3.0",
 ]
 
 [tool.pyright]
 exclude = ["examples/", "playground/", "tmp/", ".venv/", "tests/"]
+
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report=term-missing --cov-report=html:tmp/htmlcov"
+
+[tool.coverage.run]
+plugins = ["covdefaults"]
+source = ["llm_ide_rules"]
+
+[tool.coverage.report]
+fail_under = 50
 
 [tool.ruff]
 extend-exclude = ["playground.py", "playground/"]

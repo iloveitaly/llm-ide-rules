@@ -1,3 +1,8 @@
+[![Release Notes](https://img.shields.io/github/release/iloveitaly/llm-ide-rules)](https://github.com/iloveitaly/llm-ide-rules/releases)
+[![Downloads](https://static.pepy.tech/badge/llm-ide-rules/month)](https://pepy.tech/project/llm-ide-rules)
+![GitHub CI Status](https://github.com/iloveitaly/llm-ide-rules/actions/workflows/build_and_publish_release_please.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # Copilot, Cursor, Claude, Gemini, etc LLM Instructions
 
 This project makes it easy to download prompts and implode/explode them so they can be used by various providers. It's completely vibe coded, but it works.
@@ -33,7 +38,7 @@ Each IDE stores MCP server configuration in a different location and format. The
 | IDE | project path | global path | root key |
 |-----|-------------|-------------|----------|
 | **Claude Code** | `.mcp.json` | `~/.claude.json` | `mcpServers` |
-| **Cursor** | `.cursor/mcp.json` | `~/.cursor/mcp.json` | `mcpServers` |
+| **Cursor** | `.cursor/mcp.json` | `~/.cursor/mcp.json" | `mcpServers` |
 | **VS Code** | `.vscode/mcp.json` | — | `servers` |
 | **GitHub Copilot** | `.copilot/mcp-config.json` | `~/.copilot/mcp-config.json` | `mcpServers` |
 | **Gemini CLI** | `.gemini/settings.json` | `~/.gemini/settings.json` | `mcpServers` |
@@ -190,3 +195,7 @@ pbpaste | gpatch -p1
 * https://cursor.directory/rules
 * https://github.com/PatrickJS/awesome-cursorrules
 * https://www.cursorprompts.org
+
+---
+
+*This project was created from [iloveitaly/python-package-template](https://github.com/iloveitaly/python-package-template)*
