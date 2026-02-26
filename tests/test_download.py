@@ -272,9 +272,11 @@ def test_download_with_full_github_url(mock_zipfile, mock_requests):
             mock_iterdir.return_value = [extracted_dir]
 
             # Test that the URL is correctly constructed with full GitHub URL
-            result = download_and_extract_repo(
-                "https://github.com/iloveitaly/llm-ide-rules/"
-            )
+            # Clear environment to avoid GITHUB_TOKEN interference in CI
+            with patch.dict(os.environ, clear=True):
+                result = download_and_extract_repo(
+                    "https://github.com/iloveitaly/llm-ide-rules/"
+                )
 
             # Verify the correct URL was called
             expected_url = (
