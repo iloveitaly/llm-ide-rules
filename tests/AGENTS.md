@@ -16,6 +16,9 @@
 - Only use `wait_for_loading(page)` if a `LONG_INTEGRATION_TEST_TIMEOUT` on an expectation does not work: `expect(page.get_by_text("Your Matched Doctors")).to_be_visible(timeout=LONG_INTEGRATION_TEST_TIMEOUT)`
 - Prefer fewer integration tests that cover more functionality. Unlike unit tests, where each test is designed to test a very particular piece of functionality, I want integration tests to cover entire workflows. It's preferred to add more steps to an integration test to test an entire workflow.
 - Prefer simple locators. If a `filter`, `or_`, etc is required to capture a button in multiple states it indicates something is wrong in the code.
+- **Enforce Clean Consoles:** End all Playwright tests with assert_no_console_errors(request).
+  - **Test-Specific Ignores:** If a test triggers an expected error pass a regex to the ignore parameter and add a comment explaining why.
+  - **Global Ignores:** For app-wide expected errors (e.g., tracking libraries), add the ignore pattern to `conftest.py` rather than individual tests. Scope to the particular file if possible.
 
 
 ## Pytest Tests
