@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.9.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.8.0...v0.9.0) (2026-02-26)
+
+
+### Features
+
+* add agent instruction file setting ([65af3e7](https://github.com/iloveitaly/llm-ide-rules/commit/65af3e7198c68375d5bd6bf3c7fd6677b1fb40cb))
+* add ignores subcommand ([#48](https://github.com/iloveitaly/llm-ide-rules/issues/48)) ([c743d4f](https://github.com/iloveitaly/llm-ide-rules/commit/c743d4fc905e419ed4f8a829db18004fedac1cb6))
+* generate CLAUDE.md in subdirs matching glob patterns ([60399b3](https://github.com/iloveitaly/llm-ide-rules/commit/60399b3ebd8c8ea422a84a6e2a2be4a90c999949))
+
+
+### Documentation
+
+* add guidance for Copier template and merge conflicts ([5f4a865](https://github.com/iloveitaly/llm-ide-rules/commit/5f4a8658c76b5258e5c75c23dfb86af27ee307f8))
+* add instructions for enforcing clean Playwright consoles ([860090f](https://github.com/iloveitaly/llm-ide-rules/commit/860090f49ba89a65a3a2422bafb54743b77ee1da))
+* add MCP server config section and CLI usage examples ([7d0b4b5](https://github.com/iloveitaly/llm-ide-rules/commit/7d0b4b59a22c9c53a4f8394e36ba2cf507360cbd))
+* clarify comment spacing guidelines in TODO ([e5153c3](https://github.com/iloveitaly/llm-ide-rules/commit/e5153c377e257520de499660303668a301f60a78))
+* clarify secrets handling and add host.sh to env guides ([d418ef7](https://github.com/iloveitaly/llm-ide-rules/commit/d418ef7fe4c82bbaaa9340436af0ac0a5ebd5553))
+* document GITHUB_TOKEN usage for authenticated downloads ([42a55fe](https://github.com/iloveitaly/llm-ide-rules/commit/42a55fe366c5ddbc7fa956bc0b8391bba3f8eaa6))
+* **pytest:** add rules for asserting clean consoles in tests ([a6ed9ef](https://github.com/iloveitaly/llm-ide-rules/commit/a6ed9ef45a5d0fadfef31a0abfffdfae9ce96238))
+* update agent instructions and project rules ([cad4120](https://github.com/iloveitaly/llm-ide-rules/commit/cad4120ea7edc11e2bbc6619b21f85635a134fe5))
+* update development and coding instructions in instructions.md ([65d9d1e](https://github.com/iloveitaly/llm-ide-rules/commit/65d9d1e3c9ec44652246f9f1e6cd1cdeabe64b92))
+* update guidelines for standalone python scripts ([968c74b](https://github.com/iloveitaly/llm-ide-rules/commit/968c74bc3dd3d508e63aa0dfddaab391f939c1c5))
+* update instructions for python and env var management ([e0c7cad](https://github.com/iloveitaly/llm-ide-rules/commit/e0c7cadd79e25dab118bd1f4d7d812239aa88c5f))
+
 ## [0.8.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.7.0...v0.8.0) (2026-02-05)
 
 

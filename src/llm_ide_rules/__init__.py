@@ -16,7 +16,7 @@ from llm_ide_rules.commands.delete import delete_main
 from llm_ide_rules.commands.config import config_main
 from llm_ide_rules.commands.mcp import mcp_app
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 
 
 def version_callback(value: bool):
