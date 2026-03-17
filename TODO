@@ -20,3 +20,27 @@ I've reverted the changes to the `README.md`.
 ```
 
 maybe bundle this into a command?
+
+some PR review stuff to integrate?
+
+```
+Based on the feedback provided in PR #28, here are short, actionable coding guidelines for the project:
+
+**Code Style & Architecture**
+*   **Use `whenever` for dates:** Always use the `whenever` library for date, time, and timedelta operations; avoid the Python standard library for this.
+*   **Keep generic models clean:** Do not embed domain-specific details in shared data models; move that business logic upstream to the handlers using them.
+*   **Avoid the "Derived State" anti-pattern:** In React, prefer passing state down via props (e.g., `date` and `onSelect`) rather than duplicating it as internal component state.
+*   **Never modify `components/ui/` manually:** Files in this directory should only be updated through the UI library's official update mechanism (e.g., `shadcn`).
+*   **Avoid duplicate key lookups:** When extracting data from dictionaries, assign the value to a variable first, then check for `None` and provide a fallback.
+
+**Error Handling & User Experience**
+*   **User-friendly error messages:** Ensure messages surfaced to the user are non-technical and friendly. Never leak internal system details, vendor names (like Radar), or technical jargon.
+*   **Explain the "Why":** Comments and user-facing messages should focus on the business reason or user intent rather than the underlying technology.
+*   **Enforce data presence:** Do not use silent `try/catch` blocks for expected data. Enforce critical fields (like event dates) to fail loudly unless there is an explicit business reason to allow blanks.
+
+**Workflow & Best Practices**
+*   **Document follow-on work:** If a PR uncovers technical debt or requires follow-up tasks, document it immediately in a repository `TODO` file or a linked GitHub issue.
+*   **Write for future readers:** Avoid vague descriptions like "new flow" in code or test names. Provide explicit context and use `TODO` comments to explain temporary workarounds.
+*   **Reuse existing patterns:** Leverage existing libraries and components in the codebase (e.g., phone validation libraries) rather than implementing new ones.
+*   **Prevent scope creep:** Keep PRs focused on the original issue. Defer unrelated structural changes or migrations to separate PRs.
+```
