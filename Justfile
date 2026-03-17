@@ -133,6 +133,23 @@ github_last_build_failure:
         GH_PAGER=cat gh run view "$ID" --log-failed
     fi
 
+# Rerun only failed jobs for the last failed 'build' workflow for the current branch
+[script]
+github_rerun_failed:
+    BRANCH=$(git branch --show-current)
+    # Filter for runs on current branch with failure status, limit to most recent 20
+    JSON=$(gh run list -b "$BRANCH" -s failure -L 20 --json databaseId,workflowName)
+    # Find the latest failure where workflow name contains "build"
+    ID=$(echo "$JSON" | jq -r 'map(select(.workflowName | test("build"; "i"))) | .[0].databaseId')
+
+    if [[ "$ID" == "null" ]]; then
+        echo "No failed 'build' workflows found for $BRANCH."
+        exit 0
+    fi
+
+    echo "Rerunning failed jobs for run $ID..."
+    gh run rerun "$ID" --failed
+
 # Set GitHub Actions permissions for the repository to allow workflows to write and approve PR reviews
 # This enables release-please to run without a personal access token
 github_repo_permissions_create:
