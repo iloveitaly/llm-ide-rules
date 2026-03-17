@@ -23,9 +23,6 @@ class CursorAgent(BaseAgent):
     rule_extension = ".mdc"
     command_extension = ".md"
 
-    mcp_global_path = ".cursor/mcp.json"
-    mcp_project_path = ".cursor/mcp.json"
-
     def bundle_rules(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:

@@ -19,9 +19,6 @@ class ClaudeAgent(BaseAgent):
     rule_extension = None
     command_extension = ".md"
 
-    mcp_global_path = ".claude.json"
-    mcp_project_path = ".mcp.json"
-
     def bundle_rules(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:

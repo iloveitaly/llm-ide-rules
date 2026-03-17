@@ -14,7 +14,6 @@ from llm_ide_rules.commands.implode import cursor, github, claude, gemini, openc
 from llm_ide_rules.commands.download import download_main
 from llm_ide_rules.commands.delete import delete_main
 from llm_ide_rules.commands.config import config_main
-from llm_ide_rules.commands.mcp import mcp_app
 
 __version__ = "0.9.0"
 
@@ -90,9 +89,6 @@ implode_app.command("opencode", help="Bundle OpenCode commands into a single fil
     opencode
 )
 app.add_typer(implode_app, name="implode")
-
-# Add MCP configuration management
-app.add_typer(mcp_app, name="mcp")
 
 
 def main():

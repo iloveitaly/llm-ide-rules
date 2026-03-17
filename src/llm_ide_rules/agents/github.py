@@ -12,7 +12,6 @@ from llm_ide_rules.agents.base import (
     extract_description_and_filter_content,
 )
 from llm_ide_rules.constants import header_to_filename
-from llm_ide_rules.mcp import McpServer
 
 
 class GitHubAgent(BaseAgent):
@@ -23,9 +22,6 @@ class GitHubAgent(BaseAgent):
     commands_dir = ".github/prompts"
     rule_extension = ".instructions.md"
     command_extension = ".prompt.md"
-
-    mcp_global_path = ".copilot/mcp-config.json"
-    mcp_project_path = ".copilot/mcp-config.json"
 
     def bundle_rules(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
@@ -201,36 +197,6 @@ applyTo: "{glob_pattern}"
         """Write the general copilot-instructions.md file (no frontmatter)."""
         filepath = base_dir / ".github" / "copilot-instructions.md"
         write_rule_file(filepath, "", content_lines)
-
-    def transform_mcp_server(self, server: McpServer) -> dict:
-        """Transform unified server to GitHub Copilot format (adds type and tools)."""
-        base: dict = {"tools": ["*"]}
-        if server.env:
-            base["env"] = server.env
-
-        if server.url:
-            return {"type": "http", "url": server.url, **base}
-
-        return {
-            "type": "local",
-            "command": server.command,
-            "args": server.args or [],
-            **base,
-        }
-
-    def reverse_transform_mcp_server(self, name: str, config: dict) -> McpServer:
-        """Transform GitHub Copilot config back to unified format."""
-        if config.get("type") == "http":
-            return McpServer(
-                url=config["url"],
-                env=config.get("env"),
-            )
-
-        return McpServer(
-            command=config["command"],
-            args=config.get("args", []),
-            env=config.get("env"),
-        )
 
     def configure_agents_md(self, base_dir: Path) -> bool:
         """Configure VS Code to use AGENTS.md."""

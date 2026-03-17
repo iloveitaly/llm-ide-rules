@@ -8,7 +8,6 @@ from llm_ide_rules.agents.base import (
     resolve_header_from_stem,
     trim_content,
 )
-from llm_ide_rules.mcp import McpServer
 
 
 class OpenCodeAgent(BaseAgent):
@@ -19,10 +18,6 @@ class OpenCodeAgent(BaseAgent):
     commands_dir = ".opencode/commands"
     rule_extension = None
     command_extension = ".md"
-
-    mcp_global_path = ".config/opencode/opencode.json"
-    mcp_project_path = "opencode.json"
-    mcp_root_key = "mcp"
 
     def bundle_rules(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
@@ -98,38 +93,6 @@ class OpenCodeAgent(BaseAgent):
         trimmed = trim_content(content_lines)
         filepath.parent.mkdir(parents=True, exist_ok=True)
         filepath.write_text("".join(trimmed))
-
-    def transform_mcp_server(self, server: McpServer) -> dict:
-        """Transform unified server to OpenCode format (merged command array, environment key)."""
-        if server.url:
-            result = {"type": "sse", "url": server.url, "enabled": True}
-            if server.env:
-                result["environment"] = server.env
-            return result
-
-        result = {
-            "type": "local",
-            "command": [server.command] + (server.args or []),
-            "enabled": True,
-        }
-        if server.env:
-            result["environment"] = server.env
-        return result
-
-    def reverse_transform_mcp_server(self, name: str, config: dict) -> McpServer:
-        """Transform OpenCode config back to unified format."""
-        if config.get("type") == "sse":
-            return McpServer(
-                url=config["url"],
-                env=config.get("environment"),
-            )
-
-        command_array = config["command"]
-        return McpServer(
-            command=command_array[0] if command_array else None,
-            args=command_array[1:] if len(command_array) > 1 else [],
-            env=config.get("environment"),
-        )
 
     def configure_agents_md(self, base_dir: Path) -> bool:
         """OpenCode has native support, no configuration needed."""

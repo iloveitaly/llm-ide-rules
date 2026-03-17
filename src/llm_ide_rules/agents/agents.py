@@ -15,9 +15,6 @@ class AgentsAgent(BaseAgent):
     rule_extension = None
     command_extension = None
 
-    mcp_global_path = None
-    mcp_project_path = None
-
     def bundle_rules(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
