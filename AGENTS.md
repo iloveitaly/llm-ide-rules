@@ -483,3 +483,10 @@ Here's how frontend code is organized in `web/app/`:
   - `ui/` reusable ShadCN UI components (buttons, forms, etc.).
   - `shared/` components shared across multiple pages.
   - create additional folders for route- or section-specific components.
+
+### Dates & Times
+
+* Always use the ISO 8601 format when sending dates in an API request.
+* Use `Temporal` for any date or time manipulation. You can assume it's available in the browser.
+* DateTime objects should always be converted to UTC before included in any API request. Never send a timestamp with the user's timezone.
+* Unless otherwise specified, do not shift server-provided times based on the user's timezone.
