@@ -70,7 +70,7 @@ Use strict mode.
 
         Path("instructions.md").write_text(original_content)
 
-        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
         assert explode_result.exit_code == 0
 
         assert Path(".cursor/rules/python.mdc").exists()
@@ -122,7 +122,7 @@ Create a plan for the implementation.
 """
         Path("commands.md").write_text(commands_content)
 
-        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
         assert explode_result.exit_code == 0
 
         assert Path(".cursor/commands/fix-tests.md").exists()
@@ -175,7 +175,7 @@ Use JSX syntax.
 
         Path("instructions.md").write_text(original_content)
 
-        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "github"])
         assert explode_result.exit_code == 0
 
         assert Path(".github/instructions/python.instructions.md").exists()
@@ -226,7 +226,7 @@ Investigate and fix the issue.
 """
         Path("commands.md").write_text(commands_content)
 
-        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "github"])
         assert explode_result.exit_code == 0
 
         assert Path(".github/prompts/fix-tests.prompt.md").exists()
@@ -267,7 +267,7 @@ React rules.
 
         Path("instructions.md").write_text(original_content)
 
-        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
         assert explode_result.exit_code == 0
 
         implode_result = runner.invoke(app, ["implode", "cursor", "roundtrip.md"])
@@ -310,7 +310,7 @@ It should be treated as always-apply.
 
         Path("instructions.md").write_text(original_content)
 
-        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
         assert explode_result.exit_code == 0
 
         assert Path(".cursor/rules/custom-unmapped-section.mdc").exists()
@@ -361,7 +361,7 @@ That's all.
 
         Path("instructions.md").write_text(original_content)
 
-        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
         assert explode_result.exit_code == 0
 
         implode_result = runner.invoke(app, ["implode", "cursor", "roundtrip.md"])
@@ -399,7 +399,7 @@ Run pytest and fix errors.
 """
         Path("commands.md").write_text(commands_content)
 
-        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "claude"])
         assert explode_result.exit_code == 0
 
         assert Path(".claude/commands/fix-tests.md").exists()
@@ -436,7 +436,7 @@ Run pytest and fix errors.
 """
         Path("commands.md").write_text(commands_content)
 
-        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "gemini"])
         assert explode_result.exit_code == 0
 
         assert Path(".gemini/commands/fix-tests.toml").exists()
@@ -473,7 +473,7 @@ Run pytest and fix errors.
 """
         Path("commands.md").write_text(commands_content)
 
-        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        explode_result = runner.invoke(app, ["explode", "instructions.md", "--agent", "opencode"])
         assert explode_result.exit_code == 0
 
         assert Path(".opencode/commands/fix-tests.md").exists()

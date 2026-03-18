@@ -157,11 +157,11 @@ globs:
 alwaysApply: true
 ---
 """
-        if "cursor" in agent_instances:
+        if "cursor" in agent_instances and "agents" not in agent_instances:
             write_rule_file(
                 agent_dirs["cursor"]["rules"] / "general.mdc", general_header, general
             )
-        if "github" in agent_instances:
+        if "github" in agent_instances and "agents" not in agent_instances:
             agent_instances["github"].write_general_instructions(general, working_dir)
 
     # Process sections for agents that support rules
@@ -183,31 +183,32 @@ alwaysApply: true
 
         if glob_pattern is None:
             # No directive = alwaysApply
-            if "cursor" in agent_instances and "github" in agent_instances:
-                process_unmapped_as_always_apply(
-                    section_name,
-                    section_content,
-                    agent_instances["cursor"],
-                    agent_instances["github"],
-                    agent_dirs["cursor"]["rules"],
-                    agent_dirs["github"]["rules"],
-                )
-            elif "cursor" in agent_instances:
-                agent_instances["cursor"].write_rule(
-                    section_content,
-                    filename,
-                    agent_dirs["cursor"]["rules"],
-                    glob_pattern=None,
-                    description=section_name,
-                )
-            elif "github" in agent_instances:
-                agent_instances["github"].write_rule(
-                    section_content,
-                    filename,
-                    agent_dirs["github"]["rules"],
-                    glob_pattern=None,
-                    description=section_name,
-                )
+            if "agents" not in agent_instances:
+                if "cursor" in agent_instances and "github" in agent_instances:
+                    process_unmapped_as_always_apply(
+                        section_name,
+                        section_content,
+                        agent_instances["cursor"],
+                        agent_instances["github"],
+                        agent_dirs["cursor"]["rules"],
+                        agent_dirs["github"]["rules"],
+                    )
+                elif "cursor" in agent_instances:
+                    agent_instances["cursor"].write_rule(
+                        section_content,
+                        filename,
+                        agent_dirs["cursor"]["rules"],
+                        glob_pattern=None,
+                        description=section_name,
+                    )
+                elif "github" in agent_instances:
+                    agent_instances["github"].write_rule(
+                        section_content,
+                        filename,
+                        agent_dirs["github"]["rules"],
+                        glob_pattern=None,
+                        description=section_name,
+                    )
         elif glob_pattern != "manual":
             # Has glob pattern = file-specific rule
             if "cursor" in agent_instances:

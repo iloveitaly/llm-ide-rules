@@ -19,6 +19,7 @@ def test_ignores_basic_functionality():
         instructions_content = """# Sample Instructions
 
 ## Python
+globs: *.py
 
 Here are Python rules for development.
 """
