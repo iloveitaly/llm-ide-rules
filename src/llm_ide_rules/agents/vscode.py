@@ -3,6 +3,8 @@
 from pathlib import Path
 
 from llm_ide_rules.agents.base import BaseAgent
+
+
 class VSCodeAgent(BaseAgent):
     """Agent for VS Code."""
 

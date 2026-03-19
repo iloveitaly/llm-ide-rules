@@ -102,7 +102,7 @@ Here are instructions to plan only.
 
         assert Path(".cursor/commands/fix-tests.md").exists()
         assert Path(".cursor/commands/plan-only.md").exists()
-        
+
         # Other agents should not have been created because we specified --agent cursor
         assert not Path(".claude/commands/fix-tests.md").exists()
         assert not Path(".gemini/commands/fix-tests.toml").exists()
@@ -128,20 +128,27 @@ Python specific rules.
         Path("instructions.md").write_text(instructions_content)
 
         # Scenario A: cursor only - general.mdc SHOULD exist
-        result_cursor = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
+        result_cursor = runner.invoke(
+            app, ["explode", "instructions.md", "--agent", "cursor"]
+        )
         assert result_cursor.exit_code == 0
         assert Path(".cursor/rules/general.mdc").exists()
-        
+
         # Clean up for next run
         import shutil
+
         shutil.rmtree(".cursor")
 
         # Scenario B: all agents - general.mdc SHOULD NOT exist
-        result_all = runner.invoke(app, ["explode", "instructions.md", "--agent", "all"])
+        result_all = runner.invoke(
+            app, ["explode", "instructions.md", "--agent", "all"]
+        )
         assert result_all.exit_code == 0
         assert not Path(".cursor/rules/general.mdc").exists()
         assert Path("AGENTS.md").exists()
-        assert "These are general rules for the project" in Path("AGENTS.md").read_text()
+        assert (
+            "These are general rules for the project" in Path("AGENTS.md").read_text()
+        )
 
 
 def test_explode_unmapped_section_as_always_apply():
@@ -165,25 +172,30 @@ This section is not in sections.json so it should be treated as always-apply.
         Path("instructions.md").write_text(instructions_content)
 
         # Scenario A: cursor only - custom-unmapped-section.mdc SHOULD exist
-        result_cursor = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
+        result_cursor = runner.invoke(
+            app, ["explode", "instructions.md", "--agent", "cursor"]
+        )
         assert result_cursor.exit_code == 0
         assert Path(".cursor/rules/custom-unmapped-section.mdc").exists()
         cursor_content = Path(".cursor/rules/custom-unmapped-section.mdc").read_text()
         assert "alwaysApply: true" in cursor_content
         assert "globs: " in cursor_content
-        
+
         # Clean up
         import shutil
+
         shutil.rmtree(".cursor")
 
         # Scenario B: all agents - custom-unmapped-section.mdc SHOULD NOT exist
-        result_all = runner.invoke(app, ["explode", "instructions.md", "--agent", "all"])
+        result_all = runner.invoke(
+            app, ["explode", "instructions.md", "--agent", "all"]
+        )
 
         assert result_all.exit_code == 0
 
         # MDC should NOT exist because it's representable by AGENTS.md
         assert not Path(".cursor/rules/custom-unmapped-section.mdc").exists()
-        
+
         # AGENTS.md SHOULD exist and contain the content
         assert Path("AGENTS.md").exists()
         agents_content = Path("AGENTS.md").read_text()

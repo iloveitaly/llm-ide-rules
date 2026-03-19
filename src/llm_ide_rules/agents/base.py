@@ -1,6 +1,5 @@
 """Base agent class and shared utilities for LLM IDE rules."""
 
-import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 
