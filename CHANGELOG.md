@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.10.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.9.0...v0.10.0) (2026-03-19)
+
+
+### Features
+
+* **cli:** add agent-specific targeting for explode command ([a63b5c8](https://github.com/iloveitaly/llm-ide-rules/commit/a63b5c88331546dc76b43e0fd1fd5e31372c6f65))
+
+
+### Documentation
+
+* add coding guidelines and PR review notes to TODO ([894f56d](https://github.com/iloveitaly/llm-ide-rules/commit/894f56d07334fe493ac76d766bdcd62277085157))
+* add guidelines for handling dates and times in APIs ([d1bf567](https://github.com/iloveitaly/llm-ide-rules/commit/d1bf567a11f9fb1166cadf54b3558fc3846b65e0))
+* remove MCP server config and explode/implode docs from README ([281b914](https://github.com/iloveitaly/llm-ide-rules/commit/281b9141b8594a2604030ff628ca56dd910392ea))
+* **test:** recommend using react_router_url over base_url in tests ([efaf4a2](https://github.com/iloveitaly/llm-ide-rules/commit/efaf4a208e08f0bbfe3058dfb70593bff8910279))
+* update test and typescript guidelines ([9ddc8e1](https://github.com/iloveitaly/llm-ide-rules/commit/9ddc8e1981ff2711538d67030b65870f00ee0d2e))
+
 ## [0.9.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.8.0...v0.9.0) (2026-02-26)
 
 
