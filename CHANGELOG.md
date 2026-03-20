@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.10.0...v0.10.1) (2026-03-20)
+
+
+### Documentation
+
+* clarify mutation rule for dictionaries in Python ([00dc3a9](https://github.com/iloveitaly/llm-ide-rules/commit/00dc3a92a7931f6a32f369e8473bda9a4866a656))
+* **python:** clarify rule about mutating dictionaries ([55d55d4](https://github.com/iloveitaly/llm-ide-rules/commit/55d55d46d90a8951e0fa850a8d60bce1b8156bee))
+
 ## [0.10.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.9.0...v0.10.0) (2026-03-19)
 
 
