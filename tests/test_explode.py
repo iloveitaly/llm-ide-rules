@@ -109,8 +109,8 @@ Here are instructions to plan only.
         assert not Path(".github/prompts/fix-tests.prompt.md").exists()
 
 
-def test_explode_skips_general_mdc_when_agents_enabled():
-    """Test that general.mdc is skipped when agents agent is active."""
+def test_explode_generates_general_mdc_when_agents_enabled():
+    """Test that general.mdc is NOT skipped when agents agent is active."""
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -139,12 +139,12 @@ Python specific rules.
 
         shutil.rmtree(".cursor")
 
-        # Scenario B: all agents - general.mdc SHOULD NOT exist
+        # Scenario B: all agents - general.mdc SHOULD ALSO exist
         result_all = runner.invoke(
             app, ["explode", "instructions.md", "--agent", "all"]
         )
         assert result_all.exit_code == 0
-        assert not Path(".cursor/rules/general.mdc").exists()
+        assert Path(".cursor/rules/general.mdc").exists()
         assert Path("AGENTS.md").exists()
         assert (
             "These are general rules for the project" in Path("AGENTS.md").read_text()
