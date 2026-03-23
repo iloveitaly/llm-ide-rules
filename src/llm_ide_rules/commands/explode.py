@@ -157,11 +157,11 @@ globs:
 alwaysApply: true
 ---
 """
-        if "cursor" in agent_instances and "agents" not in agent_instances:
+        if "cursor" in agent_instances:
             write_rule_file(
                 agent_dirs["cursor"]["rules"] / "general.mdc", general_header, general
             )
-        if "github" in agent_instances and "agents" not in agent_instances:
+        if "github" in agent_instances:
             agent_instances["github"].write_general_instructions(general, working_dir)
 
     # Process sections for agents that support rules

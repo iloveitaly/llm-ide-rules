@@ -191,3 +191,32 @@ Python rules.
         # Markers should still be there
         assert "# START AI INSTRUCTION IGNORES" in gitignore_content
         assert "# END AI INSTRUCTION IGNORES" in gitignore_content
+
+
+def test_ignores_includes_general_files():
+    """Test that general files are included in ignores list."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        instructions_content = """# Sample Instructions
+
+This is some general instruction content.
+
+## Python
+globs: *.py
+
+Python rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
+
+        assert result.exit_code == 0
+        output = result.stdout
+
+        assert ".cursor/rules/general.mdc" in output
+        assert ".github/copilot-instructions.md" in output
+        assert "AGENTS.md" in output
+        assert "CLAUDE.md" in output
