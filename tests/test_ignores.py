@@ -152,3 +152,42 @@ Python rules.
         # Verify only one pair of markers exists
         assert gitignore_content.count("# START AI INSTRUCTION IGNORES") == 1
         assert gitignore_content.count("# END AI INSTRUCTION IGNORES") == 1
+
+
+def test_ignores_removes_from_gitignore():
+    """Test ignores removes files from .gitignore when they are no longer generated."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        # Initial state with some files
+        instructions_content = """# Sample Instructions
+
+## Python
+globs: *.py
+
+Python rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        result = runner.invoke(app, ["ignores", "instructions.md"])
+        assert result.exit_code == 0
+        gitignore_content = Path(".gitignore").read_text()
+        assert "/.cursor/rules/python.mdc" in gitignore_content
+
+        # Remove the section from instructions
+        instructions_content_empty = """# Sample Instructions
+"""
+        Path("instructions.md").write_text(instructions_content_empty)
+
+        # Run ignores again
+        result = runner.invoke(app, ["ignores", "instructions.md"])
+        assert result.exit_code == 0
+
+        # Verify it's gone from .gitignore
+        gitignore_content = Path(".gitignore").read_text()
+        assert "/.cursor/rules/python.mdc" not in gitignore_content
+        # Markers should still be there
+        assert "# START AI INSTRUCTION IGNORES" in gitignore_content
+        assert "# END AI INSTRUCTION IGNORES" in gitignore_content
