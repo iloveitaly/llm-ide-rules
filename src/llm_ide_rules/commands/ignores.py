@@ -5,6 +5,7 @@ from unittest.mock import patch
 from contextlib import redirect_stdout, redirect_stderr
 import io
 import sys
+import re
 
 from llm_ide_rules.commands.explode import explode_implementation
 
@@ -21,6 +22,13 @@ def ignores_main(
             help="Agent to list ignores for (cursor, github, claude, gemini, or all)",
         ),
     ] = "all",
+    print_output: Annotated[
+        bool,
+        typer.Option(
+            "--print",
+            help="Print the list of files to stdout instead of updating .gitignore",
+        ),
+    ] = False,
 ) -> None:
     """Generate a list of files that should be ignored by dry-running the explode command.
 
@@ -68,10 +76,51 @@ def ignores_main(
         print(f_err.getvalue(), file=sys.stderr)
         raise exit_exception
 
-    # Print the files relative to CWD
+    # Process files to relative paths with forward slashes
     cwd = Path.cwd()
+    relative_files = []
     for file_path in ignored_files:
         try:
-            print(file_path.relative_to(cwd))
+            rel_path = file_path.relative_to(cwd).as_posix()
+            relative_files.append(rel_path)
         except ValueError:
-            print(file_path)
+            relative_files.append(file_path.as_posix())
+
+    # Sort files to ensure stable output
+    relative_files.sort()
+
+    if print_output:
+        for f in relative_files:
+            print(f)
+        return
+
+    # Update .gitignore
+    gitignore_path = cwd / ".gitignore"
+    gitignore_content = ""
+    if gitignore_path.exists():
+        gitignore_content = gitignore_path.read_text()
+
+    start_marker = "# START AI INSTRUCTION IGNORES"
+    end_marker = "# END AI INSTRUCTION IGNORES"
+
+    ignores_block = f"{start_marker}\n"
+    if relative_files:
+        ignores_block += "\n".join(f"/{f}" for f in relative_files) + "\n"
+    ignores_block += end_marker
+
+    if start_marker in gitignore_content and end_marker in gitignore_content:
+        # Replace existing block
+        pattern = f"{re.escape(start_marker)}.*?{re.escape(end_marker)}"
+        new_content = re.sub(pattern, ignores_block, gitignore_content, flags=re.DOTALL)
+    else:
+        # Append to end
+        if gitignore_content and not gitignore_content.endswith("\n"):
+            gitignore_content += "\n"
+
+        new_content = gitignore_content
+        if new_content:
+            new_content += "\n"
+        new_content += ignores_block + "\n"
+
+    gitignore_path.write_text(new_content)
+    typer.echo(f"Updated .gitignore with {len(relative_files)} ignored files.")

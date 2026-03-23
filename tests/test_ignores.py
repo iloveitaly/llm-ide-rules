@@ -25,7 +25,7 @@ Here are Python rules for development.
 """
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["ignores", "instructions.md"])
+        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
 
         assert result.exit_code == 0
         output = result.stdout
@@ -58,7 +58,7 @@ Description: Fix failing tests
 """
         Path("commands.md").write_text(commands_content)
 
-        result = runner.invoke(app, ["ignores", "instructions.md"])
+        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
 
         assert result.exit_code == 0
         output = result.stdout
@@ -81,14 +81,74 @@ def test_ignores_missing_file():
         result = runner.invoke(app, ["ignores", "nonexistent.md"])
 
         assert result.exit_code == 1
-        # The error should be printed to stderr
-        # CliRunner captures both by default in stdout unless mix_stderr=False?
-        # But typer.echo(err=True) goes to stderr.
-        # My implementation prints to sys.stderr which CliRunner should capture.
 
-        # Since I re-raise the exception, Typer handles the exit code.
-        # And I print the captured stderr.
 
-        # Wait, explode calls `typer.Exit(1)`.
-        # My ignores code catches it, prints captured stderr, and re-raises.
-        # So CliRunner should see exit code 1.
+def test_ignores_updates_gitignore():
+    """Test ignores writes to .gitignore when no print flag is provided."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        instructions_content = """# Sample Instructions
+
+## Python
+globs: *.py
+
+Python rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+        Path(".gitignore").write_text("node_modules/\n")
+
+        result = runner.invoke(app, ["ignores", "instructions.md"])
+
+        assert result.exit_code == 0
+        assert "Updated .gitignore" in result.stdout
+
+        gitignore_content = Path(".gitignore").read_text()
+        assert "node_modules/" in gitignore_content
+        assert "# START AI INSTRUCTION IGNORES" in gitignore_content
+        assert "/.cursor/rules/python.mdc" in gitignore_content
+        assert "/.github/instructions/python.instructions.md" in gitignore_content
+        assert "# END AI INSTRUCTION IGNORES" in gitignore_content
+
+
+def test_ignores_replaces_in_gitignore():
+    """Test ignores replaces existing block in .gitignore."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        instructions_content = """# Sample Instructions
+
+## Python
+globs: *.py
+
+Python rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        initial_gitignore = """node_modules/
+# START AI INSTRUCTION IGNORES
+/.cursor/rules/old.mdc
+# END AI INSTRUCTION IGNORES
+*.log
+"""
+        Path(".gitignore").write_text(initial_gitignore)
+
+        result = runner.invoke(app, ["ignores", "instructions.md"])
+
+        assert result.exit_code == 0
+        assert "Updated .gitignore" in result.stdout
+
+        gitignore_content = Path(".gitignore").read_text()
+        assert "node_modules/" in gitignore_content
+        assert "*.log" in gitignore_content
+        assert "old.mdc" not in gitignore_content
+        assert "/.cursor/rules/python.mdc" in gitignore_content
+        assert "/.github/instructions/python.instructions.md" in gitignore_content
+
+        # Verify only one pair of markers exists
+        assert gitignore_content.count("# START AI INSTRUCTION IGNORES") == 1
+        assert gitignore_content.count("# END AI INSTRUCTION IGNORES") == 1
