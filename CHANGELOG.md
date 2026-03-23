@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.11.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.10.0...v0.11.0) (2026-03-23)
+
+
+### Features
+
+* **ignores:** persist ignored files to .gitignore ([5f6f531](https://github.com/iloveitaly/llm-ide-rules/commit/5f6f531a33a0d111c4007bc2096ce0586ec5e9c7))
+
+
+### Documentation
+
+* clarify mutation rule for dictionaries in Python ([00dc3a9](https://github.com/iloveitaly/llm-ide-rules/commit/00dc3a92a7931f6a32f369e8473bda9a4866a656))
+* **python:** clarify rule about mutating dictionaries ([55d55d4](https://github.com/iloveitaly/llm-ide-rules/commit/55d55d46d90a8951e0fa850a8d60bce1b8156bee))
+
 ## [0.10.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.9.0...v0.10.0) (2026-03-19)
 
 

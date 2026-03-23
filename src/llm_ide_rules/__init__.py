@@ -15,7 +15,7 @@ from llm_ide_rules.commands.download import download_main
 from llm_ide_rules.commands.delete import delete_main
 from llm_ide_rules.commands.config import config_main
 
-__version__ = "0.10.0"
+__version__ = "0.11.0"
 
 
 def version_callback(value: bool):
