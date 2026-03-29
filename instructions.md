@@ -151,7 +151,7 @@ globs: tests/integration/**/*.py
 
 globs: tests/**/*.py
 
-- Look to @tests/factories.py to generate any required database state
+- Look first to `tests.factories.*` instead of `app.models.*` to generate any required database state
   - For example, to create and persist a `Distribution` record `DistributionFactory.save()`
   - If a factory doesn't exist for the model you are working with, create one.
   - You can customize one or more params in a factory using `DistributionFactory.save(host="custom_host.com)`
@@ -538,3 +538,4 @@ Here's how frontend code is organized in `web/app/`:
 * Use `Temporal` for any date or time manipulation. You can assume it's available in the browser.
 * DateTime objects should always be converted to UTC before included in any API request. Never send a timestamp with the user's timezone.
 * Unless otherwise specified, do not shift server-provided times based on the user's timezone.
+
