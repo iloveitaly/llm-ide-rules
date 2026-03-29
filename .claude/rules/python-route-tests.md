@@ -1,8 +1,8 @@
 ---
-description: Python Route Tests
-globs: tests/routes/**/*.py
-alwaysApply: false
+paths:
+  - "tests/routes/**/*.py"
 ---
+
 ## Python Route Tests
 
 

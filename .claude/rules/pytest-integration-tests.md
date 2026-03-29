@@ -1,8 +1,8 @@
 ---
-description: Pytest Integration Tests
-globs: tests/integration/**/*.py
-alwaysApply: false
+paths:
+  - "tests/integration/**/*.py"
 ---
+
 ## Pytest Integration Tests
 
 

@@ -1,8 +1,8 @@
 ---
-description: Pytest Tests
-globs: tests/**/*.py
-alwaysApply: false
+paths:
+  - "tests/**/*.py"
 ---
+
 ## Pytest Tests
 
 
