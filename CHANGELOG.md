@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.12.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.11.0...v0.12.0) (2026-03-29)
+
+
+### Features
+
+* migrate Claude Code instructions to .claude/rules directory ([352d017](https://github.com/iloveitaly/llm-ide-rules/commit/352d017dd23ef368749c1bee57be6851ddcaf9f4))
+
+
+### Documentation
+
+* clarify preference for factories over models in test instructions ([82877be](https://github.com/iloveitaly/llm-ide-rules/commit/82877be64b3fa0f9eb1f66b82c962d27757c38d8))
+* update database factory instructions and clarify timezone guidelines ([463d228](https://github.com/iloveitaly/llm-ide-rules/commit/463d22851f8d47bfe0061f61063b1c3b969290a9))
+* update documentation for factory directory location ([6677e1e](https://github.com/iloveitaly/llm-ide-rules/commit/6677e1e6c23c2c35699095e45809481b6de662e2))
+* update factory module paths in documentation ([0a821c6](https://github.com/iloveitaly/llm-ide-rules/commit/0a821c6ed77fa7614d75b0d56c6de86fda16ba59))
+
 ## [0.11.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.10.0...v0.11.0) (2026-03-23)
 
 
