@@ -41,10 +41,7 @@ def process_command_section(
 def process_unmapped_as_always_apply(
     section_name: str,
     section_content: list[str],
-    cursor_agent,
-    github_agent,
-    cursor_rules_dir: Path,
-    copilot_dir: Path,
+    rule_agents: list[tuple[BaseAgent, Path]],
 ) -> bool:
     """Process an unmapped section as an always-apply rule."""
     if not any(line.strip() for line in section_content):
@@ -53,22 +50,36 @@ def process_unmapped_as_always_apply(
     filename = header_to_filename(section_name)
     section_content = replace_header_with_proper_casing(section_content, section_name)
 
-    cursor_agent.write_rule(
-        section_content,
-        filename,
-        cursor_rules_dir,
-        glob_pattern=None,
-        description=section_name,
-    )
-    github_agent.write_rule(
-        section_content,
-        filename,
-        copilot_dir,
-        glob_pattern=None,
-        description=section_name,
-    )
+    for agent, rules_dir in rule_agents:
+        agent.write_rule(
+            section_content,
+            filename,
+            rules_dir,
+            glob_pattern=None,
+            description=section_name,
+        )
 
     return True
+
+
+def get_always_apply_rule_agents(
+    agent_instances: dict[str, BaseAgent], agent_dirs: dict[str, dict[str, Path]]
+) -> list[tuple[BaseAgent, Path]]:
+    """Return rule-capable agents that should receive always-apply sections."""
+    if "agents" in agent_instances:
+        eligible_agent_names = ["claude"]
+    else:
+        eligible_agent_names = [
+            agent_name
+            for agent_name in agent_instances
+            if "rules" in agent_dirs[agent_name]
+        ]
+
+    return [
+        (agent_instances[agent_name], agent_dirs[agent_name]["rules"])
+        for agent_name in eligible_agent_names
+        if agent_name in agent_instances and "rules" in agent_dirs[agent_name]
+    ]
 
 
 def explode_implementation(
@@ -115,19 +126,15 @@ def explode_implementation(
 
     for agent_name in agents_to_process:
         agent_instances[agent_name] = get_agent(agent_name)
+        current_agent = agent_instances[agent_name]
 
-        if agent_name in ["cursor", "github"]:
-            # These agents have both rules and commands
-            rules_dir = working_dir / agent_instances[agent_name].rules_dir
-            commands_dir = working_dir / agent_instances[agent_name].commands_dir
-            agent_dirs[agent_name] = {"rules": rules_dir, "commands": commands_dir}
-        elif agent_instances[agent_name].commands_dir:
-            # claude, gemini, and opencode only have commands
-            commands_dir = working_dir / agent_instances[agent_name].commands_dir
-            agent_dirs[agent_name] = {"commands": commands_dir}
-        else:
-            # agents has neither rules nor commands dirs (only generates root doc)
-            agent_dirs[agent_name] = {}
+        agent_dir_map = {}
+        if current_agent.rules_dir:
+            agent_dir_map["rules"] = working_dir / current_agent.rules_dir
+        if current_agent.commands_dir:
+            agent_dir_map["commands"] = working_dir / current_agent.commands_dir
+
+        agent_dirs[agent_name] = agent_dir_map
 
     input_path = working_dir / input_file
 
@@ -163,6 +170,14 @@ alwaysApply: true
             )
         if "github" in agent_instances:
             agent_instances["github"].write_general_instructions(general, working_dir)
+        if "claude" in agent_instances:
+            agent_instances["claude"].write_rule(
+                general,
+                "general",
+                agent_dirs["claude"]["rules"],
+                glob_pattern=None,
+                description="General Instructions",
+            )
 
     # Process sections for agents that support rules
     rules_sections: dict[str, list[str]] = {}
@@ -183,47 +198,24 @@ alwaysApply: true
 
         if glob_pattern is None:
             # No directive = alwaysApply
-            if "agents" not in agent_instances:
-                if "cursor" in agent_instances and "github" in agent_instances:
-                    process_unmapped_as_always_apply(
-                        section_name,
-                        section_content,
-                        agent_instances["cursor"],
-                        agent_instances["github"],
-                        agent_dirs["cursor"]["rules"],
-                        agent_dirs["github"]["rules"],
-                    )
-                elif "cursor" in agent_instances:
-                    agent_instances["cursor"].write_rule(
-                        section_content,
-                        filename,
-                        agent_dirs["cursor"]["rules"],
-                        glob_pattern=None,
-                        description=section_name,
-                    )
-                elif "github" in agent_instances:
-                    agent_instances["github"].write_rule(
-                        section_content,
-                        filename,
-                        agent_dirs["github"]["rules"],
-                        glob_pattern=None,
-                        description=section_name,
-                    )
+            rule_agents = get_always_apply_rule_agents(agent_instances, agent_dirs)
+
+            if rule_agents:
+                process_unmapped_as_always_apply(
+                    section_name,
+                    section_content,
+                    rule_agents,
+                )
         elif glob_pattern != "manual":
             # Has glob pattern = file-specific rule
-            if "cursor" in agent_instances:
-                agent_instances["cursor"].write_rule(
+            for agent_name in agent_instances:
+                if "rules" not in agent_dirs[agent_name]:
+                    continue
+
+                agent_instances[agent_name].write_rule(
                     section_content,
                     filename,
-                    agent_dirs["cursor"]["rules"],
-                    glob_pattern,
-                    description=section_name,
-                )
-            if "github" in agent_instances:
-                agent_instances["github"].write_rule(
-                    section_content,
-                    filename,
-                    agent_dirs["github"]["rules"],
+                    agent_dirs[agent_name]["rules"],
                     glob_pattern,
                     description=section_name,
                 )
@@ -250,7 +242,7 @@ alwaysApply: true
                 section_name, section_data.content, agents_with_commands, command_dirs
             )
 
-    # Generate root documentation (CLAUDE.md, GEMINI.md, etc.)
+    # Generate root documentation for agents that support it
     for agent_name, agent_inst in agent_instances.items():
         agent_inst.generate_root_doc(
             general,
@@ -265,15 +257,15 @@ alwaysApply: true
     created_dirs = []
 
     for agent_name in agents_to_process:
-        if agent_name in ["cursor", "github"]:
+        if "rules" in agent_dirs[agent_name]:
             log_data[f"{agent_name}_rules"] = str(agent_dirs[agent_name]["rules"])
+        if "commands" in agent_dirs[agent_name]:
             log_data[f"{agent_name}_commands"] = str(agent_dirs[agent_name]["commands"])
-            created_dirs.append(f".{agent_name}/")
-        elif agent_dirs[agent_name]:
-            # Has commands directory
-            log_data[f"{agent_name}_commands"] = str(agent_dirs[agent_name]["commands"])
+        if agent_dirs[agent_name]:
             created_dirs.append(f".{agent_name}/")
         # else: agent has no directories (e.g., agents which only generates root doc)
+
+    created_dirs = list(dict.fromkeys(created_dirs))
 
     if "gemini" in agent_instances:
         if not agent_instances["gemini"].check_agents_md_config(working_dir):

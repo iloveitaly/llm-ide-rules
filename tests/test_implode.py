@@ -277,6 +277,19 @@ def test_implode_claude_basic_functionality():
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
 
+        claude_rules_dir = Path(".claude/rules")
+        claude_rules_dir.mkdir(parents=True)
+
+        with open(claude_rules_dir / "python.md", "w") as f:
+            f.write("""---
+paths:
+  - "**/*.py"
+---
+
+## Python
+
+Here are Python rules for development.""")
+
         # Create .claude/commands directory with sample files
         claude_commands_dir = Path(".claude/commands")
         claude_commands_dir.mkdir(parents=True)
@@ -284,15 +297,22 @@ def test_implode_claude_basic_functionality():
         with open(claude_commands_dir / "fix-tests.md", "w") as f:
             f.write("Here are instructions to fix tests.")
 
-        # Run implode claude command (defaults to commands.md)
+        # Run implode claude command (defaults to instructions.md)
         result = runner.invoke(app, ["implode", "claude"])
 
         # Check command succeeds
         assert result.exit_code == 0
+        assert "Bundled claude rules into instructions.md" in result.stdout
         assert "Bundled claude commands into commands.md" in result.stdout
 
-        # Check that output file was created
+        assert Path("instructions.md").exists()
         assert Path("commands.md").exists()
+
+        with open("instructions.md", "r") as f:
+            content = f.read()
+            assert "## Python" in content
+            assert "globs: **/*.py" in content
+            assert "Here are Python rules for development." in content
 
         with open("commands.md", "r") as f:
             content = f.read()
@@ -395,6 +415,14 @@ def test_implode_claude_from_subdirectory():
     with tempfile.TemporaryDirectory() as temp_dir:
         project_root = Path(temp_dir)
 
+        claude_rules_dir = project_root / ".claude" / "rules"
+        claude_rules_dir.mkdir(parents=True)
+
+        with open(claude_rules_dir / "python.md", "w") as f:
+            f.write("""## Python
+
+Here are Python rules for development.""")
+
         claude_commands_dir = project_root / ".claude" / "commands"
         claude_commands_dir.mkdir(parents=True)
 
@@ -406,15 +434,35 @@ def test_implode_claude_from_subdirectory():
         result = runner.invoke(app, ["implode", "claude"])
 
         assert result.exit_code == 0
+        assert "Bundled claude rules into instructions.md" in result.stdout
         assert "Bundled claude commands into commands.md" in result.stdout
 
+        instructions_file = project_root / "instructions.md"
         output_file = project_root / "commands.md"
+        assert instructions_file.exists()
         assert output_file.exists()
+
+        with open(instructions_file, "r") as f:
+            content = f.read()
+            assert "## Python" in content
+            assert "Here are Python rules for development." in content
 
         with open(output_file, "r") as f:
             content = f.read()
             assert "## Fix Tests" in content
             assert "Here are instructions to fix tests." in content
+
+
+def test_implode_claude_missing_rules_directory():
+    """Test implode claude with missing .claude/rules directory."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        result = runner.invoke(app, ["implode", "claude", "bundled.md"])
+
+        assert result.exit_code == 1
 
 
 def test_implode_cursor_preserves_globs():

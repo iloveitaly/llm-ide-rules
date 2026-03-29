@@ -56,8 +56,12 @@ def test_download_basic_functionality(mock_zipfile, mock_requests):
             "github instruction"
         )
 
+        (extracted_dir / ".claude").mkdir()
+        (extracted_dir / ".claude" / "rules").mkdir()
+        (extracted_dir / ".claude" / "rules" / "sample.md").write_text(
+            "Claude instructions"
+        )
         (extracted_dir / "GEMINI.md").write_text("Gemini instructions")
-        (extracted_dir / "CLAUDE.md").write_text("Claude instructions")
         (extracted_dir / "AGENTS.md").write_text("Agents instructions")
 
         # Mock the extraction to create these files
@@ -339,6 +343,15 @@ def test_agents_instruction_type_configuration():
     assert agents_config["files"] == []
     assert agents_config["generated_files"] == ["AGENTS.md"]
     assert agents_config["recursive_files"] == ["AGENTS.md"]
+
+
+def test_claude_instruction_type_configuration():
+    """Test that Claude instruction type includes rules and commands directories."""
+    from llm_ide_rules.commands.download import INSTRUCTION_TYPES
+
+    claude_config = INSTRUCTION_TYPES["claude"]
+    assert claude_config["directories"] == [".claude/rules", ".claude/commands"]
+    assert claude_config["files"] == []
 
 
 def test_copy_recursive_files_warning_for_missing_directories():

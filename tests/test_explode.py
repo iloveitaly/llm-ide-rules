@@ -327,8 +327,8 @@ def test_explode_nonexistent_file():
         assert result.exit_code == 1
 
 
-def test_explode_claude_md_in_subdirectories():
-    """Test that CLAUDE.md is generated alongside AGENTS.md in subdirectories."""
+def test_explode_claude_rules_are_generated_with_paths_frontmatter():
+    """Test that Claude rules are generated with paths frontmatter."""
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -354,18 +354,23 @@ Here are Python rules for the root.
 
         assert result.exit_code == 0
 
-        # Root CLAUDE.md should exist
-        assert Path("CLAUDE.md").exists()
-        assert "@./AGENTS.md" in Path("CLAUDE.md").read_text()
+        assert Path(".claude/rules/typescript.md").exists()
+        assert Path(".claude/rules/python.md").exists()
 
-        # Subdirectory CLAUDE.md should exist alongside AGENTS.md
+        typescript_rule = Path(".claude/rules/typescript.md").read_text()
+        assert "paths:" in typescript_rule
+        assert '  - "web/**/*.ts"' in typescript_rule
+        assert "## TypeScript" in typescript_rule
+
+        python_rule = Path(".claude/rules/python.md").read_text()
+        assert "paths:" not in python_rule
+        assert "## Python" in python_rule
+
         assert Path("web/AGENTS.md").exists()
-        assert Path("web/CLAUDE.md").exists()
-        assert "@./AGENTS.md" in Path("web/CLAUDE.md").read_text()
 
 
-def test_explode_generates_root_docs():
-    """Test that explode generates CLAUDE.md and GEMINI.md."""
+def test_explode_generates_claude_rules_without_claude_md():
+    """Test that explode generates Claude rules instead of CLAUDE.md."""
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -387,11 +392,9 @@ Here are unmapped rules.
 
         assert result.exit_code == 0
 
-        # Check CLAUDE.md
-        claude_md = Path("CLAUDE.md")
-        assert claude_md.exists()
-        claude_content = claude_md.read_text()
-        assert "@./AGENTS.md" in claude_content
+        assert not Path("CLAUDE.md").exists()
+        assert Path(".claude/rules/python.md").exists()
+        assert Path(".claude/rules/unmapped.md").exists()
 
         # Check GEMINI.md
         gemini_md = Path("GEMINI.md")

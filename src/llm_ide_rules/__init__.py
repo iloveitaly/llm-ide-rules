@@ -79,9 +79,9 @@ implode_app.command(
 implode_app.command(
     "github", help="Bundle GitHub/Copilot instructions and prompts into a single file"
 )(github)
-implode_app.command("claude", help="Bundle Claude Code commands into a single file")(
-    claude
-)
+implode_app.command(
+    "claude", help="Bundle Claude Code rules and commands into single files"
+)(claude)
 implode_app.command("gemini", help="Bundle Gemini CLI commands into a single file")(
     gemini
 )

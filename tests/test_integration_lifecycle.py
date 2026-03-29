@@ -77,4 +77,4 @@ def test_integration_full_lifecycle(monkeypatch):
         assert not Path(".cursor/commands").exists()
         assert not Path(".github/instructions").exists()
         assert not Path("AGENTS.md").exists()
-        assert not Path("CLAUDE.md").exists()
+        assert not Path(".claude/rules").exists()

@@ -196,8 +196,8 @@ def test_delete_default_types():
         (temp_path / ".cursor" / "rules").mkdir(parents=True)
         (temp_path / ".github" / "instructions").mkdir(parents=True)
         (temp_path / ".github" / "prompts").mkdir(parents=True)
+        (temp_path / ".claude" / "rules").mkdir(parents=True)
         (temp_path / "GEMINI.md").write_text("test")
-        (temp_path / "CLAUDE.md").write_text("test")
         (temp_path / "AGENTS.md").write_text("test")
 
         result = runner.invoke(
@@ -209,8 +209,8 @@ def test_delete_default_types():
         assert not (temp_path / ".cursor" / "rules").exists()
         assert not (temp_path / ".github" / "instructions").exists()
         assert not (temp_path / ".github" / "prompts").exists()
+        assert not (temp_path / ".claude" / "rules").exists()
         assert (temp_path / "GEMINI.md").exists()
-        assert not (temp_path / "CLAUDE.md").exists()
         assert not (temp_path / "AGENTS.md").exists()
 
 
@@ -223,7 +223,7 @@ def test_delete_multiple_types():
 
         (temp_path / ".cursor" / "rules").mkdir(parents=True)
         (temp_path / "GEMINI.md").write_text("test")
-        (temp_path / "CLAUDE.md").write_text("test")
+        (temp_path / ".claude" / "rules").mkdir(parents=True)
 
         result = runner.invoke(
             app,
@@ -241,7 +241,28 @@ def test_delete_multiple_types():
         assert result.exit_code == 0
         assert not (temp_path / ".cursor" / "rules").exists()
         assert (temp_path / "GEMINI.md").exists()
-        assert (temp_path / "CLAUDE.md").exists()
+        assert (temp_path / ".claude" / "rules").exists()
+
+
+def test_find_files_to_delete_claude():
+    """Test finding Claude files to delete."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+
+        claude_rules_dir = temp_path / ".claude" / "rules"
+        claude_rules_dir.mkdir(parents=True)
+        (claude_rules_dir / "test.md").write_text("test")
+
+        claude_commands_dir = temp_path / ".claude" / "commands"
+        claude_commands_dir.mkdir(parents=True)
+        (claude_commands_dir / "fix-tests.md").write_text("test")
+
+        dirs, files = find_files_to_delete(["claude"], temp_path)
+
+        assert len(dirs) == 2
+        assert claude_rules_dir in dirs
+        assert claude_commands_dir in dirs
+        assert len(files) == 0
 
 
 def test_delete_directory_with_subdirectories():

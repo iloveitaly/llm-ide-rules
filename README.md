@@ -21,8 +21,7 @@ Different AI coding assistants use different formats for instructions and comman
 |-----|------|--------|-------|
 | **Cursor** | instructions | `.cursor/rules/*.mdc` | Multiple plain markdown files |
 | **Cursor** | commands | `.cursor/commands/*.md` | Plain markdown, no frontmatter |
-| **Claude Code** | instructions | `CLAUDE.md` | Single markdown file at root |
-| **Claude Code** | instructions | `AGENT.md` | Single markdown file at root (agent-specific) |
+| **Claude Code** | instructions | `.claude/rules/**/*.md` | Markdown rules, optional `paths:` frontmatter |
 | **Claude Code** | commands | `.claude/commands/*.md` | Plain markdown, no frontmatter |
 | **GitHub Copilot** | instructions | `.github/copilot-instructions.md` | Single markdown file |
 | **GitHub Copilot** | instructions | `.github/instructions/*.instructions.md` | Multiple instruction files |
@@ -50,7 +49,7 @@ uvx llm-ide-rules explode [input_file]
 # Bundle rule files back into a single instruction file
 uvx llm-ide-rules implode cursor [output_file]     # Bundle Cursor rules
 uvx llm-ide-rules implode github [output_file]     # Bundle GitHub/Copilot instructions
-uvx llm-ide-rules implode claude [output_file]     # Bundle Claude Code commands
+uvx llm-ide-rules implode claude [output_file]     # Bundle Claude Code rules + commands
 uvx llm-ide-rules implode gemini [output_file]     # Bundle Gemini CLI commands
 uvx llm-ide-rules implode opencode [output_file]   # Bundle OpenCode commands
 

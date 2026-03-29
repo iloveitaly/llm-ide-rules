@@ -218,5 +218,6 @@ Python rules.
 
         assert ".cursor/rules/general.mdc" in output
         assert ".github/copilot-instructions.md" in output
+        assert ".claude/rules/general.md" in output
+        assert ".claude/rules/python.md" in output
         assert "AGENTS.md" in output
-        assert "CLAUDE.md" in output

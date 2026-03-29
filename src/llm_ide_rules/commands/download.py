@@ -63,10 +63,8 @@ INSTRUCTION_TYPES = {
         "include_patterns": [],
     },
     "claude": {
-        "directories": [".claude/commands"],
+        "directories": [".claude/rules", ".claude/commands"],
         "files": [],
-        "generated_files": ["CLAUDE.md"],
-        "recursive_files": ["CLAUDE.md"],
         "include_patterns": [],
     },
     "opencode": {

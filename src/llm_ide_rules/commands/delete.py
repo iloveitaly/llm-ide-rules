@@ -26,12 +26,11 @@ def get_generated_files(target_dir: Path) -> set[Path]:
             if any(line.strip() for line in general):
                 generated.add(target_dir / ".cursor/rules/general.mdc")
                 generated.add(target_dir / ".github/copilot-instructions.md")
-                generated.add(target_dir / "CLAUDE.md")
+                generated.add(target_dir / ".claude/rules/general.md")
                 generated.add(target_dir / "AGENTS.md")
 
-            # If any sections exist, root docs are definitely generated
+            # If any sections exist, AGENTS.md is definitely generated
             if sections:
-                generated.add(target_dir / "CLAUDE.md")
                 generated.add(target_dir / "AGENTS.md")
 
             # Section specific files
@@ -43,13 +42,13 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(
                     target_dir / f".github/instructions/{filename}.instructions.md"
                 )
+                generated.add(target_dir / f".claude/rules/{filename}.md")
 
-                # Add subdirectory CLAUDE.md and AGENTS.md for sections with ** glob patterns
+                # Add subdirectory AGENTS.md for sections with ** glob patterns
                 glob_pattern = section_data.glob_pattern
                 section_target_dir = resolve_target_dir(target_dir, glob_pattern)
 
                 if section_target_dir != target_dir:
-                    generated.add(section_target_dir / "CLAUDE.md")
                     generated.add(section_target_dir / "AGENTS.md")
 
         except Exception as e:

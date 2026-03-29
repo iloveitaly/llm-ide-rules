@@ -391,7 +391,7 @@ That's all.
 
 
 def test_roundtrip_claude_commands():
-    """Test explode → implode claude produces equivalent commands.md."""
+    """Test explode → implode claude produces equivalent instructions.md and commands.md."""
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -418,15 +418,57 @@ Run pytest and fix errors.
         )
         assert explode_result.exit_code == 0
 
+        assert Path(".claude/rules/python.md").exists()
         assert Path(".claude/commands/fix-tests.md").exists()
 
         implode_result = runner.invoke(app, ["implode", "claude"])
         assert implode_result.exit_code == 0
 
+        roundtrip_instructions = Path("instructions.md").read_text()
         roundtrip_content = Path("commands.md").read_text()
 
+        assert "## Python" in roundtrip_instructions
+        assert "Python rules." in roundtrip_instructions
         assert "## Fix Tests" in roundtrip_content
         assert "Run pytest and fix errors" in roundtrip_content
+
+
+def test_roundtrip_claude_preserves_globs():
+    """Test explode -> implode claude preserves scoped rule globs."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        original_content = """# Sample Instructions
+
+## TypeScript
+globs: web/**/*.ts
+
+Here are TypeScript rules.
+
+## Python
+
+Here are Python rules.
+"""
+        Path("instructions.md").write_text(original_content)
+
+        explode_result = runner.invoke(
+            app, ["explode", "instructions.md", "--agent", "claude"]
+        )
+        assert explode_result.exit_code == 0
+
+        assert Path(".claude/rules/typescript.md").exists()
+
+        implode_result = runner.invoke(app, ["implode", "claude", "roundtrip.md"])
+        assert implode_result.exit_code == 0
+
+        roundtrip_content = Path("roundtrip.md").read_text()
+        roundtrip_sections = extract_sections(roundtrip_content)
+
+        assert "globs: web/**/*.ts" in roundtrip_sections["TypeScript"]
+        assert "Here are TypeScript rules." in roundtrip_sections["TypeScript"]
+        assert "Here are Python rules." in roundtrip_sections["Python"]
 
 
 def test_roundtrip_gemini_commands():
