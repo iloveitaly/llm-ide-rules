@@ -185,27 +185,54 @@ def gemini(
         output_path.unlink(missing_ok=True)
         log.info("no gemini commands to bundle")
 
+    # Gemini uses AGENTS.md for rules, so bundle them too
+    agents_agent = get_agent("agents")
+    instructions_output_path = base_dir / "instructions.md"
+    rules_written = agents_agent.bundle_rules(instructions_output_path)
+    if rules_written:
+        success_msg = "Bundled Gemini rules (AGENTS.md) into instructions.md"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+    else:
+        log.info("no Gemini rules (AGENTS.md) to bundle")
+
+
+def agents(
+    output: Annotated[
+        str, typer.Argument(help="Output file for rules")
+    ] = "instructions.md",
+) -> None:
+    """Bundle AGENTS.md files into instructions.md."""
+
+    agent = get_agent("agents")
+    base_dir = find_project_root()
+
+    log.info("bundling AGENTS.md files")
+
+    output_path = base_dir / output
+    rules_written = agent.bundle_rules(output_path)
+    if rules_written:
+        success_msg = f"Bundled AGENTS.md files into {output}"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+    else:
+        output_path.unlink(missing_ok=True)
+        log.info("no AGENTS.md files to bundle")
+
 
 def opencode(
     output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
 ) -> None:
-    """Bundle OpenCode commands into commands.md."""
+    """Bundle OpenCode rules into instructions.md and commands into commands.md."""
 
     agent = get_agent("opencode")
     base_dir = find_project_root()
 
-    commands_dir = agent.commands_dir
-    if not commands_dir:
-        log.error("opencode commands directory not configured")
-        raise typer.Exit(1)
-
     log.info(
         "bundling opencode commands",
-        commands_dir=commands_dir,
+        commands_dir=agent.commands_dir,
     )
 
-    commands_path = base_dir / commands_dir
-    if not commands_path.exists():
+    commands_path = base_dir / agent.commands_dir if agent.commands_dir else None
+    if not commands_path or not commands_path.exists():
         log.error(
             "opencode commands directory not found", commands_dir=str(commands_path)
         )
@@ -221,3 +248,15 @@ def opencode(
     else:
         output_path.unlink(missing_ok=True)
         log.info("no opencode commands to bundle")
+
+    # OpenCode uses AGENTS.md for rules, so bundle them too
+    agents_agent = get_agent("agents")
+    instructions_output_path = base_dir / "instructions.md"
+    rules_written = agents_agent.bundle_rules(instructions_output_path)
+    if rules_written:
+        success_msg = "Bundled OpenCode rules (AGENTS.md) into instructions.md"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+    else:
+        # Don't delete instructions.md if it already exists from another process,
+        # but here we're bundling from scratch.
+        log.info("no OpenCode rules (AGENTS.md) to bundle")

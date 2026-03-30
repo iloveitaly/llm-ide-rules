@@ -18,8 +18,72 @@ class AgentsAgent(BaseAgent):
     def bundle_rules(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
-        """Agents doesn't support bundling rules."""
-        return False
+        """Bundle all AGENTS.md files into a single output file."""
+        base_dir = output_file.parent
+        # Find all AGENTS.md files recursively
+        agents_files = list(base_dir.rglob("AGENTS.md"))
+        if not agents_files:
+            return False
+
+        # Sort files: root first, then by depth and name
+        root_agents = [f for f in agents_files if f.parent == base_dir]
+        subdir_agents = sorted(
+            [f for f in agents_files if f.parent != base_dir], key=lambda f: f.as_posix()
+        )
+
+        all_agents = root_agents + subdir_agents
+        content_parts: list[str] = []
+        processed_sections: set[str] = set()
+
+        for agents_file in all_agents:
+            content = agents_file.read_text().strip()
+            if not content:
+                continue
+
+            from llm_ide_rules.markdown_parser import parse_sections
+
+            general, sections = parse_sections(content)
+
+            # Only include general instructions once (from root)
+            if general and agents_file.parent == base_dir:
+                from llm_ide_rules.agents.base import trim_content
+
+                trimmed = trim_content(general)
+                if trimmed:
+                    content_parts.extend(trimmed)
+                    content_parts.append("\n\n")
+
+            for section_name, section_data in sections.items():
+                if section_name in processed_sections:
+                    continue
+
+                processed_sections.add(section_name)
+                section_content = section_data.content
+
+                # Reconstruct header and globs if it's from a subdirectory
+                content_parts.append(f"## {section_name}\n\n")
+
+                if agents_file.parent != base_dir:
+                    rel_dir = agents_file.parent.relative_to(base_dir)
+                    content_parts.append(f"globs: {rel_dir.as_posix()}/**/*\n\n")
+
+                from llm_ide_rules.agents.base import trim_content
+
+                trimmed = trim_content(section_content)
+                # Remove the section header from content as we already added it
+                if trimmed and trimmed[0].startswith("## "):
+                    trimmed = trimmed[1:]
+                    trimmed = trim_content(trimmed)
+
+                if trimmed:
+                    content_parts.extend(trimmed)
+                    content_parts.append("\n\n")
+
+        if not content_parts:
+            return False
+
+        output_file.write_text("".join(content_parts).strip() + "\n")
+        return True
 
     def bundle_commands(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None

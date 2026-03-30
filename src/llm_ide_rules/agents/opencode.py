@@ -95,5 +95,5 @@ class OpenCodeAgent(BaseAgent):
         filepath.write_text("".join(trimmed))
 
     def configure_agents_md(self, base_dir: Path) -> bool:
-        """OpenCode has native support, no configuration needed."""
-        return False
+        """OpenCode has native support for AGENTS.md, no configuration changes needed."""
+        return True

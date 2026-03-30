@@ -119,6 +119,9 @@ def explode_implementation(
         ]
     else:
         agents_to_process = [agent]
+        # OpenCode and Gemini use AGENTS.md, so enable the agents adapter automatically
+        if agent in ["opencode", "gemini"] and "agents" not in agents_to_process:
+            agents_to_process.append("agents")
 
     # Initialize agents and create directories
     agent_instances = {}

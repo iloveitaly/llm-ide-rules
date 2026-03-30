@@ -10,7 +10,14 @@ from typing_extensions import Annotated
 
 from llm_ide_rules.commands.explode import explode_main
 from llm_ide_rules.commands.ignores import ignores_main
-from llm_ide_rules.commands.implode import cursor, github, claude, gemini, opencode
+from llm_ide_rules.commands.implode import (
+    cursor,
+    github,
+    claude,
+    gemini,
+    opencode,
+    agents,
+)
 from llm_ide_rules.commands.download import download_main
 from llm_ide_rules.commands.delete import delete_main
 from llm_ide_rules.commands.config import config_main
@@ -88,6 +95,7 @@ implode_app.command("gemini", help="Bundle Gemini CLI commands into a single fil
 implode_app.command("opencode", help="Bundle OpenCode commands into a single file")(
     opencode
 )
+implode_app.command("agents", help="Bundle AGENTS.md files into a single file")(agents)
 app.add_typer(implode_app, name="implode")
 
 
