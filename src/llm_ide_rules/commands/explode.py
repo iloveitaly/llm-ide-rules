@@ -143,6 +143,12 @@ def explode_implementation(
 
     try:
         input_text = input_path.read_text()
+        
+        # Strip marker and everything after it if present
+        marker = "<!-- END CLONED INSTRUCTIONS -->"
+        if marker in input_text:
+            log.info("ignoring content after marker in instructions file", marker=marker)
+            input_text = input_text.split(marker, 1)[0]
     except FileNotFoundError:
         log.error("input file not found", input_file=str(input_path))
         error_msg = f"Input file not found: {input_path}"
@@ -154,6 +160,11 @@ def explode_implementation(
     if commands_path.exists():
         commands_text = commands_path.read_text()
         log.info("found commands file", commands_file=str(commands_path))
+        
+        # Also strip marker for commands.md
+        if marker in commands_text:
+            log.info("ignoring content after marker in commands file", marker=marker)
+            commands_text = commands_text.split(marker, 1)[0]
 
     # Parse instructions
     general, instruction_sections = parse_sections(input_text)

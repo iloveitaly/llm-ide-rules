@@ -74,7 +74,7 @@ class GitHubAgent(BaseAgent):
         if not content_parts:
             return False
 
-        output_file.write_text("".join(content_parts))
+        self._write_bundled_content(output_file, "".join(content_parts))
         return True
 
     def _extract_apply_to_from_frontmatter(self, content: str) -> str | None:
@@ -147,7 +147,7 @@ class GitHubAgent(BaseAgent):
         if not content_parts:
             return False
 
-        output_file.write_text("".join(content_parts))
+        self._write_bundled_content(output_file, "".join(content_parts))
         return True
 
     def write_rule(

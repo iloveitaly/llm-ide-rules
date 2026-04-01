@@ -16,6 +16,32 @@ def test_implode_help():
     assert "Bundle rule files into a single instruction file" in result.stdout
 
 
+def test_implode_preserves_custom_instructions():
+    """Test that implode preserves custom instructions after the marker."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        # Pre-create output file with custom instructions
+        output_file = Path("instructions.md")
+        output_file.write_text("Old rules\n<!-- END CLONED INSTRUCTIONS -->\nMy Custom Rules", encoding="utf-8")
+
+        # Create .cursor/rules directory
+        cursor_rules_dir = Path(".cursor/rules")
+        cursor_rules_dir.mkdir(parents=True)
+        (cursor_rules_dir / "python.mdc").write_text("---\ndescription: Python\n---\n## Python\n\nNew remote rules", encoding="utf-8")
+
+        result = runner.invoke(app, ["implode", "cursor", str(output_file)])
+
+        assert result.exit_code == 0
+        content = output_file.read_text(encoding="utf-8")
+        assert "New remote rules" in content
+        assert "<!-- END CLONED INSTRUCTIONS -->" in content
+        assert "My Custom Rules" in content
+        assert "Old rules" not in content
+
+
 def test_implode_cursor_help():
     """Test that implode cursor subcommand shows help."""
     runner = CliRunner()

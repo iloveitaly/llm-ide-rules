@@ -402,9 +402,60 @@ Here are unmapped rules.
 
         # Check AGENTS.md
         agents_md = Path("AGENTS.md")
-        assert agents_md.exists()
+        assert Path("AGENTS.md").exists()
         agents_content = agents_md.read_text()
         assert "## Python" in agents_content
         assert "Here are Python rules." in agents_content
         assert "## Unmapped" in agents_content
         assert "Here are unmapped rules." in agents_content
+
+
+def test_explode_ignores_marker():
+    """Test that explode ignores the custom instructions marker and everything after it."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        instructions_content = """# Sample Instructions
+
+## Python
+globs: *.py
+
+Here are Python rules.
+
+<!-- END CLONED INSTRUCTIONS -->
+
+## Custom Local Section
+This should be ignored.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        commands_content = """## Remote Command
+This is a remote command.
+
+<!-- END CLONED INSTRUCTIONS -->
+
+## Local Command
+This should be ignored.
+"""
+        Path("commands.md").write_text(commands_content)
+
+        result = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
+
+        assert result.exit_code == 0
+
+        # Verify rule from instructions.md
+        assert Path(".cursor/rules/python.mdc").exists()
+        python_content = Path(".cursor/rules/python.mdc").read_text()
+        assert "Here are Python rules." in python_content
+        assert "Custom Local Section" not in python_content
+        assert "This should be ignored." not in python_content
+
+        # Verify command from commands.md
+        assert Path(".cursor/commands/remote-command.md").exists()
+        assert not Path(".cursor/commands/local-command.md").exists()
+        remote_command_content = Path(".cursor/commands/remote-command.md").read_text()
+        assert "This is a remote command." in remote_command_content
+        assert "Local Command" not in remote_command_content
+

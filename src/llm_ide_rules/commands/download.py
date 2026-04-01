@@ -391,7 +391,24 @@ def download_main(
                 if src.exists():
                     log.info("copying source file", source=str(src), target=str(dst))
                     dst.parent.mkdir(parents=True, exist_ok=True)
-                    dst.write_bytes(src.read_bytes())
+                    
+                    if source_file in ["instructions.md", "commands.md"]:
+                        marker = "<!-- END CLONED INSTRUCTIONS -->"
+                        local_custom_content = ""
+                        
+                        if dst.exists():
+                            local_content = dst.read_text(encoding="utf-8")
+                            if marker in local_content:
+                                local_custom_content = local_content.split(marker, 1)[1]
+                        
+                        remote_content = src.read_text(encoding="utf-8")
+                        if marker not in remote_content:
+                            remote_content += f"\n\n{marker}\n"
+                            
+                        dst.write_text(remote_content + local_custom_content, encoding="utf-8")
+                    else:
+                        dst.write_bytes(src.read_bytes())
+                        
                     copied_items.append(f"Downloaded: {source_file}")
                     sources_copied = True
 

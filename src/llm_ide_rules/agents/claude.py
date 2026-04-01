@@ -80,7 +80,7 @@ class ClaudeAgent(BaseAgent):
         if not content_parts:
             return False
 
-        output_file.write_text("".join(content_parts))
+        self._write_bundled_content(output_file, "".join(content_parts))
         return True
 
     def _extract_paths_from_frontmatter(self, content: str) -> list[str]:
@@ -157,7 +157,7 @@ class ClaudeAgent(BaseAgent):
         if not content_parts:
             return False
 
-        output_file.write_text("".join(content_parts))
+        self._write_bundled_content(output_file, "".join(content_parts))
         return True
 
     def write_rule(

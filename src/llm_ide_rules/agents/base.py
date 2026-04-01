@@ -107,6 +107,26 @@ class BaseAgent(ABC):
             raise NotImplementedError(f"{self.name} does not support commands")
         return base_dir / self.commands_dir
 
+    def _write_bundled_content(self, output_file: Path, content: str) -> None:
+        """Write bundled content to output file, preserving custom instructions after marker."""
+        marker = "<!-- END CLONED INSTRUCTIONS -->"
+        local_custom_content = ""
+
+        if output_file.exists():
+            try:
+                current_content = output_file.read_text(encoding="utf-8")
+                if marker in current_content:
+                    local_custom_content = current_content.split(marker, 1)[1]
+            except Exception:
+                # Fallback if file cannot be read
+                pass
+
+        if marker not in content:
+            # Ensure marker is present at the end of the bundled content
+            content = content.rstrip() + f"\n\n{marker}\n"
+
+        output_file.write_text(content + local_custom_content, encoding="utf-8")
+
 
 def strip_yaml_frontmatter(text: str) -> str:
     """Strip YAML frontmatter from text."""
