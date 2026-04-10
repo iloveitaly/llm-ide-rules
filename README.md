@@ -73,6 +73,28 @@ export GITHUB_TOKEN=your_token_here
 uvx llm-ide-rules download
 ```
 
+### Customizing Instructions
+
+If you have repository-specific instructions that you want to maintain locally while still being able to `download` upstream updates, you can use the `<!-- END CLONED INSTRUCTIONS -->` marker.
+
+1. Add the marker at the end of your local `instructions.md`.
+2. Add your custom instructions below it.
+
+When you run `llm_ide_rules download` again, the tool will:
+- Extract everything after the marker in your local file.
+- Download the latest upstream `instructions.md`.
+- Append your local custom instructions back to the end.
+
+```markdown
+# Upstream Instructions
+...
+
+<!-- END CLONED INSTRUCTIONS -->
+
+# My Custom Local Rules
+- Use tabs for indentation in this project.
+```
+
 ### Examples
 
 ```sh
