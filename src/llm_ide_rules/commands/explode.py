@@ -160,14 +160,30 @@ def explode_implementation(
     if commands_path.exists():
         commands_text = commands_path.read_text()
         log.info("found commands file", commands_file=str(commands_path))
-        
+
         # Also strip marker for commands.md
-        if marker in commands_text:
+        commands_marker = "<!-- END CLONED COMMANDS -->"
+        if commands_marker in commands_text:
+            log.info(
+                "ignoring content after marker in commands file",
+                marker=commands_marker,
+            )
+            commands_text = commands_text.split(commands_marker, 1)[0]
+        elif marker in commands_text:
             log.info("ignoring content after marker in commands file", marker=marker)
             commands_text = commands_text.split(marker, 1)[0]
 
     # Parse instructions
     general, instruction_sections = parse_sections(input_text)
+
+    # Calculate counts for reporting
+    rules_count = 0
+    if any(line.strip() for line in general):
+        rules_count += 1
+    
+    for section_data in instruction_sections.values():
+        if any(line.strip() for line in section_data.content):
+            rules_count += 1
 
     # Process general instructions for agents that support rules
     if any(line.strip() for line in general):
@@ -237,8 +253,15 @@ alwaysApply: true
     # Process commands for all agents
     command_sections_data = {}
     command_sections = {}
+    commands_count = 0
     if commands_text:
         _, command_sections_data = parse_sections(commands_text)
+        
+        # Calculate commands count
+        for section_data in command_sections_data.values():
+            if any(line.strip() for line in section_data.content):
+                commands_count += 1
+
         agents_with_commands = [
             agent_instances[name]
             for name in agents_to_process
@@ -296,17 +319,32 @@ alwaysApply: true
                 fg=typer.colors.YELLOW,
             )
 
-    if created_dirs:
-        if len(created_dirs) == 1:
-            success_msg = f"Created files in {created_dirs[0]} directory"
-            typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-        else:
-            success_msg = f"Created files in {', '.join(created_dirs)} directories"
-            typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-    else:
-        # No directories created (e.g., agents that only generate root docs)
+    # Build summary message
+    parts = []
+    if rules_count > 0:
+        rules_word = "rule" if rules_count == 1 else "rules"
+        parts.append(f"{rules_count} {rules_word}")
+    if commands_count > 0:
+        commands_word = "command" if commands_count == 1 else "commands"
+        parts.append(f"{commands_count} {commands_word}")
+
+    if not parts:
         success_msg = "Created root documentation files"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+        return
+
+    counts_msg = "Created " + " and ".join(parts)
+
+    if created_dirs:
+        if len(created_dirs) == 1:
+            success_msg = f"{counts_msg} in {created_dirs[0]} directory"
+        else:
+            success_msg = f"{counts_msg} across {len(created_dirs)} directories"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+    else:
+        success_msg = f"{counts_msg} in root documentation files"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+
 
 
 def explode_main(
