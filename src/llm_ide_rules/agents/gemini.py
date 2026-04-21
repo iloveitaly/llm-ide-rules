@@ -137,23 +137,68 @@ class GeminiAgent(BaseAgent):
 
     def configure_agents_md(self, base_dir: Path) -> bool:
         """Configure Gemini CLI to use AGENTS.md."""
-        from llm_ide_rules.utils import modify_json_file
+        import json
 
         settings_path = base_dir / ".gemini" / "settings.json"
+        settings_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Based on research, generic context setting might be:
-        updates = {"agent.instructionFile": "AGENTS.md"}
+        data = {}
+        if settings_path.exists():
+            try:
+                data = json.loads(settings_path.read_text())
+            except Exception:
+                pass
 
-        return modify_json_file(settings_path, updates)
+        old_data = json.dumps(data, sort_keys=True)
+        
+        if "context" not in data:
+            data["context"] = {}
+
+        file_names = data["context"].get("fileName", [])
+        if isinstance(file_names, str):
+            file_names = [file_names]
+
+        if "AGENTS.md" not in file_names:
+            file_names = ["AGENTS.md"] + [f for f in file_names if f != "AGENTS.md"]
+            if "GEMINI.md" not in file_names:
+                file_names.append("GEMINI.md")
+            data["context"]["fileName"] = file_names
+
+        new_data = json.dumps(data, sort_keys=True)
+        if old_data == new_data and settings_path.exists():
+            return False
+
+        settings_path.write_text(json.dumps(data, indent=2))
+        return True
 
     def check_agents_md_config(self, base_dir: Path) -> bool:
-        """Check if Gemini CLI is configured to use AGENTS.md."""
-        settings_path = base_dir / ".gemini" / "settings.json"
-        if not settings_path.exists():
+        """Check if Gemini CLI is configured to use AGENTS.md (local or global)."""
+        import os
+
+        # Check local config
+        local_settings = base_dir / ".gemini" / "settings.json"
+        if self._check_config_file(local_settings):
+            return True
+
+        # Check global config
+        global_settings = Path(os.path.expanduser("~/.gemini/settings.json"))
+        return self._check_config_file(global_settings)
+
+    def _check_config_file(self, config_path: Path) -> bool:
+        """Check if a specific Gemini CLI config file is configured to use AGENTS.md."""
+        import json
+
+        if not config_path.exists():
             return False
 
         try:
-            data = json.loads(settings_path.read_text())
-            return data.get("agent.instructionFile") == "AGENTS.md"
+            data = json.loads(config_path.read_text())
+            file_names = data.get("context", {}).get("fileName", [])
+            if isinstance(file_names, str):
+                return file_names == "AGENTS.md"
+            elif isinstance(file_names, list):
+                return "AGENTS.md" in file_names
         except Exception:
-            return False
+            pass
+
+        return False
