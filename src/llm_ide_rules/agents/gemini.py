@@ -171,20 +171,20 @@ class GeminiAgent(BaseAgent):
         settings_path.write_text(json.dumps(data, indent=2))
         return True
 
-    def check_agents_md_config(self, base_dir: Path) -> bool:
+    def check_gemini_config(self, base_dir: Path) -> bool:
         """Check if Gemini CLI is configured to use AGENTS.md (local or global)."""
         import os
 
         # Check local config
         local_settings = base_dir / ".gemini" / "settings.json"
-        if self._check_config_file(local_settings):
+        if self._check_gemini_config(local_settings):
             return True
 
         # Check global config
         global_settings = Path(os.path.expanduser("~/.gemini/settings.json"))
-        return self._check_config_file(global_settings)
+        return self._check_gemini_config(global_settings)
 
-    def _check_config_file(self, config_path: Path) -> bool:
+    def _check_gemini_config(self, config_path: Path) -> bool:
         """Check if a specific Gemini CLI config file is configured to use AGENTS.md."""
         import json
 

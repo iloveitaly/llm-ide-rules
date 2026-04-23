@@ -305,7 +305,7 @@ alwaysApply: true
     created_dirs = list(dict.fromkeys(created_dirs))
 
     if "gemini" in agent_instances:
-        if not agent_instances["gemini"].check_agents_md_config(working_dir):
+        if not agent_instances["gemini"].check_gemini_config(working_dir):
             typer.secho(
                 "Warning: Gemini CLI configuration missing for AGENTS.md.",
                 fg=typer.colors.YELLOW,
