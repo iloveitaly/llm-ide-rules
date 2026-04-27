@@ -42,7 +42,7 @@ jobs:
       # NOTE this permission requires configuration to be set on the repo, check `just github_repo_permissions_create`
       pull-requests: write
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release
         with:
           release-type: python
