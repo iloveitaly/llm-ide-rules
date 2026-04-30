@@ -51,9 +51,11 @@ Example:
 
 ```python
 class Distribution(
-    BaseModel, TimestampsMixin, SoftDeletionMixin, TypeIDMixin("dst"), table=True
+    BaseModel, TimestampsMixin, SoftDeletionMixin, table=True
 ):
     """Triple-quoted strings for multi-line class docstring"""
+
+    id: TypeIDField[Literal["dst"]] = TypeIDPrimaryKey("dst")
 
     date_field_with_comment: datetime | None = None
     "use a string under the field to add a comment about the field"
@@ -65,7 +67,7 @@ class Distribution(
     optional_field: str | None = None
 
     # here's how relationships are constructed
-    doctor_id: TypeIDType = Doctor.foreign_key()
+    doctor_id: TypeID = Doctor.foreign_key()
     doctor: Doctor = Relationship()
 
     @computed_field
