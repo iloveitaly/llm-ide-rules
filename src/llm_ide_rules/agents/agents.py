@@ -28,7 +28,8 @@ class AgentsAgent(BaseAgent):
         # Sort files: root first, then by depth and name
         root_agents = [f for f in agents_files if f.parent == base_dir]
         subdir_agents = sorted(
-            [f for f in agents_files if f.parent != base_dir], key=lambda f: f.as_posix()
+            [f for f in agents_files if f.parent != base_dir],
+            key=lambda f: f.as_posix(),
         )
 
         all_agents = root_agents + subdir_agents

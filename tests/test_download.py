@@ -451,24 +451,29 @@ def test_download_preserves_custom_instructions(mock_zipfile, mock_requests):
 
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
-        
+
         # Setup initial state with custom instructions
-        Path("instructions.md").write_text("Old stuff\n<!-- END CLONED INSTRUCTIONS -->\nMy Custom Rules", encoding="utf-8")
+        Path("instructions.md").write_text(
+            "Old stuff\n<!-- END CLONED INSTRUCTIONS -->\nMy Custom Rules",
+            encoding="utf-8",
+        )
 
         def mock_extractall(path):
             extract_path = Path(path)
             # Create a fake extracted repo structure
             extracted_dir = extract_path / "llm_ide_rules-master"
             extracted_dir.mkdir(parents=True, exist_ok=True)
-            (extracted_dir / "instructions.md").write_text("New remote rules", encoding="utf-8")
-            
+            (extracted_dir / "instructions.md").write_text(
+                "New remote rules", encoding="utf-8"
+            )
+
             # create .cursor directory so the download logic thinks there is something to copy since we specified "cursor"
             (extracted_dir / ".cursor").mkdir(parents=True, exist_ok=True)
             (extracted_dir / ".cursor" / "rules").mkdir(parents=True, exist_ok=True)
 
         mock_zip_instance.extractall = mock_extractall
 
-        result = runner.invoke(app, ["download", "cursor"])
+        _result = runner.invoke(app, ["download", "cursor"])
 
         # Verify the content preserved the custom rules
         content = Path("instructions.md").read_text(encoding="utf-8")

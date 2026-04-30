@@ -25,12 +25,18 @@ def test_implode_preserves_custom_instructions():
 
         # Pre-create output file with custom instructions
         output_file = Path("instructions.md")
-        output_file.write_text("Old rules\n<!-- END CLONED INSTRUCTIONS -->\nMy Custom Rules", encoding="utf-8")
+        output_file.write_text(
+            "Old rules\n<!-- END CLONED INSTRUCTIONS -->\nMy Custom Rules",
+            encoding="utf-8",
+        )
 
         # Create .cursor/rules directory
         cursor_rules_dir = Path(".cursor/rules")
         cursor_rules_dir.mkdir(parents=True)
-        (cursor_rules_dir / "python.mdc").write_text("---\ndescription: Python\n---\n## Python\n\nNew remote rules", encoding="utf-8")
+        (cursor_rules_dir / "python.mdc").write_text(
+            "---\ndescription: Python\n---\n## Python\n\nNew remote rules",
+            encoding="utf-8",
+        )
 
         result = runner.invoke(app, ["implode", "cursor", str(output_file)])
 

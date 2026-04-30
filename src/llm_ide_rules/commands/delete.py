@@ -174,7 +174,10 @@ def delete_main(
         instruction_types = DEFAULT_TYPES
 
     # OpenCode and Gemini use AGENTS.md, so enable the agents instruction type automatically
-    if any(a in instruction_types for a in ["opencode", "gemini"]) and "agents" not in instruction_types:
+    if (
+        any(a in instruction_types for a in ["opencode", "gemini"])
+        and "agents" not in instruction_types
+    ):
         instruction_types.append("agents")
 
     invalid_types = [t for t in instruction_types if t not in INSTRUCTION_TYPES]

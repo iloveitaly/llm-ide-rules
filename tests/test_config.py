@@ -25,7 +25,8 @@ def test_gemini_config_warning_in_explode():
             result = runner.invoke(app, ["explode", "instructions.md"])
 
             assert (
-                "Warning: Gemini CLI configuration missing for AGENTS.md." in result.stdout
+                "Warning: Gemini CLI configuration missing for AGENTS.md."
+                in result.stdout
             )
             assert "llm-ide-rules config" in result.stdout
             assert "gemini config set" not in result.stdout

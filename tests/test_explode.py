@@ -458,4 +458,3 @@ This should be ignored.
         remote_command_content = Path(".cursor/commands/remote-command.md").read_text()
         assert "This is a remote command." in remote_command_content
         assert "Local Command" not in remote_command_content
-

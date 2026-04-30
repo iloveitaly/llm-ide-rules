@@ -137,7 +137,6 @@ class GeminiAgent(BaseAgent):
 
     def configure_agents_md(self, base_dir: Path) -> bool:
         """Configure Gemini CLI to use AGENTS.md."""
-        import json
 
         settings_path = base_dir / ".gemini" / "settings.json"
         settings_path.parent.mkdir(parents=True, exist_ok=True)
@@ -150,7 +149,7 @@ class GeminiAgent(BaseAgent):
                 pass
 
         old_data = json.dumps(data, sort_keys=True)
-        
+
         if "context" not in data:
             data["context"] = {}
 
@@ -186,7 +185,6 @@ class GeminiAgent(BaseAgent):
 
     def _check_gemini_config(self, config_path: Path) -> bool:
         """Check if a specific Gemini CLI config file is configured to use AGENTS.md."""
-        import json
 
         if not config_path.exists():
             return False

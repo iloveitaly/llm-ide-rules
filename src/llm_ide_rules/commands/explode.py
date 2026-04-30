@@ -143,11 +143,13 @@ def explode_implementation(
 
     try:
         input_text = input_path.read_text()
-        
+
         # Strip marker and everything after it if present
         marker = "<!-- END CLONED INSTRUCTIONS -->"
         if marker in input_text:
-            log.info("ignoring content after marker in instructions file", marker=marker)
+            log.info(
+                "ignoring content after marker in instructions file", marker=marker
+            )
             input_text = input_text.split(marker, 1)[0]
     except FileNotFoundError:
         log.error("input file not found", input_file=str(input_path))
@@ -180,7 +182,7 @@ def explode_implementation(
     rules_count = 0
     if any(line.strip() for line in general):
         rules_count += 1
-    
+
     for section_data in instruction_sections.values():
         if any(line.strip() for line in section_data.content):
             rules_count += 1
@@ -256,7 +258,7 @@ alwaysApply: true
     commands_count = 0
     if commands_text:
         _, command_sections_data = parse_sections(commands_text)
-        
+
         # Calculate commands count
         for section_data in command_sections_data.values():
             if any(line.strip() for line in section_data.content):
@@ -344,7 +346,6 @@ alwaysApply: true
     else:
         success_msg = f"{counts_msg} in root documentation files"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-
 
 
 def explode_main(
