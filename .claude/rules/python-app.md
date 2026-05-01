@@ -19,15 +19,59 @@ paths:
   - Should not be used on the queuing system
   - A `perform` function that is the main entry point for the command.
   - Look at existing commands for examples of how to structure the command.
-  - Use `TypeIDType` for any parameters that are IDs of models.
+  - Use `TypeID` for any parameters that are IDs of models.
 - Files within `app/jobs/` should have:
   - Are designed for use on the queuing system.
   - A `perform` function that is the main entry point for the job.
   - Look at existing jobs for examples of how to structure the job.
-  - Use `TypeIDType | str` for any parameters that are IDs of models.
+  - Use `TypeID | str` for any parameters that are IDs of models.
 - When referencing a command, use the full-qualified name, e.g. `app.commands.transcript_deletion.perform`.
 - When queuing a job or `perform`ing it in a test, use the full-qualified name, e.g. `app.jobs.transcript_deletion.perform`.
 - `app/cli/` is for scripts or CLI tools that are specific to the application.
+
+### Factories
+
+globs: app/factories/**/.py
+
+* Each model should get it's own file under app/factories/model_name.py
+* `ActiveModelFactory` (which is a polyfactory subclass) should be used.
+* Use `BaseFactory.__faker__` to generate more specific fake data for important fields (used in routes, etc)
+* Prefer `slug = BaseFactory.__faker__.unique.slug` to `slug = Use(lambda: BaseFactory.__faker__.unique.slug())`
+
+#### Factory Example
+
+```python
+class ScreeningFactory(ActiveModelFactory[Screening]):
+    funding_goal = lambda: BaseFactory.__faker__.random_int(
+        min=0, max=2000_00
+    )
+
+    ticket_price = DEFAULT_TICKET_PRICE
+    status = ScreeningStatus.active
+
+    # always None
+    funding_ending_at = None
+
+    # pick entry from a fixed list
+    zip_code = lambda: BaseFactory.__faker__.random_element(elements=REAL_ZIP_CODES)
+
+    host_name = BaseFactory.__faker__.name
+    host_description = lambda: BaseFactory.__faker__.paragraph(nb_sentences=2)
+
+    # this method runs before the model is persisted to the database
+    @classmethod
+    def post_build(cls, model):
+      # if the user does not pass in a important relationship during creation, you can generate a factory fallback
+        if not model.distribution_id:
+            model.distribution_id = DistributionFactory.save().id
+
+        return model.save()
+
+    # runs after the model is persisted to the database
+    @classmethod
+    def post_save(cls, model):
+        return model.save()
+```
 
 ### Database & ORM
 
@@ -57,7 +101,7 @@ class Distribution(
 ):
     """Triple-quoted strings for multi-line class docstring"""
 
-    id: TypeIDField[Literal["dst"]] = TypeIDPrimaryKey("dst")
+    id: TypeID[Literal["dst"]] = TypeIDPrimaryKey("dst")
 
     date_field_with_comment: datetime | None = None
     "use a string under the field to add a comment about the field"

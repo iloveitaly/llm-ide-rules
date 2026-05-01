@@ -10,9 +10,47 @@ alwaysApply: false
   - For example, to create and persist a `Distribution` record `DistributionFactory.save()`
   - If a factory doesn't exist for the model you are working with, create one.
   - You can customize one or more params in a factory using `DistributionFactory.save(host="custom_host.com)`
-- Use the `faker` factory to generate emails, etc.
+- Use `faker` factory to generate emails, etc.
 - Do not mock or patch unless I instruct you to. Test as much of the application stack as possible in each test.
 - If you get lazy attribute errors, or need a database session to share across logic, use the `db_session` fixture to fix the issue.
   - Note that when writing route tests a `db_session` is not needed for the logic inside of the route.
 - When testing Stripe, use the sandbox API. Never mock out Stripe interactions unless explicitly told to.
-- Omit obvious docstrings and comments.
+- Omit obvious docstrs and comments. Add comments for non-obvious but easy-to-miss lines that are key to what the test is checking.
+- If a docstring needs formatting, use markdown.
+
+### Example Test
+
+Below is an example test, you'll notice the following:
+
+- Docstr is omitted since the purpose of the test is obvious
+- Comment about the `county` is added since it's the main point of the test
+- Newline between test setup, functionality under test, and assertions against result
+- `api_app_url_path_for` helper is used instead of hardcoded routes
+
+```python
+from app.generated.fastapi_typed_routes import api_app_url_path_for
+import json
+
+def test_calculate_quote_unknown_county(client):
+    payload = {
+        "subscriber": {"age": 35, "gender": "M"},
+        # fake county to ensure error is thrown
+        "county": "NotACounty",
+    }
+
+    response = client.post(
+        api_app_url_path_for("composite_quote"),
+        content=json.dumps(payload),
+        headers={"Content-Type": "application/json"},
+    )
+
+    assert_status(response, status.HTTP_422_UNPROCESSABLE_ENTITY)
+```
+
+### File Structure
+
+* If there's more than a handful of tests in a folder, you should probably create subfolders.
+* File name should be related to the file or primary class / functionality the test is covering. Do not add a component to the test name that exists in the test file path.
+  * Example: `app/routes/unauthenticated/quote.py` should be `tests/routes/unauthenticated/quote_test.py`
+* `tests/routes/{unauthenticated,authenticated}` and a handful of top-level test files for fastapi API route testing.
+* `tests/integration/` for browser tests
