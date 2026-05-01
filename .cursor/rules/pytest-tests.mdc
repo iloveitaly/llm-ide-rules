@@ -40,8 +40,7 @@ def test_calculate_quote_unknown_county(client):
 
     response = client.post(
         api_app_url_path_for("composite_quote"),
-        content=json.dumps(payload),
-        headers={"Content-Type": "application/json"},
+        json=payload,
     )
 
     assert_status(response, status.HTTP_422_UNPROCESSABLE_ENTITY)
