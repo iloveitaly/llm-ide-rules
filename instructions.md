@@ -380,7 +380,7 @@ class Distribution(
 ):
     """Triple-quoted strings for multi-line class docstring"""
 
-    id: TypeIDField[Literal["dst"]] = TypeIDPrimaryKey("dst")
+    id: TypeID[Literal["dst"]] = TypeIDPrimaryKey("dst")
 
     date_field_with_comment: datetime | None = None
     "use a string under the field to add a comment about the field"
