@@ -16,7 +16,7 @@ paths:
   - Note that when writing route tests a `db_session` is not needed for the logic inside of the route.
 - When testing Stripe, use the sandbox API. Never mock out Stripe interactions unless explicitly told to.
 - Omit obvious docstrs and comments. Add comments for non-obvious but easy-to-miss lines that are key to what the test is checking.
-- If a docstring needs formatting, use markdown.
+- If a docstring needs formatting, use markdown. Use Google Style.
 
 ### Example Test
 
