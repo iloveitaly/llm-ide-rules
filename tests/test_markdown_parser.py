@@ -33,13 +33,13 @@ def test_extract_glob_directive_mixed_case():
 
 
 def test_extract_glob_directive_no_space():
-    """Test glob directive without space after colon should NOT be parsed."""
+    """Test glob directive without space after colon should still be parsed."""
     content = ["## Python\n", "globs:**/*.py\n", "\n", "Some content\n"]
     filtered, pattern = extract_glob_directive(content)
 
-    assert pattern is None
-    assert "globs:**/*.py\n" in filtered  # Should keep the malformed line
-
+    assert pattern == "**/*.py"
+    assert "globs:**/*.py\n" not in filtered
+    assert "Some content\n" in filtered
 
 def test_extract_glob_directive_extra_whitespace():
     """Test glob directive with extra whitespace after colon."""

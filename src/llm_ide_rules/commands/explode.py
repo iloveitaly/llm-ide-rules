@@ -66,19 +66,15 @@ def get_always_apply_rule_agents(
     agent_instances: dict[str, BaseAgent], agent_dirs: dict[str, dict[str, Path]]
 ) -> list[tuple[BaseAgent, Path]]:
     """Return rule-capable agents that should receive always-apply sections."""
-    if "agents" in agent_instances:
-        eligible_agent_names = ["claude"]
-    else:
-        eligible_agent_names = [
-            agent_name
-            for agent_name in agent_instances
-            if "rules" in agent_dirs[agent_name]
-        ]
+    eligible_agent_names = [
+        agent_name
+        for agent_name in agent_instances
+        if "rules" in agent_dirs[agent_name]
+    ]
 
     return [
         (agent_instances[agent_name], agent_dirs[agent_name]["rules"])
         for agent_name in eligible_agent_names
-        if agent_name in agent_instances and "rules" in agent_dirs[agent_name]
     ]
 
 
