@@ -21,6 +21,11 @@ def normalize_whitespace(text: str) -> str:
 
 def extract_sections(text: str) -> dict[str, str]:
     """Extract sections from markdown text for easier comparison."""
+    # Strip the cloned instructions marker if present
+    marker = "<!-- END CLONED INSTRUCTIONS -->"
+    if marker in text:
+        text = text.split(marker, 1)[0]
+
     sections = {}
     current_section = None
     current_content = []

@@ -43,7 +43,8 @@ Here are React rules for frontend development.
         result = runner.invoke(app, ["explode", "instructions.md"])
 
         assert result.exit_code == 0
-        assert "Created files in" in result.stdout
+        assert "Created" in result.stdout
+        assert "rules" in result.stdout
 
         assert Path(".cursor/rules").exists()
         assert not Path(".cursor/commands").exists()
@@ -186,15 +187,15 @@ This section is not in sections.json so it should be treated as always-apply.
 
         shutil.rmtree(".cursor")
 
-        # Scenario B: all agents - custom-unmapped-section.mdc SHOULD NOT exist
+        # Scenario B: all agents - custom-unmapped-section.mdc SHOULD exist
         result_all = runner.invoke(
             app, ["explode", "instructions.md", "--agent", "all"]
         )
 
         assert result_all.exit_code == 0
 
-        # MDC should NOT exist because it's representable by AGENTS.md
-        assert not Path(".cursor/rules/custom-unmapped-section.mdc").exists()
+        # MDC should exist even if AGENTS.md is also generated
+        assert Path(".cursor/rules/custom-unmapped-section.mdc").exists()
 
         # AGENTS.md SHOULD exist and contain the content
         assert Path("AGENTS.md").exists()
@@ -270,7 +271,7 @@ Here are TypeScript rules (all caps).
 ## NoSpace
 globs:**/*.nospace
 
-This should NOT be parsed as a glob (missing space).
+This should be parsed as a glob (flexible parsing).
 
 ## ExtraWhitespace
 globs:   **/*.whitespace
@@ -304,9 +305,10 @@ This should work with extra whitespace after colon.
 
         # Test missing space - should be treated as alwaysApply (no glob pattern)
         nospace_content = Path(".cursor/rules/nospace.mdc").read_text()
-        assert "alwaysApply: true" in nospace_content
+        assert "alwaysApply: false" in nospace_content
         assert "description: NoSpace" in nospace_content
-        assert "globs:**/*.nospace" in nospace_content  # Should keep the malformed line
+        assert "**/*.nospace" in nospace_content
+        assert "globs:**/*.nospace" not in nospace_content
 
         # Test extra whitespace - should still parse correctly
         whitespace_content = Path(".cursor/rules/extrawhitespace.mdc").read_text()
