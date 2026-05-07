@@ -28,10 +28,12 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(target_dir / ".github/copilot-instructions.md")
                 generated.add(target_dir / ".claude/rules/general.md")
                 generated.add(target_dir / "AGENTS.md")
+                generated.add(target_dir / "GEMINI.md")
 
             # If any sections exist, AGENTS.md is definitely generated
             if sections:
                 generated.add(target_dir / "AGENTS.md")
+                generated.add(target_dir / "GEMINI.md")
 
             # Section specific files
             from llm_ide_rules.utils import resolve_target_dir
@@ -50,6 +52,7 @@ def get_generated_files(target_dir: Path) -> set[Path]:
 
                 if section_target_dir != target_dir:
                     generated.add(section_target_dir / "AGENTS.md")
+                    generated.add(section_target_dir / "GEMINI.md")
 
         except Exception as e:
             log.warning("failed to parse instructions.md", error=str(e))

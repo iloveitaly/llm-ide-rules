@@ -185,37 +185,39 @@ def gemini(
         output_path.unlink(missing_ok=True)
         log.info("no gemini commands to bundle")
 
-    # Gemini uses AGENTS.md for rules, so bundle them too
-    agents_agent = get_agent("agents")
+    # Gemini uses GEMINI.md for rules, so bundle them too
     instructions_output_path = base_dir / "instructions.md"
-    rules_written = agents_agent.bundle_rules(instructions_output_path)
+    rules_written = agent.bundle_rules(instructions_output_path)
     if rules_written:
-        success_msg = "Bundled Gemini rules (AGENTS.md) into instructions.md"
+        success_msg = "Bundled Gemini rules (GEMINI.md) into instructions.md"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
-        log.info("no Gemini rules (AGENTS.md) to bundle")
+        log.info("no Gemini rules (GEMINI.md) to bundle")
 
 
 def agents(
     output: Annotated[
         str, typer.Argument(help="Output file for rules")
     ] = "instructions.md",
+    filename: Annotated[
+        str, typer.Option("--filename", "-f", help="Filename to bundle (e.g. AGENTS.md)")
+    ] = "AGENTS.md",
 ) -> None:
-    """Bundle AGENTS.md files into instructions.md."""
+    """Bundle unified markdown files (default AGENTS.md) into instructions.md."""
 
     agent = get_agent("agents")
     base_dir = find_project_root()
 
-    log.info("bundling AGENTS.md files")
+    log.info("bundling files", filename=filename)
 
     output_path = base_dir / output
-    rules_written = agent.bundle_rules(output_path)
+    rules_written = agent.bundle_rules(output_path, filename=filename)
     if rules_written:
-        success_msg = f"Bundled AGENTS.md files into {output}"
+        success_msg = f"Bundled {filename} files into {output}"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         output_path.unlink(missing_ok=True)
-        log.info("no AGENTS.md files to bundle")
+        log.info(f"no {filename} files to bundle")
 
 
 def opencode(

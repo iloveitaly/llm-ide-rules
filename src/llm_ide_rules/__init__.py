@@ -23,6 +23,8 @@ from llm_ide_rules.commands.delete import delete_main
 from llm_ide_rules.commands.config import config_main
 from llm_ide_rules.version import get_cli_version
 
+__version__ = get_cli_version()
+
 
 def version_callback(value: bool):
     """Callback to display the version and exit."""

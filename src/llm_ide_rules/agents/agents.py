@@ -16,12 +16,15 @@ class AgentsAgent(BaseAgent):
     command_extension = None
 
     def bundle_rules(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
+        self,
+        output_file: Path,
+        section_globs: dict[str, str | None] | None = None,
+        filename: str = "AGENTS.md",
     ) -> bool:
         """Bundle all AGENTS.md files into a single output file."""
         base_dir = output_file.parent
         # Find all AGENTS.md files recursively
-        agents_files = list(base_dir.rglob("AGENTS.md"))
+        agents_files = list(base_dir.rglob(filename))
         if not agents_files:
             return False
 
@@ -120,13 +123,14 @@ class AgentsAgent(BaseAgent):
         command_sections: dict[str, list[str]],
         output_dir: Path,
         section_globs: dict[str, str | None] | None = None,
+        filename: str = "AGENTS.md",
     ) -> None:
         """Generate AGENTS.md files, potentially distributed based on globs."""
         if not section_globs:
             # Fallback to single root AGENTS.md
             content = self.build_root_doc_content(general_lines, rules_sections)
             if content.strip():
-                (output_dir / "AGENTS.md").write_text(content)
+                (output_dir / filename).write_text(content)
             return
 
         # Group rules by target directory
@@ -169,4 +173,4 @@ class AgentsAgent(BaseAgent):
 
             content = self.build_root_doc_content(current_general_lines, sections)
             if content.strip():
-                (target_dir / "AGENTS.md").write_text(content)
+                (target_dir / filename).write_text(content)

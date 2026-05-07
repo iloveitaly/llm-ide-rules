@@ -25,7 +25,7 @@ def test_gemini_config_warning_in_explode():
             result = runner.invoke(app, ["explode", "instructions.md"])
 
             assert (
-                "Warning: Gemini CLI configuration missing for AGENTS.md."
+                "Warning: Gemini CLI configuration missing for GEMINI.md."
                 in result.stdout
             )
             assert "llm-ide-rules config" in result.stdout
@@ -42,7 +42,7 @@ def test_gemini_config_warning_not_shown_when_present():
         gemini_dir = Path(".gemini")
         gemini_dir.mkdir()
         (gemini_dir / "settings.json").write_text(
-            '{"context": {"fileName": ["AGENTS.md"]}}'
+            '{"context": {"fileName": ["GEMINI.md"]}}'
         )
 
         # Mock expanduser to avoid using real global config
@@ -53,7 +53,7 @@ def test_gemini_config_warning_not_shown_when_present():
             result = runner.invoke(app, ["explode", "instructions.md"])
 
             assert (
-                "Warning: Gemini CLI configuration missing for AGENTS.md."
+                "Warning: Gemini CLI configuration missing for GEMINI.md."
                 not in result.stdout
             )
 
@@ -72,8 +72,7 @@ def test_config_gemini():
         settings_path = Path(".gemini/settings.json")
         assert settings_path.exists()
         data = json.loads(settings_path.read_text())
-        assert "AGENTS.md" in data.get("context", {}).get("fileName", [])
-
+        assert "GEMINI.md" in data.get("context", {}).get("fileName", [])
         # Test 2: File exists but missing key
         settings_path.write_text('{"other": "value"}')
         result = runner.invoke(app, ["config", "gemini"])
@@ -81,7 +80,8 @@ def test_config_gemini():
         assert "Configured gemini" in result.stdout
 
         data = json.loads(settings_path.read_text())
-        assert "AGENTS.md" in data.get("context", {}).get("fileName", [])
+        assert "GEMINI.md" in data.get("context", {}).get("fileName", [])
+
         assert data.get("other") == "value"
 
         # Test 3: Already configured

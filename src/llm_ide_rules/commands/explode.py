@@ -82,6 +82,7 @@ def explode_implementation(
     input_file: str = "instructions.md",
     agent: str = "all",
     working_dir: Path | None = None,
+    agents_filename: str = "AGENTS.md",
 ) -> None:
     """Core implementation of explode command."""
     if working_dir is None:
@@ -115,8 +116,8 @@ def explode_implementation(
         ]
     else:
         agents_to_process = [agent]
-        # OpenCode and Gemini use AGENTS.md, so enable the agents adapter automatically
-        if agent in ["opencode", "gemini"] and "agents" not in agents_to_process:
+        # OpenCode uses AGENTS.md, so enable the agents adapter automatically
+        if agent in ["opencode"] and "agents" not in agents_to_process:
             agents_to_process.append("agents")
 
     # Initialize agents and create directories
@@ -279,13 +280,24 @@ alwaysApply: true
 
     # Generate root documentation for agents that support it
     for agent_name, agent_inst in agent_instances.items():
-        agent_inst.generate_root_doc(
-            general,
-            rules_sections,
-            command_sections,
-            working_dir,
-            section_globs=section_globs,
-        )
+        # Special case for 'agents' adapter to use custom filename
+        if agent_name == "agents":
+            agent_inst.generate_root_doc(
+                general,
+                rules_sections,
+                command_sections,
+                working_dir,
+                section_globs=section_globs,
+                filename=agents_filename,
+            )
+        else:
+            agent_inst.generate_root_doc(
+                general,
+                rules_sections,
+                command_sections,
+                working_dir,
+                section_globs=section_globs,
+            )
 
     # Build log message and user output based on processed agents
     log_data = {"agent": agent}
@@ -305,7 +317,7 @@ alwaysApply: true
     if "gemini" in agent_instances:
         if not agent_instances["gemini"].check_gemini_config(working_dir):
             typer.secho(
-                "Warning: Gemini CLI configuration missing for AGENTS.md.",
+                "Warning: Gemini CLI configuration missing for GEMINI.md.",
                 fg=typer.colors.YELLOW,
             )
             typer.secho(

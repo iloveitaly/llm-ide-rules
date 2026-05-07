@@ -59,7 +59,8 @@ INSTRUCTION_TYPES = {
     "gemini": {
         "directories": [".gemini/commands"],
         "files": [],
-        "generated_files": [],
+        "generated_files": ["GEMINI.md"],
+        "recursive_files": ["GEMINI.md"],
         "include_patterns": [],
     },
     "claude": {
