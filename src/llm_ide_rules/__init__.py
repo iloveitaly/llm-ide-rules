@@ -21,14 +21,13 @@ from llm_ide_rules.commands.implode import (
 from llm_ide_rules.commands.download import download_main
 from llm_ide_rules.commands.delete import delete_main
 from llm_ide_rules.commands.config import config_main
-
-__version__ = "0.12.0"
+from llm_ide_rules.version import get_cli_version
 
 
 def version_callback(value: bool):
     """Callback to display the version and exit."""
     if value:
-        print(f"llm-ide-rules version {__version__}")
+        print(f"llm-ide-rules version {get_cli_version()}")
         raise typer.Exit()
 
 
