@@ -24,7 +24,10 @@ class GitHubAgent(BaseAgent):
     command_extension = ".prompt.md"
 
     def bundle_rules(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
+        self,
+        output_file: Path,
+        section_globs: dict[str, str | None] | None = None,
+        filename: str = "AGENTS.md",
     ) -> bool:
         """Bundle GitHub instruction files into a single output file."""
         rules_dir = self.rules_dir

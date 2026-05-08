@@ -20,7 +20,10 @@ class OpenCodeAgent(BaseAgent):
     command_extension = ".md"
 
     def bundle_rules(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
+        self,
+        output_file: Path,
+        section_globs: dict[str, str | None] | None = None,
+        filename: str = "AGENTS.md",
     ) -> bool:
         """OpenCode doesn't support rules."""
         return False

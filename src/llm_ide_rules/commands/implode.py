@@ -200,7 +200,8 @@ def agents(
         str, typer.Argument(help="Output file for rules")
     ] = "instructions.md",
     filename: Annotated[
-        str, typer.Option("--filename", "-f", help="Filename to bundle (e.g. AGENTS.md)")
+        str,
+        typer.Option("--filename", "-f", help="Filename to bundle (e.g. AGENTS.md)"),
     ] = "AGENTS.md",
 ) -> None:
     """Bundle unified markdown files (default AGENTS.md) into instructions.md."""

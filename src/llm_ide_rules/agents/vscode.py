@@ -15,7 +15,10 @@ class VSCodeAgent(BaseAgent):
     command_extension = None
 
     def bundle_rules(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
+        self,
+        output_file: Path,
+        section_globs: dict[str, str | None] | None = None,
+        filename: str = "AGENTS.md",
     ) -> bool:
         """VS Code doesn't support rules directly (uses GitHub Copilot)."""
         return False

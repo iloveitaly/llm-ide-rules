@@ -171,7 +171,9 @@ Python specific.
         # Mock settings.json so we don't get warnings
         gemini_dir = Path(".gemini")
         gemini_dir.mkdir()
-        (gemini_dir / "settings.json").write_text('{"context": {"fileName": ["GEMINI.md"]}}')
+        (gemini_dir / "settings.json").write_text(
+            '{"context": {"fileName": ["GEMINI.md"]}}'
+        )
 
         result = runner.invoke(app, ["explode", "instructions.md", "--agent", "gemini"])
 

@@ -22,7 +22,10 @@ class ClaudeAgent(BaseAgent):
     command_extension = ".md"
 
     def bundle_rules(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
+        self,
+        output_file: Path,
+        section_globs: dict[str, str | None] | None = None,
+        filename: str = "AGENTS.md",
     ) -> bool:
         """Bundle Claude Code rule files (.md) into a single output file."""
         rules_dir = self.rules_dir
@@ -207,6 +210,7 @@ class ClaudeAgent(BaseAgent):
         command_sections: dict[str, list[str]],
         output_dir: Path,
         section_globs: dict[str, str | None] | None = None,
+        filename: str = "AGENTS.md",
     ) -> None:
         """Claude rules replace CLAUDE.md generation."""
         return

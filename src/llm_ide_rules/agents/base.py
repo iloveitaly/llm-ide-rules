@@ -17,7 +17,10 @@ class BaseAgent(ABC):
 
     @abstractmethod
     def bundle_rules(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
+        self,
+        output_file: Path,
+        section_globs: dict[str, str | None] | None = None,
+        filename: str = "AGENTS.md",
     ) -> bool:
         """Bundle rule files into a single output file."""
         ...
@@ -67,6 +70,7 @@ class BaseAgent(ABC):
         command_sections: dict[str, list[str]],
         output_dir: Path,
         section_globs: dict[str, str | None] | None = None,
+        filename: str = "AGENTS.md",
     ) -> None:
         """Generate a root documentation file (e.g. CLAUDE.md) if supported."""
         pass
