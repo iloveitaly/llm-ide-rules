@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.13.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.12.0...v0.13.0) (2026-05-08)
+
+
+### Features
+
+* **agents:** support bundling AGENTS.md files ([3def4dc](https://github.com/iloveitaly/llm-ide-rules/commit/3def4dcb3cd0c3e054a3349c9fda5d68801ce23d))
+* **explode:** improve instruction parsing and execution summary ([e11a124](https://github.com/iloveitaly/llm-ide-rules/commit/e11a124e7a421ff5b57e66f89483400ab0aeb31d))
+* **gemini:** support GEMINI.md for rule management ([fda3f2f](https://github.com/iloveitaly/llm-ide-rules/commit/fda3f2f691a678f849c8b3c7f0a219fde0733852))
+* **gemini:** update instruction file configuration for Gemini CLI ([ef77133](https://github.com/iloveitaly/llm-ide-rules/commit/ef77133547797c12b108858226ff1034380e0240))
+* support custom instructions via persistent markers ([740dfd7](https://github.com/iloveitaly/llm-ide-rules/commit/740dfd7df4df4bb15158f0c3ebcaedeb61dc01b6))
+
+
+### Bug Fixes
+
+* **parser:** support glob directives without spaces ([e653d97](https://github.com/iloveitaly/llm-ide-rules/commit/e653d97c469fa76f082031cd07aff98a2f359ca5))
+* update deprecated status code in instructions ([b7314a2](https://github.com/iloveitaly/llm-ide-rules/commit/b7314a2e3224574c608739dc77298450951d4a95))
+* update id type to TypeID in Distribution model ([d073269](https://github.com/iloveitaly/llm-ide-rules/commit/d073269c3dc35f5df54c3a6e8a6aa5d8c03bfec8))
+
+
+### Documentation
+
+* document instructions.md customization feature ([6d6ebf1](https://github.com/iloveitaly/llm-ide-rules/commit/6d6ebf14df727da373418bf9e0c30de132e2fc77))
+* update AI coding and testing guidelines ([df80d6c](https://github.com/iloveitaly/llm-ide-rules/commit/df80d6cd590758307acd247360846d6d2bf6dd9c))
+* update developer workflow and python style rules ([fb3b90f](https://github.com/iloveitaly/llm-ide-rules/commit/fb3b90fd4fc1389bef9644285a4bb3343d36c3d8))
+* update development workflow instructions ([26bcae1](https://github.com/iloveitaly/llm-ide-rules/commit/26bcae133cd45a9d20ff2dce3359b632c7940f1d))
+* update documentation style and coding guidelines ([c3ca831](https://github.com/iloveitaly/llm-ide-rules/commit/c3ca83136542e5c583b3973ca8869b545dee77a6))
+* update model and type definition examples in documentation ([9d14f56](https://github.com/iloveitaly/llm-ide-rules/commit/9d14f5659b9b2466479aadf5969c538ef4ab90b8))
+* update model pattern documentation ([2f71c80](https://github.com/iloveitaly/llm-ide-rules/commit/2f71c80aa16d454ad8129c41a16608a872e1ab62))
+* update status code in testing documentation ([522fe04](https://github.com/iloveitaly/llm-ide-rules/commit/522fe0411eab4c2a46fd9f0e20eb32b4f99eda3e))
+
 ## [0.12.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.11.0...v0.12.0) (2026-03-29)
 
 
