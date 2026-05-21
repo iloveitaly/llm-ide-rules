@@ -14,6 +14,7 @@ from llm_ide_rules.commands.implode import (
     cursor,
     github,
     claude,
+    antigravity,
     gemini,
     opencode,
     agents,
@@ -90,6 +91,9 @@ implode_app.command(
 implode_app.command(
     "claude", help="Bundle Claude Code rules and commands into single files"
 )(claude)
+implode_app.command(
+    "antigravity", help="Bundle Antigravity rules and skills into single files"
+)(antigravity)
 implode_app.command("gemini", help="Bundle Gemini CLI commands into a single file")(
     gemini
 )

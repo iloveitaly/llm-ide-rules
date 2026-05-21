@@ -113,6 +113,7 @@ def explode_implementation(
             "gemini",
             "opencode",
             "agents",
+            "antigravity",
         ]
     else:
         agents_to_process = [agent]
@@ -235,8 +236,8 @@ alwaysApply: true
                     section_content,
                     rule_agents,
                 )
-        elif glob_pattern != "manual":
-            # Has glob pattern = file-specific rule
+        else:
+            # Has glob pattern or is manual = file-specific rule
             for agent_name in agent_instances:
                 if "rules" not in agent_dirs[agent_name]:
                     continue
@@ -309,7 +310,8 @@ alwaysApply: true
         if "commands" in agent_dirs[agent_name]:
             log_data[f"{agent_name}_commands"] = str(agent_dirs[agent_name]["commands"])
         if agent_dirs[agent_name]:
-            created_dirs.append(f".{agent_name}/")
+            dir_name = ".agents/" if agent_name == "antigravity" else f".{agent_name}/"
+            created_dirs.append(dir_name)
         # else: agent has no directories (e.g., agents which only generates root doc)
 
     created_dirs = list(dict.fromkeys(created_dirs))

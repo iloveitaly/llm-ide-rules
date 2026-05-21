@@ -8,6 +8,7 @@ from llm_ide_rules.agents.gemini import GeminiAgent
 from llm_ide_rules.agents.opencode import OpenCodeAgent
 from llm_ide_rules.agents.agents import AgentsAgent
 from llm_ide_rules.agents.vscode import VSCodeAgent
+from llm_ide_rules.agents.antigravity import AntigravityAgent
 
 AGENTS: dict[str, type[BaseAgent]] = {
     "cursor": CursorAgent,
@@ -17,6 +18,7 @@ AGENTS: dict[str, type[BaseAgent]] = {
     "opencode": OpenCodeAgent,
     "agents": AgentsAgent,
     "vscode": VSCodeAgent,
+    "antigravity": AntigravityAgent,
 }
 
 

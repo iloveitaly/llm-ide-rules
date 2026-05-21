@@ -27,6 +27,7 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(target_dir / ".cursor/rules/general.mdc")
                 generated.add(target_dir / ".github/copilot-instructions.md")
                 generated.add(target_dir / ".claude/rules/general.md")
+                generated.add(target_dir / ".agents/rules/general.md")
                 generated.add(target_dir / "AGENTS.md")
                 generated.add(target_dir / "GEMINI.md")
 
@@ -45,6 +46,7 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                     target_dir / f".github/instructions/{filename}.instructions.md"
                 )
                 generated.add(target_dir / f".claude/rules/{filename}.md")
+                generated.add(target_dir / f".agents/rules/{filename}.md")
 
                 # Add subdirectory AGENTS.md for sections with ** glob patterns
                 glob_pattern = section_data.glob_pattern
@@ -69,6 +71,7 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(target_dir / f".gemini/commands/{filename}.toml")
                 generated.add(target_dir / f".claude/commands/{filename}.md")
                 generated.add(target_dir / f".opencode/commands/{filename}.md")
+                generated.add(target_dir / f".agents/skills/{filename}/SKILL.md")
         except Exception as e:
             log.warning("failed to parse commands.md", error=str(e))
 

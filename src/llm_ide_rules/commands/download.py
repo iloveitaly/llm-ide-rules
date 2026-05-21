@@ -68,6 +68,11 @@ INSTRUCTION_TYPES = {
         "files": [],
         "include_patterns": [],
     },
+    "antigravity": {
+        "directories": [".agents/rules", ".agents/skills"],
+        "files": [],
+        "include_patterns": [],
+    },
     "opencode": {
         "directories": [".opencode/commands"],
         "files": [],

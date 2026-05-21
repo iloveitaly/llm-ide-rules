@@ -149,6 +149,52 @@ def claude(
         commands_output_path.unlink(missing_ok=True)
 
 
+def antigravity(
+    output: Annotated[
+        str, typer.Argument(help="Output file for instructions")
+    ] = "instructions.md",
+) -> None:
+    """Bundle Antigravity rules into instructions.md and skills into commands.md."""
+
+    agent = get_agent("antigravity")
+    base_dir = find_project_root()
+
+    rules_dir = agent.rules_dir
+    if not rules_dir:
+        log.error("antigravity rules directory not configured")
+        raise typer.Exit(1)
+
+    log.info(
+        "bundling antigravity rules and skills",
+        rules_dir=rules_dir,
+        commands_dir=agent.commands_dir,
+    )
+
+    rules_path = base_dir / rules_dir
+    if not rules_path.exists():
+        log.error("antigravity rules directory not found", rules_dir=str(rules_path))
+        error_msg = f"Antigravity rules directory not found: {rules_path}"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
+        raise typer.Exit(1)
+
+    output_path = base_dir / output
+    instructions_written = agent.bundle_rules(output_path)
+    if instructions_written:
+        success_msg = f"Bundled antigravity rules into {output}"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+    else:
+        output_path.unlink(missing_ok=True)
+        log.info("no antigravity rules to bundle")
+
+    commands_output_path = base_dir / "commands.md"
+    commands_written = agent.bundle_commands(commands_output_path)
+    if commands_written:
+        success_msg = "Bundled antigravity skills into commands.md"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+    else:
+        commands_output_path.unlink(missing_ok=True)
+
+
 def gemini(
     output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
 ) -> None:
