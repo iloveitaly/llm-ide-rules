@@ -1,6 +1,7 @@
 ---
-paths:
-  - "**/*.py"
+description: Python
+globs: ["**/*.py"]
+alwaysApply: false
 ---
 
 ## Python

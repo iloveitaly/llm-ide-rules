@@ -10,6 +10,7 @@ Coding instructions for all programming languages:
 - Prefer constants with separators: `10_000` is preferred to `10000` (or `10_00` over `1000` in the case of a integer representing cents).
 - Only add comments if the code is not self-explanatory. Do not add obvious comments.
 - Do not remove existing comments.
+- Do not capitalize or add periods at the end of single-line comments.
 - When I ask you to write code, prioritize simplicity and legibility over covering all edge cases, handling all errors, etc.
 - When a particular need can be met with a mature, reasonably adopted and maintained package, I would prefer to use that package rather than engineering my own solution.
 - Never add error handling to catch an error without being asked to do so. Fail hard and early with assertions and allow exceptions to propagate.
@@ -18,6 +19,7 @@ Coding instructions for all programming languages:
 - If terminal commands are failing because of missing variables or commands which are unrelated to your current task, stop your work and let me know.
 - Don't worry about fixing lint errors or running lint scripts unless I specifically ask you to.
 - When implementing workarounds for tooling limitations (like using `Any` for unresolvable types) or handling non-obvious edge cases, always add a brief inline comment explaining the technical reasoning.
+- Reserve exact-width `#`-box section separators for long files requiring organization, though they should not be necessary in the large majority of cases (separate files is generally better).
 
 Use line breaks to organize code into logical groups. Instead of:
 
@@ -37,6 +39,12 @@ session_id = client_secret_id.split("_secret")[0]
 ```
 
 **DO NOT FORGET**: keep your responses short, dense, and without fluff. I am a senior, well-educated software engineer, and hate long explanations.
+
+### Add Comments for Expert Engineer with Limited Domain Knowledge
+
+The engineer reading your code is a world-class software engineer, but is not familiar with the internals of every system. Include concise one-line comments explaining key hooks, API usage, blocks of logic, etc., to help the reader quickly understand the code you've written.
+
+In other words, embed the business requirements as comments in the code when the code does not self-document.
 
 ### Important Workflow Rules
 
