@@ -131,6 +131,7 @@ dmypy.json
 # ai stuff
 .cursor/settings.local.json
 .claude/settings.local.json
+.antigravitycli/
 
 # i like having temporary files specified locally vs globally
 tmp/
