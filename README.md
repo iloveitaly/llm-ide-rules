@@ -28,6 +28,7 @@ Different AI coding assistants use different formats for instructions and comman
 | **GitHub Copilot** | prompts | `.github/prompts/*.prompt.md` | YAML frontmatter with `mode: 'agent'` |
 | **Gemini CLI** | instructions | `AGENTS.md` | Single markdown file at root |
 | **Gemini CLI** | commands | `.gemini/commands/*.toml` | TOML format, supports `{{args}}` and shell commands |
+| **OpenCode** | instructions | `AGENTS.md` | Single markdown file at root (same as Gemini) |
 | **OpenCode** | commands | `.opencode/commands/*.md` | Plain markdown, no frontmatter |
 
 ## Installation
