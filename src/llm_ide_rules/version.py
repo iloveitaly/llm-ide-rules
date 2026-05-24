@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-__version__ = "0.13.0"
+__version__ = "0.13.1"
 
 
 def is_local_source_checkout() -> bool:
