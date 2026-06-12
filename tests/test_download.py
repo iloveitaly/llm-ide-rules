@@ -164,13 +164,15 @@ def test_download_instruction_types_configuration():
         "github",
         "gemini",
         "claude",
+        "antigravity",
+        "grok",
         "opencode",
         "agents",
     ]
     assert all(t in INSTRUCTION_TYPES for t in expected_types)
 
-    # Check that DEFAULT_TYPES uses the keys from INSTRUCTION_TYPES
-    assert set(DEFAULT_TYPES) == set(INSTRUCTION_TYPES.keys())
+    # grok is an alias for antigravity; exclude it from defaults to avoid duplicate work
+    assert set(DEFAULT_TYPES) == set(INSTRUCTION_TYPES.keys()) - {"grok"}
 
     # Check that each instruction type has proper configuration
     for inst_type, config in INSTRUCTION_TYPES.items():

@@ -149,50 +149,67 @@ def claude(
         commands_output_path.unlink(missing_ok=True)
 
 
-def antigravity(
-    output: Annotated[
-        str, typer.Argument(help="Output file for instructions")
-    ] = "instructions.md",
+def _bundle_dot_agents(
+    output: str = "instructions.md",
+    label: str = "antigravity",
 ) -> None:
-    """Bundle Antigravity rules into instructions.md and skills into commands.md."""
-
-    agent = get_agent("antigravity")
+    """Shared implementation for antigravity/grok (the .agents layout provider)."""
+    agent = get_agent("antigravity")  # the underlying impl
     base_dir = find_project_root()
 
     rules_dir = agent.rules_dir
     if not rules_dir:
-        log.error("antigravity rules directory not configured")
+        log.error("rules directory not configured", provider=label)
         raise typer.Exit(1)
 
     log.info(
-        "bundling antigravity rules and skills",
+        "bundling rules and skills",
+        provider=label,
         rules_dir=rules_dir,
         commands_dir=agent.commands_dir,
     )
 
     rules_path = base_dir / rules_dir
     if not rules_path.exists():
-        log.error("antigravity rules directory not found", rules_dir=str(rules_path))
-        error_msg = f"Antigravity rules directory not found: {rules_path}"
+        log.error("rules directory not found", provider=label, rules_dir=str(rules_path))
+        error_msg = f"{label.title()} rules directory not found: {rules_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
     output_path = base_dir / output
     instructions_written = agent.bundle_rules(output_path)
     if instructions_written:
-        success_msg = f"Bundled antigravity rules into {output}"
+        success_msg = f"Bundled {label} rules into {output}"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         output_path.unlink(missing_ok=True)
-        log.info("no antigravity rules to bundle")
+        log.info("no rules to bundle", provider=label)
 
     commands_output_path = base_dir / "commands.md"
     commands_written = agent.bundle_commands(commands_output_path)
     if commands_written:
-        success_msg = "Bundled antigravity skills into commands.md"
+        success_msg = f"Bundled {label} skills into commands.md"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
     else:
         commands_output_path.unlink(missing_ok=True)
+
+
+def antigravity(
+    output: Annotated[
+        str, typer.Argument(help="Output file for instructions")
+    ] = "instructions.md",
+) -> None:
+    """Bundle Antigravity (.agents) rules into instructions.md and skills into commands.md."""
+    _bundle_dot_agents(output, "antigravity")
+
+
+def grok(
+    output: Annotated[
+        str, typer.Argument(help="Output file for instructions")
+    ] = "instructions.md",
+) -> None:
+    """Bundle Grok (.agents) rules into instructions.md and skills into commands.md."""
+    _bundle_dot_agents(output, "grok")
 
 
 def gemini(

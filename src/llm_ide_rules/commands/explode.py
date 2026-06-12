@@ -114,6 +114,7 @@ def explode_implementation(
             "opencode",
             "agents",
             "antigravity",
+            "grok",
         ]
     else:
         agents_to_process = [agent]
@@ -310,7 +311,7 @@ alwaysApply: true
         if "commands" in agent_dirs[agent_name]:
             log_data[f"{agent_name}_commands"] = str(agent_dirs[agent_name]["commands"])
         if agent_dirs[agent_name]:
-            dir_name = ".agents/" if agent_name == "antigravity" else f".{agent_name}/"
+            dir_name = ".agents/" if agent_name in {"antigravity", "grok"} else f".{agent_name}/"
             created_dirs.append(dir_name)
         # else: agent has no directories (e.g., agents which only generates root doc)
 

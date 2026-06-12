@@ -73,6 +73,11 @@ INSTRUCTION_TYPES = {
         "files": [],
         "include_patterns": [],
     },
+    "grok": {
+        "directories": [".agents/rules", ".agents/skills"],
+        "files": [],
+        "include_patterns": [],
+    },
     "opencode": {
         "directories": [".opencode/commands"],
         "files": [],
@@ -87,7 +92,8 @@ INSTRUCTION_TYPES = {
 }
 
 # Default types to download when no specific types are specified
-DEFAULT_TYPES = list(INSTRUCTION_TYPES.keys())
+# Exclude aliases (grok is alias for antigravity) to avoid duplicate work on "all"
+DEFAULT_TYPES = [k for k in INSTRUCTION_TYPES.keys() if k != "grok"]
 
 
 def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
@@ -306,7 +312,7 @@ def download_main(
     instruction_types: Annotated[
         list[str] | None,
         typer.Argument(
-            help="Types of instructions to download (cursor, github, gemini, claude, opencode, agents). Downloads everything by default."
+            help="Types of instructions to download (cursor, github, gemini, claude, opencode, agents, antigravity, grok). Downloads everything by default."
         ),
     ] = None,
     repo: Annotated[
