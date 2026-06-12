@@ -1,7 +1,6 @@
 """Tests for Antigravity CLI agent integration."""
 
 import os
-import re
 import tempfile
 from pathlib import Path
 
