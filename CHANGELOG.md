@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.13.0...v0.13.1) (2026-05-19)
+
+
+### Documentation
+
+* add regex documentation guidelines to instructions.md ([24ed471](https://github.com/iloveitaly/llm-ide-rules/commit/24ed471bf21073f8ab0e18f7755b3e1fd54a69ef))
+* update coding standards and refactor type aliases ([0b73d21](https://github.com/iloveitaly/llm-ide-rules/commit/0b73d2120c2384abc1b15f412801e55688f83b4e))
+
 ## [0.13.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.12.0...v0.13.0) (2026-05-08)
 
 
