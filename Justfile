@@ -1,3 +1,7 @@
+# Line recipes and [script] recipes both use zsh with strict mode.
+set shell := ["zsh", "-euo", "pipefail", "-c"]
+set script-interpreter := ["zsh", "-euo", "pipefail"]
+
 # Set up the Python environment, done automatically for you when using direnv
 setup:
     [ -f .env ] || cp .env-example .env
@@ -36,7 +40,7 @@ lint FILES=".":
 
         uv run pyright {{FILES}} --outputjson > pyright_report.json || exit_code=$?
         jq -r \
-            --arg root "$GITHUB_WORKSPACE/" \
+            --arg root "${GITHUB_WORKSPACE:-}/" \
             '
                 .generalDiagnostics[] |
                 .file as $file |
