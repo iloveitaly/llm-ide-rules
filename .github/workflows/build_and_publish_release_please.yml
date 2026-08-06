@@ -72,6 +72,7 @@ jobs:
 
       # `uv run` prefix is required since the venv is not activated
 
+      # CLI entry point is llm-ide-rules (project.scripts), not necessarily the repo name
       - name: Make sure the CLI runs properly
         run: uv run llm-ide-rules --help
       - run: just test

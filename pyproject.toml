@@ -17,12 +17,14 @@ dependencies = [
 authors = [{ name = "Michael Bianco", email = "mike@mikebian.co" }]
 urls = { "Repository" = "https://github.com/iloveitaly/llm-ide-rules" }
 
+
 # additional packaging information: https://packaging.python.org/en/latest/specifications/core-metadata/#license
 [project.scripts]
 llm-ide-rules = "llm_ide_rules:main"
 
+
 [build-system]
-requires = ["uv_build>=0.10.0"]
+requires = ["uv_build>=0.11.0,<0.12"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -53,6 +55,3 @@ source = ["llm_ide_rules"]
 
 [tool.coverage.report]
 fail_under = 50
-
-[tool.ruff]
-extend-exclude = ["playground.py", "playground/"]

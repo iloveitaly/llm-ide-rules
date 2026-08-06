@@ -15,7 +15,11 @@ docker_up:
 docker_down:
 	docker compose down
 
-# Run tests
+upgrade:
+    mise self-update
+    mise upgrade --local
+    uv sync -U
+
 test:
     uv run pytest -v
 
