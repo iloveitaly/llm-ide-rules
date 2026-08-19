@@ -59,7 +59,9 @@ class AntigravityAgent(BaseAgent):
             if not file_content:
                 continue
 
-            desc, glob_pattern, always_apply = self._extract_metadata_from_frontmatter(file_content)
+            desc, glob_pattern, always_apply = self._extract_metadata_from_frontmatter(
+                file_content
+            )
 
             extracted_header = None
             for line in file_content.splitlines():
@@ -111,7 +113,9 @@ class AntigravityAgent(BaseAgent):
         self._write_bundled_content(output_file, "".join(content_parts))
         return True
 
-    def _extract_metadata_from_frontmatter(self, content: str) -> tuple[str | None, str | None, bool]:
+    def _extract_metadata_from_frontmatter(
+        self, content: str
+    ) -> tuple[str | None, str | None, bool]:
         """Extract description, glob pattern, and alwaysApply from YAML frontmatter.
 
         Returns:
@@ -130,12 +134,12 @@ class AntigravityAgent(BaseAgent):
             if line == "---":
                 break
             if line.startswith("description:"):
-                description = line[len("description:"):].strip().strip('"').strip("'")
+                description = line[len("description:") :].strip().strip('"').strip("'")
             elif line.startswith("alwaysApply:"):
-                val = line[len("alwaysApply:"):].strip().lower()
-                always_apply = (val == "true")
+                val = line[len("alwaysApply:") :].strip().lower()
+                always_apply = val == "true"
             elif line.startswith("globs:"):
-                globs_val = line[len("globs:"):].strip()
+                globs_val = line[len("globs:") :].strip()
                 # Parse either inline list ["*.py"] or [] or list on next lines
                 if globs_val.startswith("[") and globs_val.endswith("]"):
                     inner = globs_val[1:-1].strip()
@@ -148,7 +152,9 @@ class AntigravityAgent(BaseAgent):
                             if next_line == "---" or ":" in next_line:
                                 break
                             if next_line.startswith("-"):
-                                glob_pattern = next_line[1:].strip().strip('"').strip("'")
+                                glob_pattern = (
+                                    next_line[1:].strip().strip('"').strip("'")
+                                )
                                 break
 
         return description, glob_pattern, always_apply
@@ -180,7 +186,6 @@ class AntigravityAgent(BaseAgent):
             if not file_content:
                 continue
 
-            name = None
             desc = None
             lines = file_content.splitlines()
             if lines and lines[0].strip() == "---":
@@ -188,10 +193,9 @@ class AntigravityAgent(BaseAgent):
                     line = lines[i].strip()
                     if line == "---":
                         break
-                    if line.startswith("name:"):
-                        name = line[len("name:"):].strip().strip('"').strip("'")
-                    elif line.startswith("description:"):
-                        desc = line[len("description:"):].strip().strip('"').strip("'")
+                    # name: in frontmatter is unused; headers come from H1 or stem
+                    if line.startswith("description:"):
+                        desc = line[len("description:") :].strip().strip('"').strip("'")
 
             content = strip_yaml_frontmatter(file_content)
 
