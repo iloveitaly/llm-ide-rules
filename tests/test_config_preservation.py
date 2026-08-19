@@ -2,7 +2,6 @@
 
 from textwrap import dedent
 
-
 from llm_ide_rules.utils import modify_json_file
 
 

@@ -175,7 +175,7 @@ def test_download_instruction_types_configuration():
     assert set(DEFAULT_TYPES) == set(INSTRUCTION_TYPES.keys()) - {"grok"}
 
     # Check that each instruction type has proper configuration
-    for inst_type, config in INSTRUCTION_TYPES.items():
+    for config in INSTRUCTION_TYPES.values():
         assert "directories" in config
         assert "files" in config
         assert isinstance(config["directories"], list)
@@ -312,28 +312,28 @@ def test_download_with_github_token(mock_zipfile, mock_requests):
     mock_zip_instance.extractall = Mock()
 
     # Create a dummy environment with GITHUB_TOKEN
-    with patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"}):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Mock tempfile.mkdtemp to return our controlled temp dir
-            with patch(
-                "llm_ide_rules.commands.download.tempfile.mkdtemp"
-            ) as mock_mkdtemp:
-                mock_mkdtemp.return_value = temp_dir
+    with (
+        patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"}),
+        tempfile.TemporaryDirectory() as temp_dir,
+        # Mock tempfile.mkdtemp to return our controlled temp dir
+        patch("llm_ide_rules.commands.download.tempfile.mkdtemp") as mock_mkdtemp,
+    ):
+        mock_mkdtemp.return_value = temp_dir
 
-                # Create the expected directory structure in the temp dir
-                extract_dir = Path(temp_dir) / "extracted"
-                extract_dir.mkdir(parents=True, exist_ok=True)
-                (extract_dir / "repo-master").mkdir()
+        # Create the expected directory structure in the temp dir
+        extract_dir = Path(temp_dir) / "extracted"
+        extract_dir.mkdir(parents=True, exist_ok=True)
+        (extract_dir / "repo-master").mkdir()
 
-                # Call the function
-                download_and_extract_repo("user/repo")
+        # Call the function
+        download_and_extract_repo("user/repo")
 
-                # Verify request headers
-                mock_requests.assert_called_with(
-                    "https://github.com/user/repo/archive/master.zip",
-                    timeout=30,
-                    headers={"Authorization": "Bearer test-token"},
-                )
+        # Verify request headers
+        mock_requests.assert_called_with(
+            "https://github.com/user/repo/archive/master.zip",
+            timeout=30,
+            headers={"Authorization": "Bearer test-token"},
+        )
 
 
 def test_agents_instruction_type_configuration():
@@ -406,33 +406,33 @@ def test_download_with_github_token_logs(mock_log, mock_zipfile, mock_requests):
     mock_zip_instance.extractall = Mock()
 
     # Create a dummy environment with GITHUB_TOKEN
-    with patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"}):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            with patch(
-                "llm_ide_rules.commands.download.tempfile.mkdtemp"
-            ) as mock_mkdtemp:
-                mock_mkdtemp.return_value = temp_dir
+    with (
+        patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"}),
+        tempfile.TemporaryDirectory() as temp_dir,
+        patch("llm_ide_rules.commands.download.tempfile.mkdtemp") as mock_mkdtemp,
+    ):
+        mock_mkdtemp.return_value = temp_dir
 
-                # Create the expected directory structure in the temp dir
-                extract_dir = Path(temp_dir) / "extracted"
-                extract_dir.mkdir(parents=True, exist_ok=True)
-                (extract_dir / "repo-master").mkdir()
+        # Create the expected directory structure in the temp dir
+        extract_dir = Path(temp_dir) / "extracted"
+        extract_dir.mkdir(parents=True, exist_ok=True)
+        (extract_dir / "repo-master").mkdir()
 
-                try:
-                    download_and_extract_repo("user/repo")
-                except Exception:
-                    # Ignore downstream errors, we focus on the request
-                    pass
+        try:
+            download_and_extract_repo("user/repo")
+        except (OSError, ValueError, TypeError, KeyError):
+            # Ignore downstream errors, we focus on the request
+            pass
 
-                # Verify request headers
-                mock_requests.assert_called_with(
-                    "https://github.com/user/repo/archive/master.zip",
-                    timeout=30,
-                    headers={"Authorization": "Bearer test-token"},
-                )
+        # Verify request headers
+        mock_requests.assert_called_with(
+            "https://github.com/user/repo/archive/master.zip",
+            timeout=30,
+            headers={"Authorization": "Bearer test-token"},
+        )
 
-                # Verify debug log
-                mock_log.debug.assert_any_call("using GITHUB_TOKEN for authentication")
+        # Verify debug log
+        mock_log.debug.assert_any_call("using GITHUB_TOKEN for authentication")
 
 
 @patch("llm_ide_rules.commands.download.requests.get")

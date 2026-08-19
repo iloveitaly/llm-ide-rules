@@ -1,6 +1,8 @@
 import tempfile
 from pathlib import Path
+
 from typer.testing import CliRunner
+
 from llm_ide_rules import app
 
 

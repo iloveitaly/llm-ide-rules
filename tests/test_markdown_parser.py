@@ -133,7 +133,7 @@ Python content.
 React content.
 """
 
-    general, sections = parse_sections(text)
+    _general, sections = parse_sections(text)
 
     python_section = sections["Python"]
     assert python_section.glob_pattern is None

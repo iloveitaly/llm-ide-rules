@@ -1,14 +1,14 @@
 """Test config command and configuration warnings."""
 
+import json
 import os
 import tempfile
-import json
 from pathlib import Path
-from typer.testing import CliRunner
-from llm_ide_rules import app
-
-
 from unittest.mock import patch
+
+from typer.testing import CliRunner
+
+from llm_ide_rules import app
 
 
 def test_gemini_config_warning_in_explode():
