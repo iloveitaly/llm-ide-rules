@@ -109,7 +109,12 @@ def test_antigravity_write_command():
         commands_dir = temp_path / ".agents/skills"
 
         agent.write_command(
-            content_lines=["## Deploy App\n", "Description: How to deploy\n", "\n", "Run fab deploy.\n"],
+            content_lines=[
+                "## Deploy App\n",
+                "Description: How to deploy\n",
+                "\n",
+                "Run fab deploy.\n",
+            ],
             filename="deploy-app",
             commands_dir=commands_dir,
             section_name="Deploy App",
@@ -163,7 +168,9 @@ Use functional components and hooks.
             assert Path(".agents/rules/python.md").exists()
             assert Path(".agents/rules/react.md").exists()
 
-            implode_result = runner.invoke(app, ["implode", "antigravity", "roundtrip.md"])
+            implode_result = runner.invoke(
+                app, ["implode", "antigravity", "roundtrip.md"]
+            )
             assert implode_result.exit_code == 0
 
             roundtrip_content = Path("roundtrip.md").read_text()
@@ -230,7 +237,9 @@ Create a plan for the implementation.
             assert set(original_sections.keys()) == set(roundtrip_sections.keys())
 
             for section_name in original_sections:
-                original_normalized = normalize_whitespace(original_sections[section_name])
+                original_normalized = normalize_whitespace(
+                    original_sections[section_name]
+                )
                 roundtrip_normalized = normalize_whitespace(
                     roundtrip_sections[section_name]
                 )

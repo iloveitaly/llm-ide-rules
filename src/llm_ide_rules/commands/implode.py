@@ -171,7 +171,9 @@ def _bundle_dot_agents(
 
     rules_path = base_dir / rules_dir
     if not rules_path.exists():
-        log.error("rules directory not found", provider=label, rules_dir=str(rules_path))
+        log.error(
+            "rules directory not found", provider=label, rules_dir=str(rules_path)
+        )
         error_msg = f"{label.title()} rules directory not found: {rules_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
