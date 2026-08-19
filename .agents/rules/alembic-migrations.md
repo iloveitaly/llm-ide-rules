@@ -13,11 +13,18 @@ To add a non-nullable column and set a specific value for all existing rows with
 
 ```python
 # 1. Add the column as nullable (no default needed):
-op.add_column('distribution', sa.Column('default_campaign_ending_date', sa.DateTime(timezone=True), nullable=True))
+op.add_column(
+    "distribution",
+    sa.Column(
+        "default_campaign_ending_date", sa.DateTime(timezone=True), nullable=True
+    ),
+)
 # 2. Update existing rows with your desired value (e.g., a specific datetime)
-op.execute("UPDATE distribution SET default_campaign_ending_date = %s", [datetime.utcnow()])
+op.execute(
+    "UPDATE distribution SET default_campaign_ending_date = %s", [datetime.utcnow()]
+)
 # 3. Alter the column to non-nullable:
-op.alter_column('distribution', 'default_campaign_ending_date', nullable=False)
+op.alter_column("distribution", "default_campaign_ending_date", nullable=False)
 ```
 
 ### Record Backfill Operations
@@ -30,25 +37,27 @@ from sqlmodel import Session
 from activemodel.session_manager import global_session
 from app import log
 
+
 def run_migration_helper():
-  pass
+    pass
+
 
 def upgrade() -> None:
-  session = Session(bind=op.get_bind())
+    session = Session(bind=op.get_bind())
 
-  with global_session(session):
-      run_migration_helper()
-      flip_point_coordinates()
-      backfill_screening_host_data()
+    with global_session(session):
+        run_migration_helper()
+        flip_point_coordinates()
+        backfill_screening_host_data()
 
-  # flush before running any other operations, otherwise not all changes will persist to the transaction
-  session.flush()
+    # flush before running any other operations, otherwise not all changes will persist to the transaction
+    session.flush()
 ```
 
 However, if you don't need the business logic attached to the models, you can execute a query using `op.execute`:
 
 ```python
 op.execute(
-  TheModel.__table__.update().values({"a_field": "a_value"}) # type: ignore
+    TheModel.__table__.update().values({"a_field": "a_value"})  # type: ignore
 )
 ```

@@ -32,6 +32,7 @@ Below is an example test, you'll notice the following:
 from app.generated.fastapi_typed_routes import api_app_url_path_for
 import json
 
+
 def test_calculate_quote_unknown_county(client):
     payload = {
         "subscriber": {"age": 35, "gender": "M"},
