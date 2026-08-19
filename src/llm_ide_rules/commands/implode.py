@@ -1,6 +1,6 @@
 """Implode command: Bundle rule files into a single instruction file."""
 
-from typing_extensions import Annotated
+from typing import Annotated
 
 import typer
 

@@ -2,11 +2,11 @@
 
 import shutil
 from pathlib import Path
+from typing import Annotated
 
 import typer
-from typing_extensions import Annotated
 
-from llm_ide_rules.commands.download import INSTRUCTION_TYPES, DEFAULT_TYPES
+from llm_ide_rules.commands.download import DEFAULT_TYPES, INSTRUCTION_TYPES
 from llm_ide_rules.constants import header_to_filename
 from llm_ide_rules.log import log
 from llm_ide_rules.markdown_parser import parse_sections
@@ -56,7 +56,7 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                     generated.add(section_target_dir / "AGENTS.md")
                     generated.add(section_target_dir / "GEMINI.md")
 
-        except Exception as e:
+        except (OSError, ValueError, TypeError, KeyError) as e:
             log.warning("failed to parse instructions.md", error=str(e))
 
     # Check commands.md
@@ -72,7 +72,7 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(target_dir / f".claude/commands/{filename}.md")
                 generated.add(target_dir / f".opencode/commands/{filename}.md")
                 generated.add(target_dir / f".agents/skills/{filename}/SKILL.md")
-        except Exception as e:
+        except (OSError, ValueError, TypeError, KeyError) as e:
             log.warning("failed to parse commands.md", error=str(e))
 
     return {p.resolve() for p in generated}
@@ -285,7 +285,7 @@ def delete_main(
             log.info("deleting directory", path=str(dir_path))
             shutil.rmtree(dir_path)
             deleted_count += 1
-        except Exception as e:
+        except OSError as e:
             log.error("failed to delete directory", path=str(dir_path), error=str(e))
             typer.echo(f"Error deleting {dir_path}: {e}", err=True)
 
@@ -294,7 +294,7 @@ def delete_main(
             log.info("deleting file", path=str(file_path))
             file_path.unlink()
             deleted_count += 1
-        except Exception as e:
+        except OSError as e:
             log.error("failed to delete file", path=str(file_path), error=str(e))
             typer.echo(f"Error deleting {file_path}: {e}", err=True)
 

@@ -5,24 +5,25 @@ import os
 if "LOG_LEVEL" not in os.environ:
     os.environ["LOG_LEVEL"] = "WARNING"
 
-import typer
-from typing_extensions import Annotated
+from typing import Annotated
 
+import typer
+
+from llm_ide_rules.commands.config import config_main
+from llm_ide_rules.commands.delete import delete_main
+from llm_ide_rules.commands.download import download_main
 from llm_ide_rules.commands.explode import explode_main
 from llm_ide_rules.commands.ignores import ignores_main
 from llm_ide_rules.commands.implode import (
-    cursor,
-    github,
-    claude,
-    antigravity,
-    grok,
-    gemini,
-    opencode,
     agents,
+    antigravity,
+    claude,
+    cursor,
+    gemini,
+    github,
+    grok,
+    opencode,
 )
-from llm_ide_rules.commands.download import download_main
-from llm_ide_rules.commands.delete import delete_main
-from llm_ide_rules.commands.config import config_main
 from llm_ide_rules.version import get_cli_version
 
 __version__ = get_cli_version()

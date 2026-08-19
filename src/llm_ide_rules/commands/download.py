@@ -5,10 +5,10 @@ import re
 import tempfile
 import zipfile
 from pathlib import Path
+from typing import Annotated
 
 import requests
 import typer
-from typing_extensions import Annotated
 
 from llm_ide_rules.commands.explode import explode_implementation
 from llm_ide_rules.constants import VALID_AGENTS
@@ -93,7 +93,7 @@ INSTRUCTION_TYPES = {
 
 # Default types to download when no specific types are specified
 # Exclude aliases (grok is alias for antigravity) to avoid duplicate work on "all"
-DEFAULT_TYPES = [k for k in INSTRUCTION_TYPES.keys() if k != "grok"]
+DEFAULT_TYPES = [k for k in INSTRUCTION_TYPES if k != "grok"]
 
 
 def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
@@ -261,9 +261,10 @@ def copy_directory_contents(
     source_dir: Path,
     target_dir: Path,
     exclude_patterns: list[str],
-    include_patterns: list[str] = [],
+    include_patterns: list[str] | None = None,
 ):
     """Recursively copy directory contents, excluding specified patterns."""
+    include_patterns = include_patterns or []
     for item in source_dir.rglob("*"):
         if item.is_file():
             relative_path = item.relative_to(source_dir)
@@ -433,12 +434,11 @@ def download_main(
         explodable_agents = [t for t in instruction_types if t in VALID_AGENTS]
 
         if explodable_agents:
-            if not sources_copied:
-                # Check if they existed in target already?
-                if not (target_path / "instructions.md").exists():
-                    log.warning(
-                        "source file instructions.md missing, generation might fail"
-                    )
+            # Check if they existed in target already?
+            if not sources_copied and not (target_path / "instructions.md").exists():
+                log.warning(
+                    "source file instructions.md missing, generation might fail"
+                )
 
             for agent in explodable_agents:
                 log.info("generating rules locally", agent=agent)
@@ -449,7 +449,7 @@ def download_main(
                         working_dir=target_path,
                     )
                     copied_items.append(f"Generated: {agent} rules")
-                except Exception as e:
+                except (OSError, ValueError, TypeError, KeyError) as e:
                     log.error("failed to generate rules", agent=agent, error=str(e))
                     typer.echo(
                         f"Warning: Failed to generate rules for {agent}: {e}", err=True

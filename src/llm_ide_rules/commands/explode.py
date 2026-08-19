@@ -1,7 +1,7 @@
 """Explode command: Convert instruction file to separate rule files."""
 
 from pathlib import Path
-from typing_extensions import Annotated
+from typing import Annotated
 
 import typer
 
@@ -11,8 +11,8 @@ from llm_ide_rules.agents.base import (
     replace_header_with_proper_casing,
     write_rule_file,
 )
+from llm_ide_rules.constants import VALID_AGENTS, header_to_filename
 from llm_ide_rules.log import log
-from llm_ide_rules.constants import header_to_filename, VALID_AGENTS
 from llm_ide_rules.markdown_parser import parse_sections
 
 
@@ -239,11 +239,11 @@ alwaysApply: true
                 )
         else:
             # Has glob pattern or is manual = file-specific rule
-            for agent_name in agent_instances:
+            for agent_name, agent_instance in agent_instances.items():
                 if "rules" not in agent_dirs[agent_name]:
                     continue
 
-                agent_instances[agent_name].write_rule(
+                agent_instance.write_rule(
                     section_content,
                     filename,
                     agent_dirs[agent_name]["rules"],
@@ -321,20 +321,21 @@ alwaysApply: true
 
     created_dirs = list(dict.fromkeys(created_dirs))
 
-    if "gemini" in agent_instances:
-        if not agent_instances["gemini"].check_gemini_config(working_dir):
-            typer.secho(
-                "Warning: Gemini CLI configuration missing for GEMINI.md.",
-                fg=typer.colors.YELLOW,
-            )
-            typer.secho(
-                "Run this command to configure it:",
-                fg=typer.colors.YELLOW,
-            )
-            typer.secho(
-                "  llm-ide-rules config",
-                fg=typer.colors.YELLOW,
-            )
+    if "gemini" in agent_instances and not agent_instances[
+        "gemini"
+    ].check_gemini_config(working_dir):
+        typer.secho(
+            "Warning: Gemini CLI configuration missing for GEMINI.md.",
+            fg=typer.colors.YELLOW,
+        )
+        typer.secho(
+            "Run this command to configure it:",
+            fg=typer.colors.YELLOW,
+        )
+        typer.secho(
+            "  llm-ide-rules config",
+            fg=typer.colors.YELLOW,
+        )
 
     # Build summary message
     parts = []

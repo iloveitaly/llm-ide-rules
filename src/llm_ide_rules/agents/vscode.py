@@ -38,7 +38,6 @@ class VSCodeAgent(BaseAgent):
         description: str | None = None,
     ) -> None:
         """VS Code doesn't support rules."""
-        pass
 
     def write_command(
         self,
@@ -48,4 +47,3 @@ class VSCodeAgent(BaseAgent):
         section_name: str | None = None,
     ) -> None:
         """VS Code doesn't support commands."""
-        pass

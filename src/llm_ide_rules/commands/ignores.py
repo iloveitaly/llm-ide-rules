@@ -1,11 +1,12 @@
-import typer
-from pathlib import Path
-from typing_extensions import Annotated
-from unittest.mock import patch
-from contextlib import redirect_stdout, redirect_stderr
 import io
-import sys
 import re
+import sys
+from contextlib import redirect_stderr, redirect_stdout
+from pathlib import Path
+from typing import Annotated
+from unittest.mock import patch
+
+import typer
 
 from llm_ide_rules.commands.explode import explode_implementation
 

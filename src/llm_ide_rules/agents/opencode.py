@@ -80,7 +80,6 @@ class OpenCodeAgent(BaseAgent):
         description: str | None = None,
     ) -> None:
         """OpenCode doesn't support rules."""
-        pass
 
     def write_command(
         self,

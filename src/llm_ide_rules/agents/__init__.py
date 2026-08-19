@@ -1,14 +1,14 @@
 """Agent registry for LLM IDE rules."""
 
-from llm_ide_rules.agents.base import BaseAgent
-from llm_ide_rules.agents.cursor import CursorAgent
-from llm_ide_rules.agents.github import GitHubAgent
-from llm_ide_rules.agents.claude import ClaudeAgent
-from llm_ide_rules.agents.gemini import GeminiAgent
-from llm_ide_rules.agents.opencode import OpenCodeAgent
 from llm_ide_rules.agents.agents import AgentsAgent
-from llm_ide_rules.agents.vscode import VSCodeAgent
 from llm_ide_rules.agents.antigravity import AntigravityAgent
+from llm_ide_rules.agents.base import BaseAgent
+from llm_ide_rules.agents.claude import ClaudeAgent
+from llm_ide_rules.agents.cursor import CursorAgent
+from llm_ide_rules.agents.gemini import GeminiAgent
+from llm_ide_rules.agents.github import GitHubAgent
+from llm_ide_rules.agents.opencode import OpenCodeAgent
+from llm_ide_rules.agents.vscode import VSCodeAgent
 
 AGENTS: dict[str, type[BaseAgent]] = {
     "cursor": CursorAgent,

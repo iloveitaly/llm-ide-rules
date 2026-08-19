@@ -73,7 +73,6 @@ class BaseAgent(ABC):
         filename: str = "AGENTS.md",
     ) -> None:
         """Generate a root documentation file (e.g. CLAUDE.md) if supported."""
-        pass
 
     def build_root_doc_content(
         self,
@@ -91,7 +90,7 @@ class BaseAgent(ABC):
                 content.append("\n\n")
 
         # Add sections in document order (dict maintains insertion order in Python 3.7+)
-        for section_name, lines in rules_sections.items():
+        for lines in rules_sections.values():
             trimmed = trim_content(lines)
             if trimmed:
                 content.extend(trimmed)
@@ -121,7 +120,7 @@ class BaseAgent(ABC):
                 current_content = output_file.read_text(encoding="utf-8")
                 if marker in current_content:
                     local_custom_content = current_content.split(marker, 1)[1]
-            except Exception:
+            except OSError:
                 # Fallback if file cannot be read
                 pass
 
@@ -169,7 +168,7 @@ def strip_toml_metadata(text: str) -> str:
             and "shell" in data["command"]
         ):
             return str(data["command"]["shell"]).strip()
-    except Exception:
+    except (tomllib.TOMLDecodeError, TypeError, KeyError):
         pass
 
     return text.strip()
@@ -235,7 +234,7 @@ def resolve_header_from_stem(stem: str, section_globs: dict[str, str | None]) ->
     Prefer exact header names from section_globs (preserves acronyms like FastAPI, TypeScript).
     Fallback to title-casing the filename when not found in section_globs.
     """
-    for section_name in section_globs.keys():
+    for section_name in section_globs:
         if header_to_filename(section_name) == stem:
             return section_name
 

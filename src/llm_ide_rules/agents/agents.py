@@ -1,6 +1,7 @@
 """Agents documentation agent implementation."""
 
 from pathlib import Path
+
 import typer
 
 from llm_ide_rules.agents.base import BaseAgent
@@ -104,7 +105,6 @@ class AgentsAgent(BaseAgent):
         description: str | None = None,
     ) -> None:
         """Agents doesn't support writing rules."""
-        pass
 
     def write_command(
         self,
@@ -114,7 +114,6 @@ class AgentsAgent(BaseAgent):
         section_name: str | None = None,
     ) -> None:
         """Agents doesn't support writing commands."""
-        pass
 
     def generate_root_doc(
         self,
