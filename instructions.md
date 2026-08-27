@@ -263,7 +263,6 @@ globs: tests/**/*.py
   - Note that when writing route tests a `db_session` is not needed for the logic inside of the route.
 - When testing Stripe, use the sandbox API. Never mock out Stripe interactions unless explicitly told to.
 - Omit obvious docstrs and comments. Add comments for non-obvious but easy-to-miss lines that are key to what the test is checking.
-- If a docstring needs formatting, use markdown. Use Google Style.
 
 ### Example Test
 
@@ -434,8 +433,12 @@ When writing Python:
 
 * Assume the latest python, version 3.13.
 * Prefer Pathlib methods (including read and write methods, like `read_text`) over `os.path`, `open`, `write`, etc.
-* Prefer docstr to multi-line comments at the top of a function or file.
-* If a docstr does not span multiple lines, do not use triple-quoted strings.
+* docstrs and comments:
+  * If a docstring needs formatting, use markdown. Use Google Style.
+  * Prefer docstr to multi-line comments at the top of a function or file.
+  * If a docstr does not span multiple lines, do not use triple-quoted strings.
+  * Add a newline after `"""` when using triple-quoted docstrings.
+  * If a comment or docstr is a single line, do not end it in a period.
 * Do not create `__init__` files unless specifically instructed
 * Use Pydantic models over dataclass or a typed dict.
 * Use SQLAlchemy for generating any SQL queries.
