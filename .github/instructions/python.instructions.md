@@ -8,8 +8,12 @@ When writing Python:
 
 * Assume the latest python, version 3.13.
 * Prefer Pathlib methods (including read and write methods, like `read_text`) over `os.path`, `open`, `write`, etc.
-* Prefer docstr to multi-line comments at the top of a function or file.
-* If a docstr does not span multiple lines, do not use triple-quoted strings.
+* docstrs and comments:
+  * If a docstring needs formatting, use markdown. Use Google Style.
+  * Prefer docstr to multi-line comments at the top of a function or file.
+  * If a docstr does not span multiple lines, do not use triple-quoted strings.
+  * Add a newline after `"""` when using triple-quoted docstrings.
+  * If a comment or docstr is a single line, do not end it in a period.
 * Do not create `__init__` files unless specifically instructed
 * Use Pydantic models over dataclass or a typed dict.
 * Use SQLAlchemy for generating any SQL queries.
