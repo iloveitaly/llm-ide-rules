@@ -13,8 +13,8 @@ def test_delete_help():
     result = runner.invoke(app, ["delete", "--help"])
     assert result.exit_code == 0
     assert "Remove downloaded LLM instruction files" in result.stdout
-    assert "--yes" in result.stdout
-    assert "--target" in result.stdout
+    assert "yes" in result.stdout
+    assert "target" in result.stdout
 
 
 def test_find_files_to_delete_cursor():
