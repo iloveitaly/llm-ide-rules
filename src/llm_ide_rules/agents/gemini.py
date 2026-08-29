@@ -5,11 +5,11 @@ from pathlib import Path
 
 from llm_ide_rules.agents.base import (
     BaseAgent,
+    extract_description_and_filter_content,
     get_ordered_files,
     resolve_header_from_stem,
     strip_toml_metadata,
     trim_content,
-    extract_description_and_filter_content,
 )
 
 
@@ -88,7 +88,6 @@ class GeminiAgent(BaseAgent):
         description: str | None = None,
     ) -> None:
         """Gemini CLI doesn't support rules."""
-        pass
 
     def write_command(
         self,
@@ -162,7 +161,7 @@ class GeminiAgent(BaseAgent):
         if settings_path.exists():
             try:
                 data = json.loads(settings_path.read_text())
-            except Exception:
+            except (json.JSONDecodeError, OSError):
                 pass
 
         old_data = json.dumps(data, sort_keys=True)
@@ -211,7 +210,7 @@ class GeminiAgent(BaseAgent):
                 return file_names == "GEMINI.md"
             elif isinstance(file_names, list):
                 return "GEMINI.md" in file_names
-        except Exception:
+        except (json.JSONDecodeError, OSError):
             pass
 
         return False

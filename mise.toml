@@ -5,5 +5,8 @@ uv = "latest"
 direnv = "latest"
 "github:casey/just" = "latest"
 
+[bootstrap.packages]
+"apt:zsh" = { os = "linux" }
+
 [settings]
 python.uv_venv_auto = "create|source"

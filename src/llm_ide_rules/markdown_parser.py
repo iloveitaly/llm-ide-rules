@@ -69,15 +69,19 @@ def parse_sections(text: str) -> tuple[list[str], dict[str, SectionData]]:
     # Find all H2 headers
     section_starts = []
     for i, token in enumerate(tokens):
-        if token.type == "heading_open" and token.tag == "h2":
-            # Get the content of the header
-            # The next token is usually inline, which contains the text
-            if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
-                header_content = tokens[i + 1].content.strip()
-                # token.map contains [start_line, end_line] (0-based)
-                if token.map:
-                    start_line = token.map[0]
-                    section_starts.append((start_line, header_content))
+        # Get the content of the header
+        # The next token is usually inline, which contains the text
+        if (
+            token.type == "heading_open"
+            and token.tag == "h2"
+            and i + 1 < len(tokens)
+            and tokens[i + 1].type == "inline"
+        ):
+            header_content = tokens[i + 1].content.strip()
+            # token.map contains [start_line, end_line] (0-based)
+            if token.map:
+                start_line = token.map[0]
+                section_starts.append((start_line, header_content))
 
     if not section_starts:
         return lines, {}

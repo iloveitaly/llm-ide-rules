@@ -17,7 +17,6 @@ alwaysApply: false
   - Note that when writing route tests a `db_session` is not needed for the logic inside of the route.
 - When testing Stripe, use the sandbox API. Never mock out Stripe interactions unless explicitly told to.
 - Omit obvious docstrs and comments. Add comments for non-obvious but easy-to-miss lines that are key to what the test is checking.
-- If a docstring needs formatting, use markdown. Use Google Style.
 
 ### Example Test
 
@@ -31,6 +30,7 @@ Below is an example test, you'll notice the following:
 ```python
 from app.generated.fastapi_typed_routes import api_app_url_path_for
 import json
+
 
 def test_calculate_quote_unknown_county(client):
     payload = {

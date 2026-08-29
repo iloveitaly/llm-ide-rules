@@ -7,9 +7,6 @@ Coding instructions for all programming languages:
 - Prefer `continue` within a loop vs nested if statements.
 - Prefer smaller functions over larger functions. Break up logic into smaller chunks with well-named functions.
 - Prefer constants with separators: `10_000` is preferred to `10000` (or `10_00` over `1000` in the case of a integer representing cents).
-- Only add comments if the code is not self-explanatory. Do not add obvious comments.
-- Do not remove existing comments.
-- Do not capitalize or add periods at the end of single-line comments.
 - When I ask you to write code, prioritize simplicity and legibility over covering all edge cases, handling all errors, etc.
 - When a particular need can be met with a mature, reasonably adopted and maintained package, I would prefer to use that package rather than engineering my own solution.
 - Never add error handling to catch an error without being asked to do so. Fail hard and early with assertions and allow exceptions to propagate.
@@ -45,6 +42,13 @@ The engineer reading your code is a world-class software engineer, but is not fa
 
 In other words, embed the business requirements as comments in the code when the code does not self-document.
 
+### Code Comments
+
+- Describe behavior as it exists today—don’t frame comments around version history or “old vs new.”
+- Only add comments if the code is not self-explanatory. Do not add obvious comments.
+- Do not remove existing comments.
+- Do not capitalize or add periods at the end of single-line comments.
+
 ### Important Workflow Rules
 
 Pay careful attention to these instructions when running tests, generating database migrations, or otherwise figuring out how to operate this project:
@@ -71,11 +75,18 @@ To add a non-nullable column and set a specific value for all existing rows with
 
 ```python
 # 1. Add the column as nullable (no default needed):
-op.add_column('distribution', sa.Column('default_campaign_ending_date', sa.DateTime(timezone=True), nullable=True))
+op.add_column(
+    "distribution",
+    sa.Column(
+        "default_campaign_ending_date", sa.DateTime(timezone=True), nullable=True
+    ),
+)
 # 2. Update existing rows with your desired value (e.g., a specific datetime)
-op.execute("UPDATE distribution SET default_campaign_ending_date = %s", [datetime.utcnow()])
+op.execute(
+    "UPDATE distribution SET default_campaign_ending_date = %s", [datetime.utcnow()]
+)
 # 3. Alter the column to non-nullable:
-op.alter_column('distribution', 'default_campaign_ending_date', nullable=False)
+op.alter_column("distribution", "default_campaign_ending_date", nullable=False)
 ```
 
 ### Record Backfill Operations
@@ -88,26 +99,28 @@ from sqlmodel import Session
 from activemodel.session_manager import global_session
 from app import log
 
+
 def run_migration_helper():
-  pass
+    pass
+
 
 def upgrade() -> None:
-  session = Session(bind=op.get_bind())
+    session = Session(bind=op.get_bind())
 
-  with global_session(session):
-      run_migration_helper()
-      flip_point_coordinates()
-      backfill_screening_host_data()
+    with global_session(session):
+        run_migration_helper()
+        flip_point_coordinates()
+        backfill_screening_host_data()
 
-  # flush before running any other operations, otherwise not all changes will persist to the transaction
-  session.flush()
+    # flush before running any other operations, otherwise not all changes will persist to the transaction
+    session.flush()
 ```
 
 However, if you don't need the business logic attached to the models, you can execute a query using `op.execute`:
 
 ```python
 op.execute(
-  TheModel.__table__.update().values({"a_field": "a_value"}) # type: ignore
+    TheModel.__table__.update().values({"a_field": "a_value"})  # type: ignore
 )
 ```
 
@@ -170,9 +183,7 @@ globs: app/factories/**/.py
 
 ```python
 class ScreeningFactory(ActiveModelFactory[Screening]):
-    funding_goal = lambda: BaseFactory.__faker__.random_int(
-        min=0, max=2000_00
-    )
+    funding_goal = lambda: BaseFactory.__faker__.random_int(min=0, max=2000_00)
 
     ticket_price = DEFAULT_TICKET_PRICE
     status = ScreeningStatus.active
@@ -189,7 +200,7 @@ class ScreeningFactory(ActiveModelFactory[Screening]):
     # this method runs before the model is persisted to the database
     @classmethod
     def post_build(cls, model):
-      # if the user does not pass in a important relationship during creation, you can generate a factory fallback
+        # if the user does not pass in a important relationship during creation, you can generate a factory fallback
         if not model.distribution_id:
             model.distribution_id = DistributionFactory.save().id
 
@@ -224,9 +235,7 @@ When writing database models:
 Example:
 
 ```python
-class Distribution(
-    BaseModel, TimestampsMixin, SoftDeletionMixin, table=True
-):
+class Distribution(BaseModel, TimestampsMixin, SoftDeletionMixin, table=True):
     """Triple-quoted strings for multi-line class docstring"""
 
     id: TypeID[Literal["dst"]] = TypeIDPrimaryKey("dst")
@@ -258,8 +267,12 @@ When writing Python:
 
 * Assume the latest python, version 3.13.
 * Prefer Pathlib methods (including read and write methods, like `read_text`) over `os.path`, `open`, `write`, etc.
-* Prefer docstr to multi-line comments at the top of a function or file.
-* If a docstr does not span multiple lines, do not use triple-quoted strings.
+* docstrs and comments:
+  * If a docstring needs formatting, use markdown. Use Google Style.
+  * Prefer docstr to multi-line comments at the top of a function or file.
+  * If a docstr does not span multiple lines, do not use triple-quoted strings.
+  * Add a newline after `"""` when using triple-quoted docstrings.
+  * If a comment or docstr is a single line, do not end it in a period.
 * Do not create `__init__` files unless specifically instructed
 * Use Pydantic models over dataclass or a typed dict.
 * Use SQLAlchemy for generating any SQL queries.

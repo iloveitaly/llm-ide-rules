@@ -11,7 +11,7 @@ def test_import() -> None:
 
 
 def test_version() -> None:
-    """Test that the version is available and well-formed."""
+    """Test that the version is available."""
     assert isinstance(llm_ide_rules.__version__, str)
     assert re.fullmatch(
         r"\d+\.\d+\.\d+(?:[.-][0-9A-Za-z]+)*", llm_ide_rules.__version__

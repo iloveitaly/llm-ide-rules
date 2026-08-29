@@ -4,12 +4,12 @@ from pathlib import Path
 
 from llm_ide_rules.agents.base import (
     BaseAgent,
+    extract_description_and_filter_content,
     get_ordered_files_github,
     resolve_header_from_stem,
-    strip_yaml_frontmatter,
     strip_header,
+    strip_yaml_frontmatter,
     write_rule_file,
-    extract_description_and_filter_content,
 )
 from llm_ide_rules.constants import header_to_filename
 
@@ -122,7 +122,7 @@ class GitHubAgent(BaseAgent):
 
         ordered_prompts = []
         if section_globs:
-            for section_name in section_globs.keys():
+            for section_name in section_globs:
                 filename = header_to_filename(section_name)
                 if filename in prompt_dict:
                     ordered_prompts.append(prompt_dict[filename])

@@ -4,13 +4,13 @@ from pathlib import Path
 
 from llm_ide_rules.agents.base import (
     BaseAgent,
+    extract_description_and_filter_content,
     get_ordered_files,
     resolve_header_from_stem,
-    strip_yaml_frontmatter,
     strip_header,
+    strip_yaml_frontmatter,
     trim_content,
     write_rule_file,
-    extract_description_and_filter_content,
 )
 
 

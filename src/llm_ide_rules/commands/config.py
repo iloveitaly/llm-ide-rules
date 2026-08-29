@@ -1,9 +1,9 @@
 """Command to configure agents to use AGENTS.md."""
 
 from pathlib import Path
+from typing import Annotated
 
 import typer
-from typing_extensions import Annotated
 
 from llm_ide_rules.agents import get_agent, get_all_agents
 
@@ -25,7 +25,7 @@ def config_main(
             agents_to_configure.append(get_agent(agent))
         except ValueError as e:
             typer.echo(f"Error: {e}", err=True)
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from e
     else:
         agents_to_configure = get_all_agents()
 
@@ -42,5 +42,5 @@ def config_main(
             else:
                 msg = f"Skipped {agent_inst.name} (no changes needed or not applicable)"
                 typer.echo(typer.style(msg, fg=typer.colors.YELLOW))
-        except Exception as e:
+        except (OSError, ValueError, KeyError, TypeError) as e:
             typer.echo(f"Failed to configure {agent_inst.name}: {e}", err=True)

@@ -40,9 +40,7 @@ globs: app/factories/**/.py
 
 ```python
 class ScreeningFactory(ActiveModelFactory[Screening]):
-    funding_goal = lambda: BaseFactory.__faker__.random_int(
-        min=0, max=2000_00
-    )
+    funding_goal = lambda: BaseFactory.__faker__.random_int(min=0, max=2000_00)
 
     ticket_price = DEFAULT_TICKET_PRICE
     status = ScreeningStatus.active
@@ -59,7 +57,7 @@ class ScreeningFactory(ActiveModelFactory[Screening]):
     # this method runs before the model is persisted to the database
     @classmethod
     def post_build(cls, model):
-      # if the user does not pass in a important relationship during creation, you can generate a factory fallback
+        # if the user does not pass in a important relationship during creation, you can generate a factory fallback
         if not model.distribution_id:
             model.distribution_id = DistributionFactory.save().id
 
@@ -94,9 +92,7 @@ When writing database models:
 Example:
 
 ```python
-class Distribution(
-    BaseModel, TimestampsMixin, SoftDeletionMixin, table=True
-):
+class Distribution(BaseModel, TimestampsMixin, SoftDeletionMixin, table=True):
     """Triple-quoted strings for multi-line class docstring"""
 
     id: TypeID[Literal["dst"]] = TypeIDPrimaryKey("dst")

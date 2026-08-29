@@ -1,7 +1,6 @@
 import tempfile
 from pathlib import Path
 
-import click
 from typer.testing import CliRunner
 
 from llm_ide_rules import app
@@ -13,10 +12,9 @@ def test_delete_help():
     runner = CliRunner()
     result = runner.invoke(app, ["delete", "--help"])
     assert result.exit_code == 0
-    stdout = click.unstyle(result.stdout)
-    assert "Remove downloaded LLM instruction files" in stdout
-    assert "--yes" in stdout
-    assert "--target" in stdout
+    assert "Remove downloaded LLM instruction files" in result.stdout
+    assert "yes" in result.stdout
+    assert "target" in result.stdout
 
 
 def test_find_files_to_delete_cursor():

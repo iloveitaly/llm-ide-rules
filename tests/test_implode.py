@@ -1,8 +1,9 @@
 """Test implode command functionality."""
 
-import tempfile
 import os
+import tempfile
 from pathlib import Path
+
 from typer.testing import CliRunner
 
 from llm_ide_rules import app
@@ -105,7 +106,7 @@ Here are React rules for frontend development.""")
         assert Path("bundled.md").exists()
 
         # Check output file content
-        with open("bundled.md", "r") as f:
+        with open("bundled.md") as f:
             content = f.read()
             assert "## Python" in content
             assert "## React" in content
@@ -149,13 +150,13 @@ Python rules.""")
         assert Path("commands.md").exists()
 
         # Check instructions.md content (rules only)
-        with open("instructions.md", "r") as f:
+        with open("instructions.md") as f:
             content = f.read()
             assert "## Python" in content
             assert "Python rules." in content
 
         # Check commands.md content (commands only)
-        with open("commands.md", "r") as f:
+        with open("commands.md") as f:
             content = f.read()
             assert "## Fix Tests" in content
             assert "Here are instructions to fix tests." in content
@@ -202,7 +203,7 @@ Here are React instructions for frontend development.""")
         assert Path("bundled-github.md").exists()
 
         # Check output file content
-        with open("bundled-github.md", "r") as f:
+        with open("bundled-github.md") as f:
             content = f.read()
             assert "## Python" in content
             assert "## React" in content
@@ -253,12 +254,12 @@ Here are instructions to fix tests.""")
         assert Path("commands.md").exists()
 
         # Check instructions.md content
-        with open("instructions.md", "r") as f:
+        with open("instructions.md") as f:
             content = f.read()
             assert "## Python" in content
 
         # Check commands.md content (prompts)
-        with open("commands.md", "r") as f:
+        with open("commands.md") as f:
             content = f.read()
             assert "## Fix Tests" in content
 
@@ -340,13 +341,13 @@ Here are Python rules for development.""")
         assert Path("instructions.md").exists()
         assert Path("commands.md").exists()
 
-        with open("instructions.md", "r") as f:
+        with open("instructions.md") as f:
             content = f.read()
             assert "## Python" in content
             assert "globs: **/*.py" in content
             assert "Here are Python rules for development." in content
 
-        with open("commands.md", "r") as f:
+        with open("commands.md") as f:
             content = f.read()
             assert "## Fix Tests" in content
 
@@ -382,7 +383,7 @@ Here are instructions to fix tests.
         # Check that output file was created
         assert Path("commands.md").exists()
 
-        with open("commands.md", "r") as f:
+        with open("commands.md") as f:
             content = f.read()
             assert "## Fix Tests" in content
             assert "Here are instructions to fix tests." in content
@@ -412,7 +413,7 @@ def test_implode_opencode_basic_functionality():
         # Check that output file was created
         assert Path("commands.md").exists()
 
-        with open("commands.md", "r") as f:
+        with open("commands.md") as f:
             content = f.read()
             assert "## Fix Tests" in content
             assert "Here are instructions to fix tests." in content
@@ -474,12 +475,12 @@ Here are Python rules for development.""")
         assert instructions_file.exists()
         assert output_file.exists()
 
-        with open(instructions_file, "r") as f:
+        with open(instructions_file) as f:
             content = f.read()
             assert "## Python" in content
             assert "Here are Python rules for development." in content
 
-        with open(output_file, "r") as f:
+        with open(output_file) as f:
             content = f.read()
             assert "## Fix Tests" in content
             assert "Here are instructions to fix tests." in content
@@ -533,7 +534,7 @@ Here are TypeScript rules for development.""")
 
         assert result.exit_code == 0
 
-        with open("bundled.md", "r") as f:
+        with open("bundled.md") as f:
             content = f.read()
             assert "## Python" in content
             assert 'globs: "**/*.py"' in content or "globs: **/*.py" in content
@@ -573,7 +574,7 @@ Here are JavaScript instructions for development.""")
 
         assert result.exit_code == 0
 
-        with open("bundled-github.md", "r") as f:
+        with open("bundled-github.md") as f:
             content = f.read()
             assert "## Python" in content
             assert "globs: **/*.py" in content
@@ -611,7 +612,7 @@ Here are TypeScript rules for development."""
         implode_result = runner.invoke(app, ["implode", "cursor", "bundled.md"])
         assert implode_result.exit_code == 0
 
-        with open("bundled.md", "r") as f:
+        with open("bundled.md") as f:
             bundled_content = f.read()
             assert "## Python" in bundled_content
             assert "globs: **/*.py" in bundled_content

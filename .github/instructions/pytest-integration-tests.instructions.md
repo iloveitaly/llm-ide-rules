@@ -98,9 +98,9 @@ def test_streaming_checkout_creates_user_and_links_order(
         request,
         ignore=[
             {
-              # if there are console errors specific to the project, exclude them here. Match to the specific URL if you can.
-              "file": r"https://iframe.cloudflarestream.com/.*",
-              "message": "the server responded with a status of 403",
+                # if there are console errors specific to the project, exclude them here. Match to the specific URL if you can.
+                "file": r"https://iframe.cloudflarestream.com/.*",
+                "message": "the server responded with a status of 403",
             }
         ],
     )
