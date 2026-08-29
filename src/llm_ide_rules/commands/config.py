@@ -25,7 +25,7 @@ def config_main(
             agents_to_configure.append(get_agent(agent))
         except ValueError as e:
             typer.echo(f"Error: {e}", err=True)
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from e
     else:
         agents_to_configure = get_all_agents()
 

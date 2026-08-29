@@ -150,11 +150,11 @@ def explode_implementation(
                 "ignoring content after marker in instructions file", marker=marker
             )
             input_text = input_text.split(marker, 1)[0]
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         log.error("input file not found", input_file=str(input_path))
         error_msg = f"Input file not found: {input_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
     commands_path = input_path.parent / "commands.md"
     commands_text = ""

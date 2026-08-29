@@ -120,7 +120,7 @@ def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
         response.raise_for_status()
     except requests.RequestException as e:
         log.error("failed to download repository", error=str(e), url=zip_url)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
     # Create temporary directory and file
     temp_dir = Path(tempfile.mkdtemp())

@@ -73,6 +73,7 @@ class BaseAgent(ABC):
         filename: str = "AGENTS.md",
     ) -> None:
         """Generate a root documentation file (e.g. CLAUDE.md) if supported."""
+        return
 
     def build_root_doc_content(
         self,
