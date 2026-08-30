@@ -24,15 +24,13 @@ from llm_ide_rules.commands.implode import (
     grok,
     opencode,
 )
-from llm_ide_rules.version import get_cli_version
-
-__version__ = get_cli_version()
+from llm_ide_rules.version import __version__
 
 
 def version_callback(value: bool):
     """Callback to display the version and exit."""
     if value:
-        print(f"llm-ide-rules version {get_cli_version()}")
+        print(f"llm-ide-rules version {__version__}")
         raise typer.Exit()
 
 

@@ -1,8 +1,7 @@
 """Version handling for llm-ide-rules."""
 
+import importlib.metadata
 from pathlib import Path
-
-__version__ = "0.13.0"
 
 
 def is_local_source_checkout() -> bool:
@@ -13,12 +12,23 @@ def is_local_source_checkout() -> bool:
     return (repo_root / ".git").exists() and (repo_root / "pyproject.toml").exists()
 
 
-def get_cli_version() -> str:
+def get_version() -> str:
     """Get the version string, appending .dev if running from source."""
+    try:
+        # Try to get the version of the installed package
+        version = importlib.metadata.version("llm-ide-rules")
+    except importlib.metadata.PackageNotFoundError:
+        # Fallback for local development if not installed
+        version = "0.1.0"
+
     if not is_local_source_checkout():
-        return __version__
+        return version
 
-    if __version__.endswith(".dev"):
-        return __version__
+    if version.endswith(".dev"):
+        return version
 
-    return f"{__version__}.dev"
+    return f"{version}.dev"
+
+
+get_cli_version = get_version
+__version__ = get_version()
