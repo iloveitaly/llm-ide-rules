@@ -9,7 +9,6 @@ from llm_ide_rules.agents.base import (
     replace_header_with_proper_casing,
     resolve_header_from_stem,
     strip_header,
-    strip_toml_metadata,
     strip_yaml_frontmatter,
     trim_content,
     write_rule_file,
@@ -87,71 +86,6 @@ More content"""
     result = strip_header(text)
     assert "## Python" not in result
     assert "## React" in result
-
-
-def test_strip_toml_metadata():
-    """Test extracting content from TOML command.shell block."""
-    text = """[command]
-shell = \"\"\"
-Fix failing tests
-
-Run pytest and fix errors
-\"\"\"
-"""
-
-    result = strip_toml_metadata(text)
-    assert result == "Fix failing tests\n\nRun pytest and fix errors"
-    assert "[command]" not in result
-    assert "shell =" not in result
-
-
-def test_strip_toml_metadata_single_line():
-    """Test extracting single-line shell content."""
-    text = """[command]
-shell = \"\"\"Fix tests\"\"\"
-"""
-
-    result = strip_toml_metadata(text)
-    assert result == "Fix tests"
-
-
-def test_strip_toml_metadata_with_content_after_start():
-    """Test extracting content that starts on same line as opening delimiter."""
-    text = """[command]
-shell = \"\"\"Fix tests
-and run them\"\"\"
-"""
-
-    result = strip_toml_metadata(text)
-    assert "Fix tests" in result
-    assert "and run them" in result
-
-
-def test_strip_toml_metadata_new_format():
-    """Test extracting content from TOML prompt block."""
-    text = """description = "Fix failing tests"
-
-prompt = \"\"\"
-Fix failing tests
-
-Run pytest and fix errors
-\"\"\"
-"""
-
-    result = strip_toml_metadata(text)
-    assert result == "Fix failing tests\n\nRun pytest and fix errors"
-    assert "description =" not in result
-    assert "prompt =" not in result
-
-
-def test_strip_toml_metadata_invalid_returns_original():
-    """Test that invalid TOML returns the original text."""
-    # Invalid TOML but text we might want to preserve if it wasn't TOML to begin with
-    text = """Just some plain text
-without any toml structure"""
-
-    result = strip_toml_metadata(text)
-    assert result == text.strip()
 
 
 def test_get_ordered_files():

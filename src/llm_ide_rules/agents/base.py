@@ -153,28 +153,6 @@ def strip_header(text: str) -> str:
     return text
 
 
-def strip_toml_metadata(text: str) -> str:
-    """Extract content from TOML prompt block (supports old [command] shell=... and new prompt=...)."""
-    import tomllib
-
-    try:
-        data = tomllib.loads(text)
-        # Check new format
-        if "prompt" in data:
-            return str(data["prompt"]).strip()
-        # Check legacy format
-        if (
-            "command" in data
-            and isinstance(data["command"], dict)
-            and "shell" in data["command"]
-        ):
-            return str(data["command"]["shell"]).strip()
-    except (tomllib.TOMLDecodeError, TypeError, KeyError):
-        pass
-
-    return text.strip()
-
-
 def get_ordered_files(
     file_list: list[Path], section_globs_keys: list[str] | None = None
 ) -> list[Path]:

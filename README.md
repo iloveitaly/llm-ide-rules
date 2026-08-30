@@ -3,7 +3,7 @@
 ![GitHub CI Status](https://github.com/iloveitaly/llm-ide-rules/actions/workflows/build_and_publish_release_please.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# Copilot, Cursor, Claude, Gemini, etc LLM Instructions
+# Copilot, Cursor, Claude, etc LLM Instructions
 
 This project makes it easy to download prompts and implode/explode them so they can be used by various providers. It's completely vibe coded, but it works.
 
@@ -26,9 +26,7 @@ Different AI coding assistants use different formats for instructions and comman
 | **GitHub Copilot** | instructions | `.github/copilot-instructions.md` | Single markdown file |
 | **GitHub Copilot** | instructions | `.github/instructions/*.instructions.md` | Multiple instruction files |
 | **GitHub Copilot** | prompts | `.github/prompts/*.prompt.md` | YAML frontmatter with `mode: 'agent'` |
-| **Gemini CLI** | instructions | `AGENTS.md` | Single markdown file at root |
-| **Gemini CLI** | commands | `.gemini/commands/*.toml` | TOML format, supports `{{args}}` and shell commands |
-| **OpenCode** | instructions | `AGENTS.md` | Single markdown file at root (same as Gemini) |
+| **OpenCode** | instructions | `AGENTS.md` | Single markdown file at root |
 | **OpenCode** | commands | `.opencode/commands/*.md` | Plain markdown, no frontmatter |
 
 ## Installation
@@ -51,7 +49,6 @@ uvx llm-ide-rules explode [input_file]
 uvx llm-ide-rules implode cursor [output_file]     # Bundle Cursor rules
 uvx llm-ide-rules implode github [output_file]     # Bundle GitHub/Copilot instructions
 uvx llm-ide-rules implode claude [output_file]     # Bundle Claude Code rules + commands
-uvx llm-ide-rules implode gemini [output_file]     # Bundle Gemini CLI commands
 uvx llm-ide-rules implode opencode [output_file]   # Bundle OpenCode commands
 
 # Download instruction files from repositories
@@ -61,7 +58,7 @@ uvx llm-ide-rules download --repo other/repo      # Download from different repo
 
 # Delete downloaded instruction files
 uvx llm-ide-rules delete [instruction_types]      # Delete everything by default
-uvx llm-ide-rules delete cursor gemini            # Delete specific types
+uvx llm-ide-rules delete cursor claude            # Delete specific types
 uvx llm-ide-rules delete --yes                    # Skip confirmation prompt
 ```
 
@@ -99,7 +96,7 @@ When you run `llm_ide_rules download` again, the tool will:
 ### Examples
 
 ```sh
-# Explode instructions.md into all supported formats (cursor, github, claude, gemini, opencode)
+# Explode instructions.md into all supported formats (cursor, github, claude, opencode)
 uvx llm-ide-rules explode instructions.md
 
 # Explode for a specific agent only
@@ -127,7 +124,7 @@ uvx llm-ide-rules download --repo other-user/other-repo --target ./my-project
 uvx llm-ide-rules delete
 
 # Delete specific instruction types
-uvx llm-ide-rules delete cursor gemini --target ./my-project
+uvx llm-ide-rules delete cursor claude --target ./my-project
 
 # Delete without confirmation prompt
 uvx llm-ide-rules delete --yes

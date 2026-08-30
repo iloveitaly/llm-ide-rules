@@ -125,8 +125,6 @@ def find_project_root(start_path: Path | None = None) -> Path:
             return parent
         if (parent / ".claude").exists():
             return parent
-        if (parent / ".gemini").exists():
-            return parent
         if (parent / ".github").exists():
             return parent
 

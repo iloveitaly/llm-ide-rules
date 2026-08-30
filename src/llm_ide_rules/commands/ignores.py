@@ -20,7 +20,7 @@ def ignores_main(
         typer.Option(
             "--agent",
             "-a",
-            help="Agent to list ignores for (cursor, github, claude, gemini, or all)",
+            help="Agent to list ignores for (cursor, github, claude, opencode, or all)",
         ),
     ] = "all",
     print_output: Annotated[

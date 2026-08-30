@@ -4,7 +4,6 @@ VALID_AGENTS = [
     "cursor",
     "github",
     "claude",
-    "gemini",
     "opencode",
     "agents",
     "antigravity",

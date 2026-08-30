@@ -29,12 +29,10 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(target_dir / ".claude/rules/general.md")
                 generated.add(target_dir / ".agents/rules/general.md")
                 generated.add(target_dir / "AGENTS.md")
-                generated.add(target_dir / "GEMINI.md")
 
             # If any sections exist, AGENTS.md is definitely generated
             if sections:
                 generated.add(target_dir / "AGENTS.md")
-                generated.add(target_dir / "GEMINI.md")
 
             # Section specific files
             from llm_ide_rules.utils import resolve_target_dir
@@ -54,7 +52,6 @@ def get_generated_files(target_dir: Path) -> set[Path]:
 
                 if section_target_dir != target_dir:
                     generated.add(section_target_dir / "AGENTS.md")
-                    generated.add(section_target_dir / "GEMINI.md")
 
         except (OSError, ValueError, TypeError, KeyError) as e:
             log.warning("failed to parse instructions.md", error=str(e))
@@ -68,7 +65,6 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 filename = header_to_filename(header)
                 generated.add(target_dir / f".cursor/commands/{filename}.md")
                 generated.add(target_dir / f".github/prompts/{filename}.prompt.md")
-                generated.add(target_dir / f".gemini/commands/{filename}.toml")
                 generated.add(target_dir / f".claude/commands/{filename}.md")
                 generated.add(target_dir / f".opencode/commands/{filename}.md")
                 generated.add(target_dir / f".agents/skills/{filename}/SKILL.md")
@@ -125,7 +121,7 @@ def delete_main(
     instruction_types: Annotated[
         list[str] | None,
         typer.Argument(
-            help="Types of instructions to delete (cursor, github, gemini, claude, opencode, agents). Deletes everything by default."
+            help="Types of instructions to delete (cursor, github, claude, opencode, agents). Deletes everything by default."
         ),
     ] = None,
     target_dir: Annotated[
@@ -165,8 +161,8 @@ def delete_main(
     llm_ide_rules delete --everything
 
     \b
-    # Delete only Cursor and Gemini files (but only if generated)
-    llm_ide_rules delete cursor gemini
+    # Delete only Cursor and Claude files (but only if generated)
+    llm_ide_rules delete cursor claude
 
     \b
     # Delete without confirmation prompt
@@ -179,11 +175,8 @@ def delete_main(
     if not instruction_types:
         instruction_types = DEFAULT_TYPES
 
-    # OpenCode and Gemini use AGENTS.md, so enable the agents instruction type automatically
-    if (
-        any(a in instruction_types for a in ["opencode", "gemini"])
-        and "agents" not in instruction_types
-    ):
+    # OpenCode uses AGENTS.md, so enable the agents instruction type automatically
+    if "opencode" in instruction_types and "agents" not in instruction_types:
         instruction_types.append("agents")
 
     invalid_types = [t for t in instruction_types if t not in INSTRUCTION_TYPES]

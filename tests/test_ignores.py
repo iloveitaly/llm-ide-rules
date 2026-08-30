@@ -65,7 +65,6 @@ Description: Fix failing tests
 
         assert ".cursor/commands/fix-tests.md" in output
         assert ".claude/commands/fix-tests.md" in output
-        assert ".gemini/commands/fix-tests.toml" in output
         assert ".github/prompts/fix-tests.prompt.md" in output
 
         assert not Path(".cursor").exists()

@@ -19,7 +19,6 @@ from llm_ide_rules.commands.implode import (
     antigravity,
     claude,
     cursor,
-    gemini,
     github,
     grok,
     opencode,
@@ -98,9 +97,6 @@ implode_app.command(
 implode_app.command(
     "grok", help="Bundle Grok (.agents) rules and skills into single files"
 )(grok)
-implode_app.command("gemini", help="Bundle Gemini CLI commands into a single file")(
-    gemini
-)
 implode_app.command("opencode", help="Bundle OpenCode commands into a single file")(
     opencode
 )

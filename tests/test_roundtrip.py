@@ -476,45 +476,6 @@ Here are Python rules.
         assert "Here are Python rules." in roundtrip_sections["Python"]
 
 
-def test_roundtrip_gemini_commands():
-    """Test explode → implode gemini produces equivalent commands.md."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        instructions_content = """# Sample Instructions
-
-## Python
-
-Python rules.
-"""
-        Path("instructions.md").write_text(instructions_content)
-
-        commands_content = """## Fix Tests
-
-Description: Fix failing tests
-
-Run pytest and fix errors.
-"""
-        Path("commands.md").write_text(commands_content)
-
-        explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "gemini"]
-        )
-        assert explode_result.exit_code == 0
-
-        assert Path(".gemini/commands/fix-tests.toml").exists()
-
-        implode_result = runner.invoke(app, ["implode", "gemini"])
-        assert implode_result.exit_code == 0
-
-        roundtrip_content = Path("commands.md").read_text()
-
-        assert "## Fix Tests" in roundtrip_content
-        assert "Run pytest and fix errors" in roundtrip_content
-
-
 def test_roundtrip_opencode_commands():
     """Test explode → implode opencode produces equivalent commands.md."""
     runner = CliRunner()

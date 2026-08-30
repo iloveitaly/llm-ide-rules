@@ -214,52 +214,6 @@ def grok(
     _bundle_dot_agents(output, "grok")
 
 
-def gemini(
-    output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
-) -> None:
-    """Bundle Gemini CLI commands into commands.md."""
-
-    agent = get_agent("gemini")
-    base_dir = find_project_root()
-
-    commands_dir = agent.commands_dir
-    if not commands_dir:
-        log.error("gemini cli commands directory not configured")
-        raise typer.Exit(1)
-
-    log.info(
-        "bundling gemini cli commands",
-        commands_dir=commands_dir,
-    )
-
-    commands_path = base_dir / commands_dir
-    if not commands_path.exists():
-        log.error(
-            "gemini cli commands directory not found", commands_dir=str(commands_path)
-        )
-        error_msg = f"Gemini CLI commands directory not found: {commands_path}"
-        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
-        raise typer.Exit(1)
-
-    output_path = base_dir / output
-    commands_written = agent.bundle_commands(output_path)
-    if commands_written:
-        success_msg = f"Bundled gemini commands into {output}"
-        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-    else:
-        output_path.unlink(missing_ok=True)
-        log.info("no gemini commands to bundle")
-
-    # Gemini uses GEMINI.md for rules, so bundle them too
-    instructions_output_path = base_dir / "instructions.md"
-    rules_written = agent.bundle_rules(instructions_output_path)
-    if rules_written:
-        success_msg = "Bundled Gemini rules (GEMINI.md) into instructions.md"
-        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-    else:
-        log.info("no Gemini rules (GEMINI.md) to bundle")
-
-
 def agents(
     output: Annotated[
         str, typer.Argument(help="Output file for rules")

@@ -352,43 +352,6 @@ Here are Python rules for development.""")
             assert "## Fix Tests" in content
 
 
-def test_implode_gemini_basic_functionality():
-    """Test basic implode gemini functionality."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        # Create .gemini/commands directory with sample TOML files
-        gemini_commands_dir = Path(".gemini/commands")
-        gemini_commands_dir.mkdir(parents=True)
-
-        with open(gemini_commands_dir / "fix-tests.toml", "w") as f:
-            f.write('''name = "fix-tests"
-description = "Fix Tests"
-
-[command]
-shell = """
-Here are instructions to fix tests.
-"""
-''')
-
-        # Run implode gemini command (defaults to commands.md)
-        result = runner.invoke(app, ["implode", "gemini"])
-
-        # Check command succeeds
-        assert result.exit_code == 0
-        assert "Bundled gemini commands into commands.md" in result.stdout
-
-        # Check that output file was created
-        assert Path("commands.md").exists()
-
-        with open("commands.md") as f:
-            content = f.read()
-            assert "## Fix Tests" in content
-            assert "Here are instructions to fix tests." in content
-
-
 def test_implode_opencode_basic_functionality():
     """Test basic implode opencode functionality."""
     runner = CliRunner()

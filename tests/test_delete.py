@@ -34,26 +34,6 @@ def test_find_files_to_delete_cursor():
         assert len(files) == 0
 
 
-def test_find_files_to_delete_gemini():
-    """Test finding Gemini files to delete."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
-
-        gemini_dir = temp_path / ".gemini"
-        commands_dir = gemini_dir / "commands"
-        commands_dir.mkdir(parents=True)
-        (commands_dir / "test.toml").write_text("test")
-
-        gemini_file = temp_path / "GEMINI.md"
-        gemini_file.write_text("test")
-
-        dirs, files = find_files_to_delete(["gemini"], temp_path)
-
-        assert len(dirs) == 1
-        assert dirs[0] == commands_dir
-        assert gemini_file in files
-
-
 def test_find_files_to_delete_agents():
     """Test finding AGENTS.md file."""
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -193,7 +173,6 @@ def test_delete_default_types():
         (temp_path / ".github" / "instructions").mkdir(parents=True)
         (temp_path / ".github" / "prompts").mkdir(parents=True)
         (temp_path / ".claude" / "rules").mkdir(parents=True)
-        (temp_path / "GEMINI.md").write_text("test")
         (temp_path / "AGENTS.md").write_text("test")
 
         result = runner.invoke(
@@ -206,8 +185,6 @@ def test_delete_default_types():
         assert not (temp_path / ".github" / "instructions").exists()
         assert not (temp_path / ".github" / "prompts").exists()
         assert not (temp_path / ".claude" / "rules").exists()
-        assert not (temp_path / "GEMINI.md").exists()
-
         assert not (temp_path / "AGENTS.md").exists()
 
 
@@ -219,15 +196,15 @@ def test_delete_multiple_types():
         temp_path = Path(temp_dir)
 
         (temp_path / ".cursor" / "rules").mkdir(parents=True)
-        (temp_path / "GEMINI.md").write_text("test")
         (temp_path / ".claude" / "rules").mkdir(parents=True)
+        (temp_path / ".github" / "instructions").mkdir(parents=True)
 
         result = runner.invoke(
             app,
             [
                 "delete",
                 "cursor",
-                "gemini",
+                "claude",
                 "--target",
                 temp_dir,
                 "--yes",
@@ -237,9 +214,8 @@ def test_delete_multiple_types():
 
         assert result.exit_code == 0
         assert not (temp_path / ".cursor" / "rules").exists()
-        assert not (temp_path / "GEMINI.md").exists()
-
-        assert (temp_path / ".claude" / "rules").exists()
+        assert not (temp_path / ".claude" / "rules").exists()
+        assert (temp_path / ".github" / "instructions").exists()
 
 
 def test_find_files_to_delete_claude():

@@ -110,7 +110,6 @@ def explode_implementation(
             "cursor",
             "github",
             "claude",
-            "gemini",
             "opencode",
             "agents",
             "antigravity",
@@ -321,22 +320,6 @@ alwaysApply: true
 
     created_dirs = list(dict.fromkeys(created_dirs))
 
-    if "gemini" in agent_instances and not agent_instances[
-        "gemini"
-    ].check_gemini_config(working_dir):
-        typer.secho(
-            "Warning: Gemini CLI configuration missing for GEMINI.md.",
-            fg=typer.colors.YELLOW,
-        )
-        typer.secho(
-            "Run this command to configure it:",
-            fg=typer.colors.YELLOW,
-        )
-        typer.secho(
-            "  llm-ide-rules config",
-            fg=typer.colors.YELLOW,
-        )
-
     # Build summary message
     parts = []
     if rules_count > 0:
@@ -373,7 +356,7 @@ def explode_main(
         typer.Option(
             "--agent",
             "-a",
-            help="Agent to explode for (cursor, github, claude, gemini, or all)",
+            help="Agent to explode for (cursor, github, claude, opencode, or all)",
         ),
     ] = "all",
 ) -> None:

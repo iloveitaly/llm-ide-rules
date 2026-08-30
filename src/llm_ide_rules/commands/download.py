@@ -41,7 +41,7 @@ def normalize_repo(repo: str) -> str:
 
 
 # Define what files/directories each instruction type includes
-# For agents supported by 'explode' (cursor, github, gemini, claude, opencode),
+# For agents supported by 'explode' (cursor, github, claude, opencode),
 # we don't download specific directories anymore. Instead, we download the source
 # files (instructions.md, commands.md) and generate them locally using explode.
 # The directories listed here are what gets created by explode and what delete removes.
@@ -54,13 +54,6 @@ INSTRUCTION_TYPES = {
     "github": {
         "directories": [".github/instructions", ".github/prompts"],
         "files": [".github/copilot-instructions.md"],
-        "include_patterns": [],
-    },
-    "gemini": {
-        "directories": [".gemini/commands"],
-        "files": [],
-        "generated_files": ["GEMINI.md"],
-        "recursive_files": ["GEMINI.md"],
         "include_patterns": [],
     },
     "claude": {
@@ -313,7 +306,7 @@ def download_main(
     instruction_types: Annotated[
         list[str] | None,
         typer.Argument(
-            help="Types of instructions to download (cursor, github, gemini, claude, opencode, agents, antigravity, grok). Downloads everything by default."
+            help="Types of instructions to download (cursor, github, claude, opencode, agents, antigravity, grok). Downloads everything by default."
         ),
     ] = None,
     repo: Annotated[
@@ -353,11 +346,8 @@ def download_main(
     if not instruction_types:
         instruction_types = DEFAULT_TYPES
 
-    # OpenCode and Gemini use AGENTS.md, so enable the agents instruction type automatically
-    if (
-        any(a in instruction_types for a in ["opencode", "gemini"])
-        and "agents" not in instruction_types
-    ):
+    # OpenCode uses AGENTS.md, so enable the agents instruction type automatically
+    if "opencode" in instruction_types and "agents" not in instruction_types:
         instruction_types.append("agents")
 
     # Validate instruction types

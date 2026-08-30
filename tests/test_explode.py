@@ -51,7 +51,6 @@ Here are React rules for frontend development.
         assert Path(".github/instructions").exists()
         assert not Path(".github/prompts").exists()
         assert not Path(".claude/commands").exists()
-        assert not Path(".gemini/commands").exists()
 
         assert Path(".cursor/rules/python.mdc").exists()
         assert Path(".cursor/rules/react.mdc").exists()
@@ -106,7 +105,6 @@ Here are instructions to plan only.
 
         # Other agents should not have been created because we specified --agent cursor
         assert not Path(".claude/commands/fix-tests.md").exists()
-        assert not Path(".gemini/commands/fix-tests.toml").exists()
         assert not Path(".github/prompts/fix-tests.prompt.md").exists()
 
 
@@ -150,40 +148,6 @@ Python specific rules.
         assert (
             "These are general rules for the project" in Path("AGENTS.md").read_text()
         )
-
-
-def test_explode_gemini_generates_gemini_md():
-    """Test that explode --agent gemini generates GEMINI.md and NOT AGENTS.md."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        instructions_content = """# General Instructions
-Project rules.
-
-## Python
-globs: *.py
-Python specific.
-"""
-        Path("instructions.md").write_text(instructions_content)
-
-        # Mock settings.json so we don't get warnings
-        gemini_dir = Path(".gemini")
-        gemini_dir.mkdir()
-        (gemini_dir / "settings.json").write_text(
-            '{"context": {"fileName": ["GEMINI.md"]}}'
-        )
-
-        result = runner.invoke(app, ["explode", "instructions.md", "--agent", "gemini"])
-
-        assert result.exit_code == 0
-        assert Path("GEMINI.md").exists()
-        assert not Path("AGENTS.md").exists()
-
-        content = Path("GEMINI.md").read_text()
-        assert "General Instructions" in content
-        assert "Python" in content
 
 
 def test_explode_unmapped_section_as_always_apply():
@@ -431,10 +395,6 @@ Here are unmapped rules.
         assert not Path("CLAUDE.md").exists()
         assert Path(".claude/rules/python.md").exists()
         assert Path(".claude/rules/unmapped.md").exists()
-
-        # Check GEMINI.md
-        gemini_md = Path("GEMINI.md")
-        assert gemini_md.exists()
 
         # Check AGENTS.md
         agents_md = Path("AGENTS.md")
