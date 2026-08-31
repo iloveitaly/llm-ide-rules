@@ -6,6 +6,7 @@ from llm_ide_rules.agents.base import BaseAgent
 from llm_ide_rules.agents.claude import ClaudeAgent
 from llm_ide_rules.agents.cursor import CursorAgent
 from llm_ide_rules.agents.github import GitHubAgent
+from llm_ide_rules.agents.grok import GrokAgent
 from llm_ide_rules.agents.opencode import OpenCodeAgent
 from llm_ide_rules.agents.vscode import VSCodeAgent
 
@@ -17,17 +18,15 @@ AGENTS: dict[str, type[BaseAgent]] = {
     "agents": AgentsAgent,
     "vscode": VSCodeAgent,
     "antigravity": AntigravityAgent,
-    "grok": AntigravityAgent,
+    "grok": GrokAgent,
 }
 
-# Aliases for user-friendly names (e.g. grok for the .agents layout)
-AGENT_ALIASES: dict[str, str] = {
-    "grok": "antigravity",
-}
+# Aliases for user-friendly names
+AGENT_ALIASES: dict[str, str] = {}
 
 
 def get_agent(name: str) -> BaseAgent:
-    """Get an agent instance by name. Supports aliases like 'grok'."""
+    """Get an agent instance by name."""
     if name in AGENT_ALIASES:
         name = AGENT_ALIASES[name]
     if name not in AGENTS:
@@ -36,7 +35,7 @@ def get_agent(name: str) -> BaseAgent:
 
 
 def get_all_agents() -> list[BaseAgent]:
-    """Get instances of all registered agents (deduped by implementation class for aliases like grok)."""
+    """Get instances of all registered agents."""
     seen: set[type[BaseAgent]] = set()
     result: list[BaseAgent] = []
     for agent_cls in AGENTS.values():

@@ -169,7 +169,7 @@ def test_download_instruction_types_configuration():
     ]
     assert all(t in INSTRUCTION_TYPES for t in expected_types)
 
-    # grok is an alias for antigravity; exclude it from defaults to avoid duplicate work
+    # grok shares the .agents/ directory with antigravity; exclude it from defaults to avoid duplicate work
     assert set(DEFAULT_TYPES) == set(INSTRUCTION_TYPES.keys()) - {"grok"}
 
     # Check that each instruction type has proper configuration

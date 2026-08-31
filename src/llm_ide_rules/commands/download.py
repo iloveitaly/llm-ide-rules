@@ -85,7 +85,7 @@ INSTRUCTION_TYPES = {
 }
 
 # Default types to download when no specific types are specified
-# Exclude aliases (grok is alias for antigravity) to avoid duplicate work on "all"
+# Exclude grok from defaults since both antigravity and grok share the .agents/ directory
 DEFAULT_TYPES = [k for k in INSTRUCTION_TYPES if k != "grok"]
 
 

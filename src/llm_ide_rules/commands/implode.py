@@ -153,8 +153,8 @@ def _bundle_dot_agents(
     output: str = "instructions.md",
     label: str = "antigravity",
 ) -> None:
-    """Shared implementation for antigravity/grok (the .agents layout provider)."""
-    agent = get_agent("antigravity")  # the underlying impl
+    """Shared implementation for .agents layout providers (antigravity, grok)."""
+    agent = get_agent(label)
     base_dir = find_project_root()
 
     rules_dir = agent.rules_dir
