@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.14.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.13.0...v0.14.0) (2026-08-31)
+
+
+### Features
+
+* **agent:** add support for antigravity agent ([d1ef021](https://github.com/iloveitaly/llm-ide-rules/commit/d1ef02150177de8a585a912dbf5b76863fff8dce))
+* **agent:** add support for grok as an antigravity alias ([176af35](https://github.com/iloveitaly/llm-ide-rules/commit/176af3551d292ec098127d6b818f45fa0429e2b1))
+* support Grok CLI as dedicated agent using .agents layout ([0cb3056](https://github.com/iloveitaly/llm-ide-rules/commit/0cb3056ba179bfc078613fe83dcfffcd62edb84b))
+
+
+### Bug Fixes
+
+* resolve package version dynamically via metadata ([6f02255](https://github.com/iloveitaly/llm-ide-rules/commit/6f02255ea4961ba733f860a8c4151feb64f37844))
+
+
+### Documentation
+
+* add guidelines for concise code commenting ([40c30bb](https://github.com/iloveitaly/llm-ide-rules/commit/40c30bbd550f151dc724db51342a70ea6972d75b))
+* add OpenCode support details to README ([90ef447](https://github.com/iloveitaly/llm-ide-rules/commit/90ef447a4f97278e108f54a65afcf6e9e1b78d30))
+* add regex documentation guidelines to instructions.md ([24ed471](https://github.com/iloveitaly/llm-ide-rules/commit/24ed471bf21073f8ab0e18f7755b3e1fd54a69ef))
+* update coding standards and refactor type aliases ([0b73d21](https://github.com/iloveitaly/llm-ide-rules/commit/0b73d2120c2384abc1b15f412801e55688f83b4e))
+
 ## [0.13.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.12.0...v0.13.0) (2026-05-08)
 
 
