@@ -19,10 +19,19 @@ docker_up:
 docker_down:
 	docker compose down
 
-upgrade:
-    mise self-update
-    mise upgrade --local
-    uv sync -U
+# Upgrade tool versions, python dependencies, and optionally bump pyproject.toml constraints
+[script]
+[arg("bump_constraints", long="bump-constraints", value="true", help="Bump pyproject.toml minimum constraints using uv-bump")]
+upgrade bump_constraints="false":
+    mise self-update --yes
+    mise upgrade --yes --local
+    uv sync --all-groups --all-extras -U
+
+    if [ "{{bump_constraints}}" = "true" ]; then
+        echo "Bumping pyproject.toml minimum constraints with uv-bump..."
+        uvx uv-bump -v
+    fi
+
 
 test:
     uv run pytest -v
