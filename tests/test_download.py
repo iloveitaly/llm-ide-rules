@@ -505,7 +505,9 @@ def test_detect_active_agents(tmp_path: Path):
 
 @patch("llm_ide_rules.commands.download.requests.get")
 @patch("llm_ide_rules.commands.download.zipfile.ZipFile")
-def test_download_auto_detects_in_use_agents(mock_zipfile, mock_requests, tmp_path: Path):
+def test_download_auto_detects_in_use_agents(
+    mock_zipfile, mock_requests, tmp_path: Path
+):
     "test download command infers agents from target directory"
     runner = CliRunner()
 
@@ -578,4 +580,3 @@ def test_download_explicit_types_bypass_auto_detect(
     assert "Detected active agents:" not in result.stdout
     assert (target_dir / ".claude" / "rules" / "python.md").exists()
     assert not (target_dir / ".cursor" / "rules").exists()
-

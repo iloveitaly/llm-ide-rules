@@ -424,4 +424,3 @@ def test_agent_detect_methods(tmp_path: Path):
     agents_file.touch()
     assert agents.detect(tmp_path)
     agents_file.unlink()
-

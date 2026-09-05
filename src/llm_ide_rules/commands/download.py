@@ -101,7 +101,6 @@ def detect_active_agents(target_dir: Path) -> list[str]:
     return detected
 
 
-
 def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
     """Download a GitHub repository as a ZIP and extract it to a temporary directory."""
     normalized_repo = normalize_repo(repo)
@@ -382,7 +381,6 @@ def download_main(
         error_msg = f"Invalid instruction types: {', '.join(invalid_types)}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
-
 
     log.info(
         "starting download",

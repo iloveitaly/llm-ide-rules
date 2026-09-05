@@ -13,4 +13,3 @@ class GrokAgent(DotAgentsBaseAgent):
     def detect(self, base_dir: Path) -> bool:
         "detect if Grok CLI is in use in the given directory"
         return (base_dir / ".grok").exists()
-

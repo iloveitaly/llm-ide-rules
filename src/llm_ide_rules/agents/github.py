@@ -219,4 +219,3 @@ applyTo: "{glob_pattern}"
             or (github_dir / "instructions").exists()
             or (github_dir / "prompts").exists()
         )
-

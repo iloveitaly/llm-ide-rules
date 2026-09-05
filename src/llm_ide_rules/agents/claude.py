@@ -226,4 +226,3 @@ class ClaudeAgent(BaseAgent):
             or (base_dir / "CLAUDE.md").exists()
             or (base_dir / ".claude.json").exists()
         )
-

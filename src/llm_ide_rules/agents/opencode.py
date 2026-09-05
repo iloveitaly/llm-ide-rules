@@ -102,5 +102,6 @@ class OpenCodeAgent(BaseAgent):
 
     def detect(self, base_dir: Path) -> bool:
         "detect if OpenCode is in use in the given directory"
-        return (base_dir / ".opencode").exists() or (base_dir / "opencode.json").exists()
-
+        return (base_dir / ".opencode").exists() or (
+            base_dir / "opencode.json"
+        ).exists()

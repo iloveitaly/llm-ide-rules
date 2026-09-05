@@ -177,4 +177,3 @@ class AgentsAgent(BaseAgent):
     def detect(self, base_dir: Path) -> bool:
         "detect if AGENTS.md is in use in the given directory"
         return (base_dir / "AGENTS.md").exists()
-

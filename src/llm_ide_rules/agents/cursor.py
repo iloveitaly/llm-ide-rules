@@ -230,4 +230,3 @@ alwaysApply: true
     def detect(self, base_dir: Path) -> bool:
         "detect if Cursor is in use in the given directory"
         return (base_dir / ".cursor").exists() or (base_dir / ".cursorrules").exists()
-

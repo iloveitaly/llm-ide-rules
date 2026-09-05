@@ -17,4 +17,3 @@ class AntigravityAgent(DotAgentsBaseAgent):
             or (base_dir / ".gemini").exists()
             or (base_dir / ".antigravity").exists()
         )
-

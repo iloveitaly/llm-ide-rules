@@ -316,4 +316,3 @@ class DotAgentsBaseAgent(BaseAgent):
     def detect(self, base_dir: Path) -> bool:
         "detect if .agents layout is in use in the given directory"
         return (base_dir / ".agents").exists()
-
