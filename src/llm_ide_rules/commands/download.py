@@ -89,6 +89,19 @@ INSTRUCTION_TYPES = {
 DEFAULT_TYPES = [k for k in INSTRUCTION_TYPES if k != "grok"]
 
 
+def detect_active_agents(target_dir: Path) -> list[str]:
+    "detect agents in use in the target directory"
+    from llm_ide_rules.agents import get_all_agents
+
+    detected = []
+    for agent in get_all_agents():
+        if agent.name in INSTRUCTION_TYPES and agent.detect(target_dir):
+            detected.append(agent.name)
+
+    return detected
+
+
+
 def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
     """Download a GitHub repository as a ZIP and extract it to a temporary directory."""
     normalized_repo = normalize_repo(repo)
@@ -342,9 +355,17 @@ def download_main(
     # Download to a specific directory
     llm_ide_rules download --target ./my-project
     """
-    # Use default types if none specified
+    target_path = Path(target_dir).resolve()
+
+    # Use detected types if none specified, falling back to default types
     if not instruction_types:
-        instruction_types = DEFAULT_TYPES
+        detected = detect_active_agents(target_path)
+        if detected:
+            log.info("detected active agents in target directory", detected=detected)
+            typer.echo(f"Detected active agents: {', '.join(detected)}")
+            instruction_types = detected
+        else:
+            instruction_types = DEFAULT_TYPES
 
     # OpenCode uses AGENTS.md, so enable the agents instruction type automatically
     if "opencode" in instruction_types and "agents" not in instruction_types:
@@ -362,7 +383,6 @@ def download_main(
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
 
-    target_path = Path(target_dir).resolve()
 
     log.info(
         "starting download",

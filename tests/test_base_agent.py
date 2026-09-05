@@ -337,3 +337,91 @@ def test_extract_description_and_filter_content_trims_result():
 
     assert description == "Fix tests"
     assert filtered == ["Run pytest\n"]
+
+
+def test_agent_detect_methods(tmp_path: Path):
+    "test detect method across all agent implementations"
+    from llm_ide_rules.agents.agents import AgentsAgent
+    from llm_ide_rules.agents.antigravity import AntigravityAgent
+    from llm_ide_rules.agents.base import BaseAgent
+    from llm_ide_rules.agents.claude import ClaudeAgent
+    from llm_ide_rules.agents.cursor import CursorAgent
+    from llm_ide_rules.agents.github import GitHubAgent
+    from llm_ide_rules.agents.grok import GrokAgent
+    from llm_ide_rules.agents.opencode import OpenCodeAgent
+    from llm_ide_rules.agents.vscode import VSCodeAgent
+
+    class DummyAgent(BaseAgent):
+        def bundle_rules(self, *args, **kwargs):
+            return False
+
+        def bundle_commands(self, *args, **kwargs):
+            return False
+
+        def write_rule(self, *args, **kwargs):
+            pass
+
+        def write_command(self, *args, **kwargs):
+            pass
+
+    assert not DummyAgent().detect(tmp_path)
+    assert not VSCodeAgent().detect(tmp_path)
+
+    cursor = CursorAgent()
+    assert not cursor.detect(tmp_path)
+    cursor_dir = tmp_path / ".cursor"
+    cursor_dir.mkdir()
+    assert cursor.detect(tmp_path)
+    cursor_dir.rmdir()
+    cursorrules = tmp_path / ".cursorrules"
+    cursorrules.touch()
+    assert cursor.detect(tmp_path)
+    cursorrules.unlink()
+
+    claude = ClaudeAgent()
+    assert not claude.detect(tmp_path)
+    claude_file = tmp_path / "CLAUDE.md"
+    claude_file.touch()
+    assert claude.detect(tmp_path)
+    claude_file.unlink()
+
+    github = GitHubAgent()
+    assert not github.detect(tmp_path)
+    gh_dir = tmp_path / ".github"
+    gh_dir.mkdir()
+    # bare .github should not trigger detection
+    assert not github.detect(tmp_path)
+    copilot_file = gh_dir / "copilot-instructions.md"
+    copilot_file.touch()
+    assert github.detect(tmp_path)
+    copilot_file.unlink()
+    gh_dir.rmdir()
+
+    antigravity = AntigravityAgent()
+    assert not antigravity.detect(tmp_path)
+    agents_dir = tmp_path / ".agents"
+    agents_dir.mkdir()
+    assert antigravity.detect(tmp_path)
+    agents_dir.rmdir()
+
+    grok = GrokAgent()
+    assert not grok.detect(tmp_path)
+    grok_dir = tmp_path / ".grok"
+    grok_dir.mkdir()
+    assert grok.detect(tmp_path)
+    grok_dir.rmdir()
+
+    opencode = OpenCodeAgent()
+    assert not opencode.detect(tmp_path)
+    opencode_json = tmp_path / "opencode.json"
+    opencode_json.touch()
+    assert opencode.detect(tmp_path)
+    opencode_json.unlink()
+
+    agents = AgentsAgent()
+    assert not agents.detect(tmp_path)
+    agents_file = tmp_path / "AGENTS.md"
+    agents_file.touch()
+    assert agents.detect(tmp_path)
+    agents_file.unlink()
+

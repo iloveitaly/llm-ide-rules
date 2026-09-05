@@ -173,3 +173,8 @@ class AgentsAgent(BaseAgent):
             content = self.build_root_doc_content(current_general_lines, sections)
             if content.strip():
                 (target_dir / filename).write_text(content)
+
+    def detect(self, base_dir: Path) -> bool:
+        "detect if AGENTS.md is in use in the given directory"
+        return (base_dir / "AGENTS.md").exists()
+

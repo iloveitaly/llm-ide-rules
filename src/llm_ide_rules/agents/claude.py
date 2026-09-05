@@ -218,3 +218,12 @@ class ClaudeAgent(BaseAgent):
     def configure_agents_md(self, base_dir: Path) -> bool:
         """Claude no longer needs AGENTS.md mirroring files."""
         return False
+
+    def detect(self, base_dir: Path) -> bool:
+        "detect if Claude Code is in use in the given directory"
+        return (
+            (base_dir / ".claude").exists()
+            or (base_dir / "CLAUDE.md").exists()
+            or (base_dir / ".claude.json").exists()
+        )
+

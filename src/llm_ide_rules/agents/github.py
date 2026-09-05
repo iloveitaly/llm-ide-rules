@@ -210,3 +210,13 @@ applyTo: "{glob_pattern}"
         updates = {"chat.useAgentsMdFile": True, "chat.useNestedAgentsMdFiles": True}
 
         return modify_json_file(settings_path, updates)
+
+    def detect(self, base_dir: Path) -> bool:
+        "detect if GitHub Copilot is in use in the given directory"
+        github_dir = base_dir / ".github"
+        return (
+            (github_dir / "copilot-instructions.md").exists()
+            or (github_dir / "instructions").exists()
+            or (github_dir / "prompts").exists()
+        )
+

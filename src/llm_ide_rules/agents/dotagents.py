@@ -312,3 +312,8 @@ class DotAgentsBaseAgent(BaseAgent):
         trimmed = trim_content(final_content)
         filepath.parent.mkdir(parents=True, exist_ok=True)
         filepath.write_text(frontmatter + "".join(trimmed))
+
+    def detect(self, base_dir: Path) -> bool:
+        "detect if .agents layout is in use in the given directory"
+        return (base_dir / ".agents").exists()
+

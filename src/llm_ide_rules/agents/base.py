@@ -55,6 +55,10 @@ class BaseAgent(ABC):
         """Write a single command file."""
         ...
 
+    def detect(self, base_dir: Path) -> bool:
+        "detect if this agent is in use in the given directory"
+        return False
+
     def configure_agents_md(self, base_dir: Path) -> bool:
         """Configure the agent to use AGENTS.md as context (default: no-op).
 
