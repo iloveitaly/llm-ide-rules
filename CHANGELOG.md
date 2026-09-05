@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.14.0...v0.15.0) (2026-09-05)
+
+
+### Features
+
+* auto-detect active agents in download command ([342fa1b](https://github.com/iloveitaly/llm-ide-rules/commit/342fa1b017249f353ce1646048800c9c23a496fa))
+
+
+### Documentation
+
+* document Python test code organization guidelines ([2eb9c60](https://github.com/iloveitaly/llm-ide-rules/commit/2eb9c60eb34bfd96b5d3c88c86d97354be33d89d))
+* document python test code organization rules ([85c6ae2](https://github.com/iloveitaly/llm-ide-rules/commit/85c6ae2030a82182b9fd0daa173544a00a8ea844))
+
 ## [0.14.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.13.0...v0.14.0) (2026-08-31)
 
 
