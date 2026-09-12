@@ -220,3 +220,111 @@ Python rules.
         assert ".claude/rules/general.md" in output
         assert ".claude/rules/python.md" in output
         assert "AGENTS.md" in output
+
+
+def test_ignores_detects_single_active_agent():
+    """Test ignores automatically detects a single active agent directory."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path(".cursor").mkdir()
+        instructions_content = """# Sample Instructions
+
+## Python
+globs: *.py
+
+Python rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
+
+        assert result.exit_code == 0
+        output = result.stdout
+
+        assert ".cursor/rules/python.mdc" in output
+        assert ".github" not in output
+        assert ".claude" not in output
+
+
+def test_ignores_detects_multiple_active_agents():
+    """Test ignores automatically detects multiple active agent directories."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path(".cursor").mkdir()
+        Path(".claude").mkdir()
+        instructions_content = """# Sample Instructions
+
+## Python
+globs: *.py
+
+Python rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
+
+        assert result.exit_code == 0
+        output = result.stdout
+
+        assert ".cursor/rules/python.mdc" in output
+        assert ".claude/rules/python.md" in output
+        assert ".github" not in output
+
+
+def test_ignores_explicit_agent_overrides_detection():
+    """Test that explicit --agent overrides active agent detection."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path(".cursor").mkdir()
+        instructions_content = """# Sample Instructions
+
+## Python
+globs: *.py
+
+Python rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        result = runner.invoke(
+            app, ["ignores", "instructions.md", "--agent", "github", "--print"]
+        )
+
+        assert result.exit_code == 0
+        output = result.stdout
+
+        assert ".github/instructions/python.instructions.md" in output
+        assert ".cursor" not in output
+
+
+def test_ignores_echoes_detected_agents_when_not_print():
+    """Test that ignores echoes detected active agents when writing .gitignore."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path(".cursor").mkdir()
+        instructions_content = """# Sample Instructions
+
+## Python
+globs: *.py
+
+Python rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        result = runner.invoke(app, ["ignores", "instructions.md"])
+
+        assert result.exit_code == 0
+        assert "Detected active agents: cursor" in result.stdout
+        assert "Updated .gitignore" in result.stdout
+

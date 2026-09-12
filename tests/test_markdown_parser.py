@@ -281,3 +281,164 @@ Python rules.
     filtered, omitted = filter_markdown_by_globs(text, [])
     assert filtered == text
     assert omitted == []
+
+
+def test_filter_markdown_by_globs_single_include():
+    """Test including sections matching a single glob pattern."""
+    text = """# Instructions
+General rules.
+
+## Python
+globs: **/*.py
+
+Python rules.
+
+## React
+globs: **/*.tsx
+
+React rules.
+"""
+    filtered, omitted = filter_markdown_by_globs(text, include_globs=["**/*.py"])
+
+    assert omitted == ["React"]
+    assert "## Python" in filtered
+    assert "Python rules." in filtered
+    assert "## React" not in filtered
+    assert "React rules." not in filtered
+    assert "General rules." in filtered
+
+
+def test_filter_markdown_by_globs_comma_separated_include():
+    """Test including sections using comma-separated glob patterns."""
+    text = """# Instructions
+General rules.
+
+## Python
+globs: **/*.py
+
+Python rules.
+
+## Shell
+globs: **/*.sh
+
+Shell rules.
+
+## React
+globs: **/*.tsx
+
+React rules.
+"""
+    filtered, omitted = filter_markdown_by_globs(
+        text, include_globs=["*.py,**/*.sh"]
+    )
+
+    assert omitted == ["React"]
+    assert "## Python" in filtered
+    assert "## Shell" in filtered
+    assert "## React" not in filtered
+
+
+def test_filter_markdown_by_globs_include_partial_match_preserved():
+    """Test sections with multiple globs are included if at least one matches."""
+    text = """# Instructions
+
+## Typescript
+globs: **/*.ts,**/*.tsx
+
+TS rules.
+
+## React
+globs: **/*.tsx
+
+React rules.
+"""
+    filtered, omitted = filter_markdown_by_globs(text, include_globs=["**/*.ts"])
+
+    assert omitted == ["React"]
+    assert "## Typescript" in filtered
+    assert "TS rules." in filtered
+    assert "## React" not in filtered
+
+
+def test_filter_markdown_by_globs_include_unglobbed_omitted_without_wildcard():
+    """Test unglobbed sections are omitted when include_globs lacks a wildcard."""
+    text = """# Instructions
+General rules.
+
+## General Coding
+Some general coding instructions without glob.
+
+## Python
+globs: **/*.py
+
+Python rules.
+"""
+    filtered, omitted = filter_markdown_by_globs(text, include_globs=["**/*.py"])
+
+    assert omitted == ["General Coding"]
+    assert "General rules." in filtered
+    assert "## General Coding" not in filtered
+    assert "## Python" in filtered
+
+
+def test_filter_markdown_by_globs_include_unglobbed_preserved_with_wildcard():
+    """Test unglobbed sections are preserved when include_globs contains a wildcard."""
+    text = """# Instructions
+General rules.
+
+## General Coding
+Some general coding instructions without glob.
+
+## Typescript
+globs: **/*.ts
+
+TS rules.
+
+## React
+globs: **/*.tsx
+
+React rules.
+"""
+    filtered, omitted = filter_markdown_by_globs(
+        text, include_globs=["*,*.ts"]
+    )
+
+    assert omitted == ["React"]
+    assert "General rules." in filtered
+    assert "## General Coding" in filtered
+    assert "Some general coding instructions without glob." in filtered
+    assert "## Typescript" in filtered
+    assert "## React" not in filtered
+
+
+def test_filter_markdown_by_globs_both_include_and_exclude():
+    """Test combining include and exclude globs."""
+    text = """# Instructions
+
+## Alembic Migrations
+globs: migrations/versions/*.py
+
+Migration rules.
+
+## Python
+globs: **/*.py
+
+Python rules.
+
+## React
+globs: **/*.tsx
+
+React rules.
+"""
+    filtered, omitted = filter_markdown_by_globs(
+        text,
+        exclude_globs=["migrations/versions/*.py"],
+        include_globs=["**/*.py"],
+    )
+
+    assert "React" in omitted
+    assert "Alembic Migrations" in omitted
+    assert "## Alembic Migrations" not in filtered
+    assert "## React" not in filtered
+    assert "## Python" in filtered
+

@@ -350,6 +350,13 @@ def download_main(
             help="Exclude sections matching glob patterns (comma-separated or multiple flags).",
         ),
     ] = None,
+    include_glob: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--include-glob",
+            help="Include only sections matching glob patterns (comma-separated or multiple flags).",
+        ),
+    ] = None,
 ):
     """Download LLM instruction files from GitHub repositories.
 
@@ -377,6 +384,10 @@ def download_main(
     \b
     # Exclude sections matching glob patterns
     llm_ide_rules download --exclude-glob "**/*.py"
+
+    \b
+    # Include only sections matching glob patterns
+    llm_ide_rules download --include-glob "**/*.py"
     """
     target_path = Path(target_dir).resolve()
 
@@ -423,15 +434,23 @@ def download_main(
     elif exclude_glob:
         exclude_glob_list = [str(item) for item in exclude_glob]
 
+    include_glob_list: list[str] = []
+    if isinstance(include_glob, str):
+        include_glob_list = [str(include_glob)]
+    elif include_glob:
+        include_glob_list = [str(item) for item in include_glob]
+
     # identify omitted filenames from source instructions if present
     omitted_filenames: set[str] = set()
     instructions_src = repo_dir / "instructions.md"
-    if exclude_glob_list and instructions_src.exists():
+    if (exclude_glob_list or include_glob_list) and instructions_src.exists():
         from llm_ide_rules.constants import header_to_filename
         from llm_ide_rules.markdown_parser import filter_markdown_by_globs
 
         _, omitted_headers = filter_markdown_by_globs(
-            instructions_src.read_text(encoding="utf-8"), exclude_glob_list
+            instructions_src.read_text(encoding="utf-8"),
+            exclude_globs=exclude_glob_list,
+            include_globs=include_glob_list,
         )
         omitted_filenames = {header_to_filename(h) for h in omitted_headers}
 
@@ -473,17 +492,21 @@ def download_main(
                                 local_custom_content = local_content.split(marker, 1)[1]
 
                         remote_content = src.read_text(encoding="utf-8")
-                        if exclude_glob_list:
+                        if (
+                            exclude_glob_list or include_glob_list
+                        ) and source_file == "instructions.md":
                             from llm_ide_rules.markdown_parser import (
                                 filter_markdown_by_globs,
                             )
 
                             remote_content, omitted_headers = filter_markdown_by_globs(
-                                remote_content, exclude_glob_list
+                                remote_content,
+                                exclude_globs=exclude_glob_list,
+                                include_globs=include_glob_list,
                             )
                             if omitted_headers:
                                 log.info(
-                                    "omitted sections matching exclude globs",
+                                    "omitted sections matching glob filters",
                                     source_file=source_file,
                                     omitted=omitted_headers,
                                 )

@@ -115,15 +115,30 @@ def parse_sections(text: str) -> tuple[list[str], dict[str, SectionData]]:
 
 
 def filter_markdown_by_globs(
-    text: str, exclude_globs: Sequence[str]
+    text: str,
+    exclude_globs: Sequence[str] | None = None,
+    include_globs: Sequence[str] | None = None,
 ) -> tuple[str, list[str]]:
-    """Filter markdown sections whose glob entries match exclude patterns in full."""
-    if not exclude_globs:
+    """Filter markdown sections based on exclude and include glob patterns."""
+    exclude_patterns = (
+        [p.strip() for raw in exclude_globs for p in raw.split(",") if p.strip()]
+        if exclude_globs
+        else []
+    )
+    include_patterns = (
+        [p.strip() for raw in include_globs for p in raw.split(",") if p.strip()]
+        if include_globs
+        else []
+    )
+
+    if not exclude_patterns and not include_patterns:
         return text, []
 
-    patterns = [p.strip() for raw in exclude_globs for p in raw.split(",") if p.strip()]
-    if not patterns:
-        return text, []
+    include_has_wildcard = any(
+        pat in ("*", "**/*", "**") for pat in include_patterns
+    )
+    # patterns for matching section globs (bare '*' designates unglobbed sections)
+    glob_include_patterns = [p for p in include_patterns if p != "*"]
 
     md = MarkdownIt()
     tokens = md.parse(text)
@@ -157,22 +172,47 @@ def filter_markdown_by_globs(
         _, glob_pattern = extract_glob_directive(section_content)
 
         if glob_pattern is None:
+            # unglobbed sections are omitted under include globs unless wildcard is present
+            if include_patterns and not include_has_wildcard:
+                omitted_headers.append(header_name)
+                continue
+
             result_lines.extend(section_content)
             continue
 
         section_globs = [g.strip() for g in glob_pattern.split(",") if g.strip()]
         if not section_globs:
+            # empty glob directive behaves like an unglobbed section
+            if include_patterns and not include_has_wildcard:
+                omitted_headers.append(header_name)
+                continue
+
             result_lines.extend(section_content)
             continue
+
+        # section must match at least one include pattern when include patterns are active
+        if glob_include_patterns:
+            matches_include = any(
+                fnmatch.fnmatch(sg, pat) or fnmatch.fnmatch(pat, sg)
+                for pat in glob_include_patterns
+                for sg in section_globs
+            )
+            if not matches_include:
+                omitted_headers.append(header_name)
+                continue
+
 
         # all globs in section must match an exclude pattern for section to be omitted
-        all_matched = all(
-            any(fnmatch.fnmatch(sg, pat) for pat in patterns) for sg in section_globs
-        )
-        if not all_matched:
-            result_lines.extend(section_content)
-            continue
+        if exclude_patterns:
+            all_matched = all(
+                any(fnmatch.fnmatch(sg, pat) for pat in exclude_patterns)
+                for sg in section_globs
+            )
+            if all_matched:
+                omitted_headers.append(header_name)
+                continue
 
-        omitted_headers.append(header_name)
+        result_lines.extend(section_content)
 
     return "".join(result_lines), omitted_headers
+

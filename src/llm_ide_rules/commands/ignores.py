@@ -8,7 +8,9 @@ from unittest.mock import patch
 
 import typer
 
+from llm_ide_rules.commands.download import detect_active_agents
 from llm_ide_rules.commands.explode import explode_implementation
+from llm_ide_rules.log import log
 
 
 def ignores_main(
@@ -16,13 +18,13 @@ def ignores_main(
         str, typer.Argument(help="Input markdown file")
     ] = "instructions.md",
     agent: Annotated[
-        str,
+        str | None,
         typer.Option(
             "--agent",
             "-a",
-            help="Agent to list ignores for (cursor, github, claude, opencode, or all)",
+            help="Agent to list ignores for (cursor, github, claude, opencode, or all). Defaults to detecting active agents.",
         ),
-    ] = "all",
+    ] = None,
     print_output: Annotated[
         bool,
         typer.Option(
@@ -38,6 +40,20 @@ def ignores_main(
     which files *would* be created, without actually creating them or modifying the `explode` implementation
     to support a dry-run flag.
     """
+
+    cwd = Path.cwd()
+
+    if agent:
+        agents_to_run = [agent]
+    else:
+        detected = detect_active_agents(cwd)
+        if detected:
+            log.info("detected active agents in target directory", detected=detected)
+            if not print_output:
+                typer.echo(f"Detected active agents: {', '.join(detected)}")
+            agents_to_run = detected
+        else:
+            agents_to_run = ["all"]
 
     ignored_files = []
 
@@ -67,7 +83,8 @@ def ignores_main(
             redirect_stdout(f_out),
             redirect_stderr(f_err),
         ):
-            explode_implementation(input_file, agent, Path.cwd())
+            for agent_name in agents_to_run:
+                explode_implementation(input_file, agent_name, cwd)
 
     except typer.Exit as e:
         exit_exception = e
@@ -78,14 +95,17 @@ def ignores_main(
         raise exit_exception
 
     # Process files to relative paths with forward slashes
-    cwd = Path.cwd()
     relative_files = []
+    seen = set()
     for file_path in ignored_files:
         try:
             rel_path = file_path.relative_to(cwd).as_posix()
-            relative_files.append(rel_path)
         except ValueError:
-            relative_files.append(file_path.as_posix())
+            rel_path = file_path.as_posix()
+
+        if rel_path not in seen:
+            seen.add(rel_path)
+            relative_files.append(rel_path)
 
     # Sort files to ensure stable output
     relative_files.sort()
@@ -93,6 +113,7 @@ def ignores_main(
     if print_output:
         for f in relative_files:
             print(f)
+
         return
 
     # Update .gitignore
