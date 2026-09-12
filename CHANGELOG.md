@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.16.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.16.0...v0.16.1) (2026-09-12)
+
+
+### Documentation
+
+* add script configuration and style rules for justfiles ([5aaa536](https://github.com/iloveitaly/llm-ide-rules/commit/5aaa536833b39ea3f104c75635aa2797cec1d0a7))
+* add script execution configuration rules to just instructions ([14ac3a9](https://github.com/iloveitaly/llm-ide-rules/commit/14ac3a95f5d8384e10cc35d23c204328c3b89c1d))
+
 ## [0.16.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.15.0...v0.16.0) (2026-09-07)
 
 
