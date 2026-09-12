@@ -328,9 +328,7 @@ globs: **/*.tsx
 
 React rules.
 """
-    filtered, omitted = filter_markdown_by_globs(
-        text, include_globs=["*.py,**/*.sh"]
-    )
+    filtered, omitted = filter_markdown_by_globs(text, include_globs=["*.py,**/*.sh"])
 
     assert omitted == ["React"]
     assert "## Python" in filtered
@@ -399,9 +397,7 @@ globs: **/*.tsx
 
 React rules.
 """
-    filtered, omitted = filter_markdown_by_globs(
-        text, include_globs=["*,*.ts"]
-    )
+    filtered, omitted = filter_markdown_by_globs(text, include_globs=["*,*.ts"])
 
     assert omitted == ["React"]
     assert "General rules." in filtered
@@ -441,4 +437,3 @@ React rules.
     assert "## Alembic Migrations" not in filtered
     assert "## React" not in filtered
     assert "## Python" in filtered
-

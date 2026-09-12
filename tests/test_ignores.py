@@ -327,4 +327,3 @@ Python rules.
         assert result.exit_code == 0
         assert "Detected active agents: cursor" in result.stdout
         assert "Updated .gitignore" in result.stdout
-

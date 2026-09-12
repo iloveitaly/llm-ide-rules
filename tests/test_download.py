@@ -1021,4 +1021,3 @@ React rules.
     assert "## Python" in content
     assert "## Alembic Migrations" not in content
     assert "## React" not in content
-

@@ -134,9 +134,7 @@ def filter_markdown_by_globs(
     if not exclude_patterns and not include_patterns:
         return text, []
 
-    include_has_wildcard = any(
-        pat in ("*", "**/*", "**") for pat in include_patterns
-    )
+    include_has_wildcard = any(pat in ("*", "**/*", "**") for pat in include_patterns)
     # patterns for matching section globs (bare '*' designates unglobbed sections)
     glob_include_patterns = [p for p in include_patterns if p != "*"]
 
@@ -201,7 +199,6 @@ def filter_markdown_by_globs(
                 omitted_headers.append(header_name)
                 continue
 
-
         # all globs in section must match an exclude pattern for section to be omitted
         if exclude_patterns:
             all_matched = all(
@@ -215,4 +212,3 @@ def filter_markdown_by_globs(
         result_lines.extend(section_content)
 
     return "".join(result_lines), omitted_headers
-
