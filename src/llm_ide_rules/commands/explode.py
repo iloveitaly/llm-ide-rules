@@ -79,7 +79,7 @@ def get_always_apply_rule_agents(
 
 
 def explode_implementation(
-    input_file: str = "instructions.md",
+    input_file: str | Path = "instructions.md",
     agent: str = "all",
     working_dir: Path | None = None,
     agents_filename: str = "AGENTS.md",
@@ -137,7 +137,10 @@ def explode_implementation(
 
         agent_dirs[agent_name] = agent_dir_map
 
-    input_path = working_dir / input_file
+    input_file_path = Path(input_file)
+    input_path = (
+        input_file_path if input_file_path.is_absolute() else working_dir / input_file
+    )
 
     try:
         input_text = input_path.read_text()

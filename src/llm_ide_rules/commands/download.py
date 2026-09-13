@@ -357,6 +357,13 @@ def download_main(
             help="Include only sections matching glob patterns (comma-separated or multiple flags).",
         ),
     ] = None,
+    inline: Annotated[
+        bool,
+        typer.Option(
+            "--inline",
+            help="Explode instruction files directly without persisting instructions.md or commands.md to disk.",
+        ),
+    ] = False,
 ):
     """Download LLM instruction files from GitHub repositories.
 
@@ -388,8 +395,13 @@ def download_main(
     \b
     # Include only sections matching glob patterns
     llm_ide_rules download --include-glob "**/*.py"
+
+    \b
+    # Explode directly without saving instructions.md or commands.md to disk
+    llm_ide_rules download --inline
     """
     target_path = Path(target_dir).resolve()
+    target_path.mkdir(parents=True, exist_ok=True)
 
     # Use detected types if none specified, falling back to default types
     if not instruction_types:
@@ -454,6 +466,8 @@ def download_main(
         )
         omitted_filenames = {header_to_filename(h) for h in omitted_headers}
 
+    staging_dir: Path | None = None
+
     try:
         # Copy instruction files
         copied_items = [
@@ -466,7 +480,7 @@ def download_main(
             )
         ]
 
-        # Check for source files (instructions.md, commands.md) and copy them if available
+        # Check for source files (instructions.md, commands.md) and copy or stage them
         # These are needed for 'explode' logic
         source_files = ["instructions.md", "commands.md"]
         sources_copied = False
@@ -474,54 +488,68 @@ def download_main(
         # Only copy source files if we have at least one agent that uses explode
         has_explode_agent = any(t in VALID_AGENTS for t in instruction_types)
 
+        if inline:
+            staging_dir = Path(tempfile.mkdtemp())
+
         if has_explode_agent:
             for source_file in source_files:
                 src = repo_dir / source_file
                 dst = target_path / source_file
-                if src.exists():
+                if not src.exists():
+                    continue
+
+                if inline:
+                    log.info(
+                        "staging source file in temporary directory",
+                        source=str(src),
+                    )
+                else:
                     log.info("copying source file", source=str(src), target=str(dst))
                     dst.parent.mkdir(parents=True, exist_ok=True)
 
-                    if source_file in ["instructions.md", "commands.md"]:
-                        marker = "<!-- END CLONED INSTRUCTIONS -->"
-                        local_custom_content = ""
+                marker = "<!-- END CLONED INSTRUCTIONS -->"
+                local_custom_content = ""
 
-                        if dst.exists():
-                            local_content = dst.read_text(encoding="utf-8")
-                            if marker in local_content:
-                                local_custom_content = local_content.split(marker, 1)[1]
+                if dst.exists():
+                    local_content = dst.read_text(encoding="utf-8")
+                    if marker in local_content:
+                        local_custom_content = local_content.split(marker, 1)[1]
 
-                        remote_content = src.read_text(encoding="utf-8")
-                        if (
-                            exclude_glob_list or include_glob_list
-                        ) and source_file == "instructions.md":
-                            from llm_ide_rules.markdown_parser import (
-                                filter_markdown_by_globs,
-                            )
+                remote_content = src.read_text(encoding="utf-8")
+                if (
+                    exclude_glob_list or include_glob_list
+                ) and source_file == "instructions.md":
+                    from llm_ide_rules.markdown_parser import (
+                        filter_markdown_by_globs,
+                    )
 
-                            remote_content, omitted_headers = filter_markdown_by_globs(
-                                remote_content,
-                                exclude_globs=exclude_glob_list,
-                                include_globs=include_glob_list,
-                            )
-                            if omitted_headers:
-                                log.info(
-                                    "omitted sections matching glob filters",
-                                    source_file=source_file,
-                                    omitted=omitted_headers,
-                                )
-
-                        if marker not in remote_content:
-                            remote_content += f"\n\n{marker}\n"
-
-                        dst.write_text(
-                            remote_content + local_custom_content, encoding="utf-8"
+                    remote_content, omitted_headers = filter_markdown_by_globs(
+                        remote_content,
+                        exclude_globs=exclude_glob_list,
+                        include_globs=include_glob_list,
+                    )
+                    if omitted_headers:
+                        log.info(
+                            "omitted sections matching glob filters",
+                            source_file=source_file,
+                            omitted=omitted_headers,
                         )
-                    else:
-                        dst.write_bytes(src.read_bytes())
 
+                if marker not in remote_content:
+                    remote_content += f"\n\n{marker}\n"
+
+                file_content = remote_content + local_custom_content
+
+                if inline:
+                    assert staging_dir is not None
+                    (staging_dir / source_file).write_text(
+                        file_content, encoding="utf-8"
+                    )
+                else:
+                    dst.write_text(file_content, encoding="utf-8")
                     copied_items.append(f"Downloaded: {source_file}")
-                    sources_copied = True
+
+                sources_copied = True
 
         if omitted_filenames:
             for filename in omitted_filenames:
@@ -548,17 +576,25 @@ def download_main(
         explodable_agents = [t for t in instruction_types if t in VALID_AGENTS]
 
         if explodable_agents:
-            # Check if they existed in target already?
-            if not sources_copied and not (target_path / "instructions.md").exists():
+            source_exists = (
+                (staging_dir / "instructions.md").exists()
+                if (inline and staging_dir)
+                else (target_path / "instructions.md").exists()
+            )
+            if not sources_copied and not source_exists:
                 log.warning(
                     "source file instructions.md missing, generation might fail"
                 )
+
+            input_instructions: str | Path = "instructions.md"
+            if inline and staging_dir and (staging_dir / "instructions.md").exists():
+                input_instructions = staging_dir / "instructions.md"
 
             for agent in explodable_agents:
                 log.info("generating rules locally", agent=agent)
                 try:
                     explode_implementation(
-                        input_file="instructions.md",
+                        input_file=input_instructions,
                         agent=agent,
                         working_dir=target_path,
                     )
@@ -596,5 +632,8 @@ def download_main(
     finally:
         # Clean up temporary directory
         import shutil
+
+        if staging_dir and staging_dir.exists():
+            shutil.rmtree(staging_dir, ignore_errors=True)
 
         shutil.rmtree(repo_dir.parent.parent, ignore_errors=True)

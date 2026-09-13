@@ -55,6 +55,7 @@ uvx llm-ide-rules implode opencode [output_file]   # Bundle OpenCode commands
 uvx llm-ide-rules download [instruction_types]    # Download everything by default
 uvx llm-ide-rules download cursor github          # Download specific types
 uvx llm-ide-rules download --repo other/repo      # Download from different repo
+uvx llm-ide-rules download --inline               # Explode rules without saving instructions.md or commands.md
 
 # Delete downloaded instruction files
 uvx llm-ide-rules delete [instruction_types]      # Delete everything by default
@@ -119,6 +120,9 @@ uvx llm-ide-rules download cursor github
 
 # Download from a different repository
 uvx llm-ide-rules download --repo other-user/other-repo --target ./my-project
+
+# Download and explode directly without saving instructions.md or commands.md
+uvx llm-ide-rules download --inline
 
 # Delete all downloaded files (with confirmation)
 uvx llm-ide-rules delete

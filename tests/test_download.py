@@ -1021,3 +1021,230 @@ React rules.
     assert "## Python" in content
     assert "## Alembic Migrations" not in content
     assert "## React" not in content
+
+
+def test_download_help_shows_inline():
+    """Test that download help displays the inline option"""
+    runner = CliRunner()
+    result = runner.invoke(app, ["download", "--help"])
+    assert result.exit_code == 0
+    assert "inline" in result.stdout
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+def test_download_inline_basic(mock_zipfile, mock_requests, tmp_path: Path):
+    """Test download with --inline does not persist instructions or commands to disk"""
+    runner = CliRunner()
+
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+
+    def mock_extractall(path):
+        extract_path = Path(path)
+        extracted_dir = extract_path / "llm_ide_rules-master"
+        extracted_dir.mkdir(parents=True, exist_ok=True)
+        instructions = """# General Instructions
+Always write clean code.
+
+## Python
+globs: **/*.py
+
+Python rules.
+"""
+        commands = """## Test
+Run tests with pytest.
+"""
+        (extracted_dir / "instructions.md").write_text(instructions, encoding="utf-8")
+        (extracted_dir / "commands.md").write_text(commands, encoding="utf-8")
+
+    mock_zip_instance.extractall = mock_extractall
+
+    target_dir = tmp_path / "project"
+    target_dir.mkdir()
+
+    result = runner.invoke(
+        app,
+        [
+            "download",
+            "cursor",
+            "--inline",
+            "--target",
+            str(target_dir),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert not (target_dir / "instructions.md").exists()
+    assert not (target_dir / "commands.md").exists()
+    assert (target_dir / ".cursor" / "rules" / "general.mdc").exists()
+    assert (target_dir / ".cursor" / "rules" / "python.mdc").exists()
+    assert (target_dir / ".cursor" / "commands" / "test.md").exists()
+    assert "Downloaded: instructions.md" not in result.stdout
+    assert "Downloaded: commands.md" not in result.stdout
+    assert "Generated: cursor rules" in result.stdout
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+def test_download_inline_with_exclude_glob(mock_zipfile, mock_requests, tmp_path: Path):
+    """Test download with --inline and glob filters omits excluded sections"""
+    runner = CliRunner()
+
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+
+    def mock_extractall(path):
+        extract_path = Path(path)
+        extracted_dir = extract_path / "llm_ide_rules-master"
+        extracted_dir.mkdir(parents=True, exist_ok=True)
+        instructions = """## Python
+globs: **/*.py
+
+Python rules.
+
+## React
+globs: **/*.tsx
+
+React rules.
+"""
+        (extracted_dir / "instructions.md").write_text(instructions, encoding="utf-8")
+
+    mock_zip_instance.extractall = mock_extractall
+
+    target_dir = tmp_path / "project"
+    target_dir.mkdir()
+
+    result = runner.invoke(
+        app,
+        [
+            "download",
+            "cursor",
+            "--inline",
+            "--target",
+            str(target_dir),
+            "--exclude-glob",
+            "**/*.py",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert not (target_dir / "instructions.md").exists()
+    assert (target_dir / ".cursor" / "rules" / "react.mdc").exists()
+    assert not (target_dir / ".cursor" / "rules" / "python.mdc").exists()
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+def test_download_inline_does_not_modify_existing_instruction_files(
+    mock_zipfile, mock_requests, tmp_path: Path
+):
+    """Test download with --inline leaves existing instructions.md and commands.md untouched"""
+    runner = CliRunner()
+
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+
+    def mock_extractall(path):
+        extract_path = Path(path)
+        extracted_dir = extract_path / "llm_ide_rules-master"
+        extracted_dir.mkdir(parents=True, exist_ok=True)
+        instructions = """## Python
+globs: **/*.py
+
+Remote Python rules.
+"""
+        (extracted_dir / "instructions.md").write_text(instructions, encoding="utf-8")
+
+    mock_zip_instance.extractall = mock_extractall
+
+    target_dir = tmp_path / "project"
+    target_dir.mkdir()
+
+    original_instructions = "# Original Instructions\nDo not overwrite me.\n"
+    original_commands = "# Original Commands\nDo not overwrite me.\n"
+    (target_dir / "instructions.md").write_text(original_instructions, encoding="utf-8")
+    (target_dir / "commands.md").write_text(original_commands, encoding="utf-8")
+
+    result = runner.invoke(
+        app,
+        [
+            "download",
+            "cursor",
+            "--inline",
+            "--target",
+            str(target_dir),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert (target_dir / "instructions.md").read_text(
+        encoding="utf-8"
+    ) == original_instructions
+    assert (target_dir / "commands.md").read_text(encoding="utf-8") == original_commands
+    assert (target_dir / ".cursor" / "rules" / "python.mdc").exists()
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+def test_download_inline_generates_agents_doc(
+    mock_zipfile, mock_requests, tmp_path: Path
+):
+    """Test download with --inline generates AGENTS.md without instructions.md"""
+    runner = CliRunner()
+
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+
+    def mock_extractall(path):
+        extract_path = Path(path)
+        extracted_dir = extract_path / "llm_ide_rules-master"
+        extracted_dir.mkdir(parents=True, exist_ok=True)
+        instructions = """## Python
+globs: **/*.py
+
+Python rules.
+"""
+        (extracted_dir / "instructions.md").write_text(instructions, encoding="utf-8")
+
+    mock_zip_instance.extractall = mock_extractall
+
+    target_dir = tmp_path / "project"
+    target_dir.mkdir()
+
+    result = runner.invoke(
+        app,
+        [
+            "download",
+            "agents",
+            "--inline",
+            "--target",
+            str(target_dir),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert not (target_dir / "instructions.md").exists()
+    assert (target_dir / "AGENTS.md").exists()
+    agents_content = (target_dir / "AGENTS.md").read_text(encoding="utf-8")
+    assert "Python rules." in agents_content
