@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.18.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.17.0...v0.18.0) (2026-09-13)
+
+
+### Features
+
+* add --inline option to download command ([5d75666](https://github.com/iloveitaly/llm-ide-rules/commit/5d7566662b9ea08e4dc198df7d41f7d47a4e0063))
+* **download:** add --inline option to explode rules in memory ([5d75666](https://github.com/iloveitaly/llm-ide-rules/commit/5d7566662b9ea08e4dc198df7d41f7d47a4e0063))
+
 ## [0.17.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.16.0...v0.17.0) (2026-09-12)
 
 
