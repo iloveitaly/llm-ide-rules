@@ -108,6 +108,75 @@ Here are instructions to plan only.
         assert not Path(".github/prompts/fix-tests.prompt.md").exists()
 
 
+def test_explode_comma_separated_agents():
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path("instructions.md").write_text(
+            """# Sample Instructions
+
+## Python
+globs: *.py
+
+Here are Python rules for development.
+"""
+        )
+
+        result = runner.invoke(
+            app, ["explode", "instructions.md", "--agent", "cursor,claude"]
+        )
+
+        assert result.exit_code == 0
+        assert Path(".cursor/rules/python.mdc").exists()
+        assert Path(".claude/rules/python.md").exists()
+        assert not Path(".github/instructions").exists()
+
+
+def test_explode_comma_separated_agents_with_spaces():
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path("instructions.md").write_text(
+            """# Sample Instructions
+
+## Python
+globs: *.py
+
+Here are Python rules for development.
+"""
+        )
+
+        result = runner.invoke(
+            app, ["explode", "instructions.md", "--agent", "cursor, claude"]
+        )
+
+        assert result.exit_code == 0
+        assert Path(".cursor/rules/python.mdc").exists()
+        assert Path(".claude/rules/python.md").exists()
+        assert not Path(".github/instructions").exists()
+
+
+def test_explode_invalid_comma_separated_agent():
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path("instructions.md").write_text("# Sample Instructions\n")
+
+        result = runner.invoke(
+            app, ["explode", "instructions.md", "--agent", "cursor,nope"]
+        )
+
+        assert result.exit_code == 1
+        assert "Invalid agent 'nope'" in result.stderr
+        assert not Path(".cursor").exists()
+
+
 def test_explode_generates_general_mdc_when_agents_enabled():
     """Test that general.mdc is NOT skipped when agents agent is active."""
     runner = CliRunner()

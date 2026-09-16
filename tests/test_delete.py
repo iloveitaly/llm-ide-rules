@@ -91,6 +91,35 @@ def test_delete_with_yes_flag():
         assert not rules_dir.exists()
 
 
+def test_delete_comma_separated_types():
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+
+        cursor_rules = temp_path / ".cursor" / "rules"
+        cursor_rules.mkdir(parents=True)
+        (cursor_rules / "test.mdc").write_text("test")
+
+        claude_rules = temp_path / ".claude" / "rules"
+        claude_rules.mkdir(parents=True)
+        (claude_rules / "test.md").write_text("test")
+
+        github_instructions = temp_path / ".github" / "instructions"
+        github_instructions.mkdir(parents=True)
+        (github_instructions / "test.instructions.md").write_text("test")
+
+        result = runner.invoke(
+            app,
+            ["delete", "cursor,claude", "--target", temp_dir, "--yes", "--everything"],
+        )
+
+        assert result.exit_code == 0
+        assert not cursor_rules.exists()
+        assert not claude_rules.exists()
+        assert github_instructions.exists()
+
+
 def test_delete_with_confirmation_yes():
     """Test delete with confirmation accepted."""
     runner = CliRunner()

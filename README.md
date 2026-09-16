@@ -54,12 +54,14 @@ uvx llm-ide-rules implode opencode [output_file]   # Bundle OpenCode commands
 # Download instruction files from repositories
 uvx llm-ide-rules download [instruction_types]    # Download everything by default
 uvx llm-ide-rules download cursor github          # Download specific types
+uvx llm-ide-rules download cursor,github          # Same, comma-separated
 uvx llm-ide-rules download --repo other/repo      # Download from different repo
 uvx llm-ide-rules download --inline               # Explode rules without saving instructions.md or commands.md
 
 # Delete downloaded instruction files
 uvx llm-ide-rules delete [instruction_types]      # Delete everything by default
 uvx llm-ide-rules delete cursor claude            # Delete specific types
+uvx llm-ide-rules delete cursor,claude            # Same, comma-separated
 uvx llm-ide-rules delete --yes                    # Skip confirmation prompt
 ```
 
@@ -103,6 +105,9 @@ uvx llm-ide-rules explode instructions.md
 # Explode for a specific agent only
 uvx llm-ide-rules explode instructions.md --agent opencode
 
+# Explode for multiple agents
+uvx llm-ide-rules explode instructions.md --agent cursor,claude
+
 # Bundle Cursor rules back into a single file
 uvx llm-ide-rules implode cursor bundled-instructions.md
 
@@ -117,6 +122,7 @@ uvx llm-ide-rules download
 
 # Download only specific instruction types
 uvx llm-ide-rules download cursor github
+uvx llm-ide-rules download cursor,github
 
 # Download from a different repository
 uvx llm-ide-rules download --repo other-user/other-repo --target ./my-project

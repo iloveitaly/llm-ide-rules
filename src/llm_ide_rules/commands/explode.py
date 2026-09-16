@@ -11,7 +11,7 @@ from llm_ide_rules.agents.base import (
     replace_header_with_proper_casing,
     write_rule_file,
 )
-from llm_ide_rules.constants import VALID_AGENTS, header_to_filename
+from llm_ide_rules.constants import VALID_AGENTS, header_to_filename, parse_client_names
 from llm_ide_rules.log import log
 from llm_ide_rules.markdown_parser import parse_sections
 
@@ -80,7 +80,7 @@ def get_always_apply_rule_agents(
 
 def explode_implementation(
     input_file: str | Path = "instructions.md",
-    agent: str = "all",
+    agent: str | list[str] = "all",
     working_dir: Path | None = None,
     agents_filename: str = "AGENTS.md",
 ) -> None:
@@ -88,10 +88,20 @@ def explode_implementation(
     if working_dir is None:
         working_dir = Path.cwd()
 
-    if agent not in VALID_AGENTS:
-        log.error("invalid agent", agent=agent, valid_agents=VALID_AGENTS)
+    requested_agents = parse_client_names(agent)
+    if not requested_agents:
+        requested_agents = ["all"]
+
+    invalid_agents = [name for name in requested_agents if name not in VALID_AGENTS]
+    if invalid_agents:
+        log.error(
+            "invalid agent",
+            agent=invalid_agents,
+            valid_agents=VALID_AGENTS,
+        )
         error_msg = (
-            f"Invalid agent '{agent}'. Must be one of: {', '.join(VALID_AGENTS)}"
+            f"Invalid agent '{', '.join(invalid_agents)}'. "
+            f"Must be one of: {', '.join(VALID_AGENTS)}"
         )
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
@@ -99,13 +109,12 @@ def explode_implementation(
     log.info(
         "starting explode operation",
         input_file=input_file,
-        agent=agent,
+        agent=requested_agents,
         working_dir=str(working_dir),
     )
 
     # Initialize only the agents we need
-    agents_to_process = []
-    if agent == "all":
+    if "all" in requested_agents:
         agents_to_process = [
             "cursor",
             "github",
@@ -116,9 +125,9 @@ def explode_implementation(
             "grok",
         ]
     else:
-        agents_to_process = [agent]
+        agents_to_process = list(requested_agents)
         # OpenCode uses AGENTS.md, so enable the agents adapter automatically
-        if agent in ["opencode"] and "agents" not in agents_to_process:
+        if "opencode" in agents_to_process and "agents" not in agents_to_process:
             agents_to_process.append("agents")
 
     # Initialize agents and create directories
@@ -304,7 +313,7 @@ alwaysApply: true
             )
 
     # Build log message and user output based on processed agents
-    log_data = {"agent": agent}
+    log_data = {"agent": requested_agents}
     created_dirs = []
 
     for agent_name in agents_to_process:
@@ -359,7 +368,7 @@ def explode_main(
         typer.Option(
             "--agent",
             "-a",
-            help="Agent to explode for (cursor, github, claude, opencode, or all)",
+            help="Agents to explode for. Comma-separated (cursor,github,claude) or all.",
         ),
     ] = "all",
 ) -> None:

@@ -10,6 +10,7 @@ import typer
 
 from llm_ide_rules.commands.download import detect_active_agents
 from llm_ide_rules.commands.explode import explode_implementation
+from llm_ide_rules.constants import parse_client_names
 from llm_ide_rules.log import log
 
 
@@ -22,7 +23,7 @@ def ignores_main(
         typer.Option(
             "--agent",
             "-a",
-            help="Agent to list ignores for (cursor, github, claude, opencode, or all). Defaults to detecting active agents.",
+            help="Agents to list ignores for. Comma-separated (cursor,github,claude) or all. Defaults to detecting active agents.",
         ),
     ] = None,
     print_output: Annotated[
@@ -44,7 +45,7 @@ def ignores_main(
     cwd = Path.cwd()
 
     if agent:
-        agents_to_run = [agent]
+        agents_to_run = parse_client_names(agent)
     else:
         detected = detect_active_agents(cwd)
         if detected:
@@ -83,8 +84,7 @@ def ignores_main(
             redirect_stdout(f_out),
             redirect_stderr(f_err),
         ):
-            for agent_name in agents_to_run:
-                explode_implementation(input_file, agent_name, cwd)
+            explode_implementation(input_file, agents_to_run, cwd)
 
     except typer.Exit as e:
         exit_exception = e

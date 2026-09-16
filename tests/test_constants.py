@@ -3,7 +3,27 @@
 from llm_ide_rules.constants import (
     filename_to_header,
     header_to_filename,
+    parse_client_names,
 )
+
+
+def test_parse_client_names():
+    assert parse_client_names(None) == []
+    assert parse_client_names("cursor") == ["cursor"]
+    assert parse_client_names("cursor,claude") == ["cursor", "claude"]
+    assert parse_client_names("cursor, claude") == ["cursor", "claude"]
+    assert parse_client_names("cursor,claude,cursor") == ["cursor", "claude"]
+    assert parse_client_names(["cursor", "github,claude"]) == [
+        "cursor",
+        "github",
+        "claude",
+    ]
+    assert parse_client_names(["cursor,github", "claude"]) == [
+        "cursor",
+        "github",
+        "claude",
+    ]
+    assert parse_client_names("cursor,") == ["cursor"]
 
 
 def test_header_to_filename_simple():

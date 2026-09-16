@@ -305,6 +305,35 @@ Python rules.
         assert ".cursor" not in output
 
 
+def test_ignores_comma_separated_agents():
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path(".cursor").mkdir()
+        instructions_content = """# Sample Instructions
+
+## Python
+globs: *.py
+
+Python rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        result = runner.invoke(
+            app,
+            ["ignores", "instructions.md", "--agent", "cursor,github", "--print"],
+        )
+
+        assert result.exit_code == 0
+        output = result.stdout
+
+        assert ".cursor/rules/python.mdc" in output
+        assert ".github/instructions/python.instructions.md" in output
+        assert ".claude" not in output
+
+
 def test_ignores_echoes_detected_agents_when_not_print():
     """Test that ignores echoes detected active agents when writing .gitignore."""
     runner = CliRunner()
