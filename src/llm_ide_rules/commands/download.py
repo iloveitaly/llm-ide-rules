@@ -320,7 +320,7 @@ def download_main(
     instruction_types: Annotated[
         list[str] | None,
         typer.Argument(
-            help="Types of instructions to download (cursor, github, claude, opencode, agents, antigravity, grok). Defaults to the current runtime environment, then already-exploded agents on disk, then all."
+            help="Types of instructions to download (cursor, github, claude, opencode, agents, antigravity, grok). Defaults to already-exploded agents on disk, then the current runtime environment, then all."
         ),
     ] = None,
     repo: Annotated[
@@ -392,7 +392,7 @@ def download_main(
     target_path = Path(target_dir).resolve()
     target_path.mkdir(parents=True, exist_ok=True)
 
-    # Use runtime environment, then detected types, then default types
+    # Use detected types, then runtime environment, then default types
     if not instruction_types:
         instruction_types, source = resolve_target_agents(
             target_path, fallback=DEFAULT_TYPES

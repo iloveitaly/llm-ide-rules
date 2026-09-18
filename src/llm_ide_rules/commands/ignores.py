@@ -21,7 +21,7 @@ def ignores_main(
         typer.Option(
             "--agent",
             "-a",
-            help="Agent to list ignores for (cursor, github, claude, opencode, or all). Defaults to the current runtime environment, then already-exploded agents on disk, then all.",
+            help="Agent to list ignores for (cursor, github, claude, opencode, or all). Defaults to already-exploded agents on disk, then the current runtime environment, then all.",
         ),
     ] = None,
     print_output: Annotated[

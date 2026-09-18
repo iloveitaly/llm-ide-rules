@@ -43,8 +43,8 @@ The `llm-ide-rules` CLI provides commands to manage LLM IDE prompts and rules:
 
 ```sh
 # Convert instruction file to separate rule files.
-# Defaults to the current runtime (e.g. Cursor Cloud), then already-exploded
-# agents on disk, then all supported agents.
+# Defaults to already-exploded agents on disk, then the current runtime
+# (e.g. Cursor Cloud), then all supported agents.
 uvx llm-ide-rules explode [input_file]
 
 # Bundle rule files back into a single instruction file
@@ -54,7 +54,7 @@ uvx llm-ide-rules implode claude [output_file]     # Bundle Claude Code rules + 
 uvx llm-ide-rules implode opencode [output_file]   # Bundle OpenCode commands
 
 # Download instruction files from repositories
-uvx llm-ide-rules download [instruction_types]    # Runtime, then disk, then all
+uvx llm-ide-rules download [instruction_types]    # Disk, then runtime, then all
 uvx llm-ide-rules download cursor github          # Download specific types
 uvx llm-ide-rules download --repo other/repo      # Download from different repo
 uvx llm-ide-rules download --inline               # Explode rules without saving instructions.md or commands.md
@@ -99,7 +99,7 @@ When you run `llm_ide_rules download` again, the tool will:
 ### Examples
 
 ```sh
-# Explode instructions.md using runtime/disk detection (or all agents)
+# Explode instructions.md using disk/runtime detection (or all agents)
 uvx llm-ide-rules explode instructions.md
 
 # Explode for a specific agent only

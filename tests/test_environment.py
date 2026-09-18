@@ -45,11 +45,21 @@ def test_is_cursor_cloud_rejects_bare_cursor_agent():
     assert detect_runtime_agent({}) is None
 
 
-def test_resolve_prefers_runtime_over_disk(tmp_path: Path):
+def test_resolve_prefers_disk_over_runtime(tmp_path: Path):
     (tmp_path / ".claude").mkdir()
     (tmp_path / ".github").mkdir()
     (tmp_path / ".github" / "copilot-instructions.md").touch()
 
+    agents, source = resolve_target_agents(
+        tmp_path,
+        environ={"CURSOR_CONVERSATION_ID": "bc-test"},
+    )
+
+    assert source == "disk"
+    assert agents == ["github", "claude"]
+
+
+def test_resolve_uses_runtime_when_disk_empty(tmp_path: Path):
     agents, source = resolve_target_agents(
         tmp_path,
         environ={"CURSOR_CONVERSATION_ID": "bc-test"},

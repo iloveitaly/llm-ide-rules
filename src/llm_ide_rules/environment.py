@@ -3,13 +3,12 @@
 Default explode/download target resolution:
 
 1. Explicit CLI selection
-2. Certain runtime environment (Cursor Cloud today)
-3. Agents already exploded on disk
+2. Agents already exploded on disk
+3. Certain runtime environment (Cursor Cloud today)
 4. Fallback (all explode agents, or download DEFAULT_TYPES)
 
 Cursor Cloud is identified from vendor-injected env vars, not from `.cursor/`
-on disk. This repo (and many others) commit rules for every agent, so disk
-detection would otherwise explode everything.
+on disk. Runtime detection only applies when the target has no exploded agents.
 
 Easy follow-ups to wire into `RUNTIME_DETECTORS`:
 
@@ -124,14 +123,14 @@ def resolve_target_agents(
     if explicit:
         return list(explicit), "explicit"
 
-    runtime_agent = detect_runtime_agent(environ)
-    if runtime_agent:
-        log.info("detected runtime environment", agent=runtime_agent)
-        return [runtime_agent], "runtime"
-
     detected = detect_active_agents(working_dir)
     if detected:
         log.info("detected active agents in target directory", detected=detected)
         return detected, "disk"
+
+    runtime_agent = detect_runtime_agent(environ)
+    if runtime_agent:
+        log.info("detected runtime environment", agent=runtime_agent)
+        return [runtime_agent], "runtime"
 
     return list(fallback), "fallback"
