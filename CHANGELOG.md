@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.20.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.19.0...v0.20.0) (2026-09-18)
+
+
+### Features
+
+* add Codex agent support for AGENTS.md and skills ([#108](https://github.com/iloveitaly/llm-ide-rules/issues/108)) ([3e67f11](https://github.com/iloveitaly/llm-ide-rules/commit/3e67f11ed1b6dd884024d22c5ecebb5f6995ca6d))
+
+
+### Documentation
+
+* update development and testing guidelines in instructions.md ([9107eae](https://github.com/iloveitaly/llm-ide-rules/commit/9107eaeebd76b4948e4c42a58b4b0cbf3422226e))
+
 ## [0.19.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.18.0...v0.19.0) (2026-09-18)
 
 
