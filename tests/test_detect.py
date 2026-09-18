@@ -1,7 +1,8 @@
 from pathlib import Path
 
 from llm_ide_rules.constants import EXPLODE_AGENTS
-from llm_ide_rules.environment import (
+from llm_ide_rules.detect import (
+    describe_resolved_agents,
     detect_active_agents,
     detect_runtime_agent,
     is_cursor_cloud,
@@ -136,3 +137,16 @@ def test_detect_active_agents(tmp_path: Path):
 
     (tmp_path / ".github" / "copilot-instructions.md").touch()
     assert set(detect_active_agents(tmp_path)) == {"cursor", "claude", "github"}
+
+
+def test_describe_resolved_agents():
+    assert (
+        describe_resolved_agents("runtime", ["cursor"])
+        == "Detected runtime environment: cursor"
+    )
+    assert (
+        describe_resolved_agents("disk", ["cursor", "claude"])
+        == "Detected active agents: cursor, claude"
+    )
+    assert describe_resolved_agents("fallback", EXPLODE_AGENTS) is None
+    assert describe_resolved_agents("explicit", ["github"]) is None

@@ -12,7 +12,7 @@ import typer
 
 from llm_ide_rules.commands.explode import explode_implementation
 from llm_ide_rules.constants import VALID_AGENTS
-from llm_ide_rules.environment import resolve_target_agents
+from llm_ide_rules.detect import describe_resolved_agents, resolve_target_agents
 from llm_ide_rules.log import log
 
 DEFAULT_REPO = "iloveitaly/llm-ide-rules"
@@ -397,10 +397,8 @@ def download_main(
         instruction_types, source = resolve_target_agents(
             target_path, fallback=DEFAULT_TYPES
         )
-        if source == "runtime":
-            typer.echo(f"Detected runtime environment: {', '.join(instruction_types)}")
-        elif source == "disk":
-            typer.echo(f"Detected active agents: {', '.join(instruction_types)}")
+        if message := describe_resolved_agents(source, instruction_types):
+            typer.echo(message)
 
     # OpenCode uses AGENTS.md, so enable the agents instruction type automatically
     if "opencode" in instruction_types and "agents" not in instruction_types:

@@ -12,7 +12,7 @@ from llm_ide_rules.agents.base import (
     write_rule_file,
 )
 from llm_ide_rules.constants import EXPLODE_AGENTS, VALID_AGENTS, header_to_filename
-from llm_ide_rules.environment import resolve_target_agents
+from llm_ide_rules.detect import describe_resolved_agents, resolve_target_agents
 from llm_ide_rules.log import log
 from llm_ide_rules.markdown_parser import parse_sections
 
@@ -392,10 +392,8 @@ def explode_main(
 
     if agent is None:
         agents, source = resolve_target_agents(working_dir)
-        if source == "runtime":
-            typer.echo(f"Detected runtime environment: {', '.join(agents)}")
-        elif source == "disk":
-            typer.echo(f"Detected active agents: {', '.join(agents)}")
+        if message := describe_resolved_agents(source, agents):
+            typer.echo(message)
 
         explode_implementation(input_file, agents, working_dir)
         return

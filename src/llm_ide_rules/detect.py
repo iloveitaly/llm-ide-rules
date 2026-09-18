@@ -1,4 +1,4 @@
-"""Detect the coding-agent runtime and which agents should be exploded.
+"""Detect exploded agents on disk and the coding-agent runtime.
 
 Default explode/download target resolution:
 
@@ -134,3 +134,14 @@ def resolve_target_agents(
         return [runtime_agent], "runtime"
 
     return list(fallback), "fallback"
+
+
+def describe_resolved_agents(source: str, agents: list[str]) -> str | None:
+    """User-facing reason for a default agent selection, if one should be shown."""
+    if source == "runtime":
+        return f"Detected runtime environment: {', '.join(agents)}"
+
+    if source == "disk":
+        return f"Detected active agents: {', '.join(agents)}"
+
+    return None

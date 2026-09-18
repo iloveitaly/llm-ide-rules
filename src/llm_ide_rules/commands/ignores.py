@@ -9,7 +9,7 @@ from unittest.mock import patch
 import typer
 
 from llm_ide_rules.commands.explode import explode_implementation
-from llm_ide_rules.environment import resolve_target_agents
+from llm_ide_rules.detect import describe_resolved_agents, resolve_target_agents
 
 
 def ignores_main(
@@ -46,12 +46,9 @@ def ignores_main(
         agents_to_run = [agent]
     else:
         agents_to_run, source = resolve_target_agents(cwd, fallback=["all"])
-        if source == "runtime":
-            if not print_output:
-                typer.echo(f"Detected runtime environment: {', '.join(agents_to_run)}")
-        elif source == "disk":
-            if not print_output:
-                typer.echo(f"Detected active agents: {', '.join(agents_to_run)}")
+        message = describe_resolved_agents(source, agents_to_run)
+        if message and not print_output:
+            typer.echo(message)
 
     ignored_files = []
 
