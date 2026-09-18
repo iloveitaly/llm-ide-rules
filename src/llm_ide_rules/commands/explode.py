@@ -198,13 +198,13 @@ def explode_implementation(
         if "github" in agent_instances:
             agent_instances["github"].write_general_instructions(general, working_dir)
 
-        for agent, rules_dir in get_always_apply_rule_agents(
+        for agent_instance, rules_dir in get_always_apply_rule_agents(
             agent_instances, agent_dirs
         ):
-            if agent.name == "github":
+            if agent_instance.name == "github":
                 continue
 
-            agent.write_rule(
+            agent_instance.write_rule(
                 general,
                 "general",
                 rules_dir,
