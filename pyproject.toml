@@ -5,6 +5,13 @@ description = "CLI tool for managing LLM IDE prompts and rules"
 keywords = ["llm", "ide", "prompts", "cursor", "copilot"]
 readme = "README.md"
 requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
 dependencies = [
     "typer>=0.27.2",
     "structlog-config>=0.15.0",
@@ -23,7 +30,7 @@ llm-ide-rules = "llm_ide_rules:main"
 
 
 [build-system]
-requires = ["uv_build>=0.11.0,<0.13"]
+requires = ["uv_build>=0.11.0,<0.14"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -39,6 +46,7 @@ dev = [
     "coverage>=7.16.0",
     "pytest-cov>=7.1.0",
     "covdefaults>=2.3.0",
+    "beautiful-traceback>=1.0.2",
 ]
 
 [tool.pyright]

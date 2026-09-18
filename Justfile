@@ -5,7 +5,11 @@ set script-interpreter := ["zsh", "-euo", "pipefail"]
 # Set up the Python environment, done automatically for you when using direnv
 setup:
     [ -f .env ] || cp .env-example .env
-    uv venv && uv sync
+    uv venv --allow-existing && uv sync
+    # Calling the CLI tool installs a .pth file into the virtualenv for nice tracebacks
+    uv run beautiful-traceback
+    # Keep IDE-specific rule files in sync with instructions.md
+    if [ -f instructions.md ]; then uvx llm-ide-rules explode; fi
     @echo "activate: source ./.venv/bin/activate"
 
 # Build the package
@@ -64,10 +68,23 @@ lint FILES=".":
         uv run pyright {{FILES}} || exit_code=$?
     fi
 
+    # Scan git history for secrets. `just gitleaks_baseline` writes .gitleaksignore.
+    gitleaks git --no-banner --redact=20 || exit_code=$?
+
     if [ $exit_code -ne 0 ]; then
         echo "One or more linting checks failed"
         exit 1
     fi
+
+# Write current gitleaks findings to .gitleaksignore
+[script]
+gitleaks_baseline:
+    tmp=$(mktemp)
+    # gitleaks exits 1 when it finds secrets; that's expected while baselining
+    gitleaks git --no-banner --redact=20 --report-format json --report-path="$tmp" || true
+    jq -r '(. // [])[] | .Fingerprint' "$tmp" | sort > .gitleaksignore
+    rm -f "$tmp"
+    echo "Wrote $(wc -l < .gitleaksignore | tr -d ' ') fingerprints to .gitleaksignore"
 
 # Automatically fix linting errors
 lint-fix:
@@ -116,6 +133,14 @@ github_ruleset_protect_master_delete:
     ruleset_name=$(echo '{{GITHUB_PROTECT_MASTER_RULESET}}' | jq -r .name) && \
     ruleset_id=$(gh api repos/$repo/rulesets --jq ".[] | select(.name == \"$ruleset_name\") | .id") && \
     (([ -n "${ruleset_id}" ] || (echo "No ruleset found" && exit 0)) || gh api --method DELETE repos/$repo/rulesets/$ruleset_id)
+
+# allow squash merges only: disable merge commits and rebase merges
+github_enforce_squash_merge:
+  gh api --method PATCH repos/$(just _github_repo) \
+    -F allow_squash_merge=true \
+    -F allow_merge_commit=false \
+    -F allow_rebase_merge=false \
+    -F delete_branch_on_merge=true
 
 # adds github ruleset to prevent --force and other destructive actions on the github main branch
 github_ruleset_protect_master_create: github_ruleset_protect_master_delete
