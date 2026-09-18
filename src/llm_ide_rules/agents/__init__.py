@@ -4,6 +4,7 @@ from llm_ide_rules.agents.agents import AgentsAgent
 from llm_ide_rules.agents.antigravity import AntigravityAgent
 from llm_ide_rules.agents.base import BaseAgent
 from llm_ide_rules.agents.claude import ClaudeAgent
+from llm_ide_rules.agents.codex import CodexAgent
 from llm_ide_rules.agents.cursor import CursorAgent
 from llm_ide_rules.agents.github import GitHubAgent
 from llm_ide_rules.agents.grok import GrokAgent
@@ -19,6 +20,7 @@ AGENTS: dict[str, type[BaseAgent]] = {
     "vscode": VSCodeAgent,
     "antigravity": AntigravityAgent,
     "grok": GrokAgent,
+    "codex": CodexAgent,
 }
 
 # Aliases for user-friendly names

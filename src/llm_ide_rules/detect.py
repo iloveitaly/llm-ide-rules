@@ -143,12 +143,20 @@ def is_antigravity(environ: Env | None = None) -> bool:
     return _any_set(_env(environ), ("ANTIGRAVITY_AGENT", "ANTIGRAVITY_PROJECT_ID"))
 
 
+def is_codex(environ: Env | None = None) -> bool:
+    "return True when this process was spawned by Codex"
+
+    # CODEX_HOME is the user config dir (~/.codex), not a runtime signal
+    return _any_set(_env(environ), ("CODEX_SANDBOX", "CODEX_CI", "CODEX_THREAD_ID"))
+
+
 RUNTIME_DETECTORS: list[tuple[str, Callable[[Env | None], bool]]] = [
     ("cursor", is_cursor_cloud),
     ("claude", is_claude_code_cloud),
     ("github", is_github_copilot_agent),
     ("opencode", is_opencode),
     ("antigravity", is_antigravity),
+    ("codex", is_codex),
 ]
 
 

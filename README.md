@@ -28,6 +28,8 @@ Different AI coding assistants use different formats for instructions and comman
 | **GitHub Copilot** | prompts | `.github/prompts/*.prompt.md` | YAML frontmatter with `mode: 'agent'` |
 | **OpenCode** | instructions | `AGENTS.md` | Single markdown file at root |
 | **OpenCode** | commands | `.opencode/commands/*.md` | Plain markdown, no frontmatter |
+| **Codex** | instructions | `AGENTS.md` | Root and nested markdown files |
+| **Codex** | commands | `.agents/skills/*/SKILL.md` | YAML frontmatter with `name` and `description` |
 
 ## Installation
 
@@ -55,6 +57,7 @@ uvx llm-ide-rules implode cursor [output_file]     # Bundle Cursor rules
 uvx llm-ide-rules implode github [output_file]     # Bundle GitHub/Copilot instructions
 uvx llm-ide-rules implode claude [output_file]     # Bundle Claude Code rules + commands
 uvx llm-ide-rules implode opencode [output_file]   # Bundle OpenCode commands
+uvx llm-ide-rules implode codex [output_file]      # Bundle Codex skills + AGENTS.md
 
 # Download instructions.md/commands.md, then explode for the given agents.
 # Defaults to already-exploded agents on disk, then the current runtime, then all.
@@ -110,6 +113,7 @@ uvx llm-ide-rules explode
 
 # Explode for a specific agent only
 uvx llm-ide-rules explode opencode
+uvx llm-ide-rules explode codex
 
 # Explode for multiple agents
 uvx llm-ide-rules explode cursor claude
@@ -128,6 +132,9 @@ uvx llm-ide-rules implode github --verbose instructions.md
 
 # Bundle OpenCode commands into commands.md
 uvx llm-ide-rules implode opencode
+
+# Bundle Codex skills into commands.md and AGENTS.md into instructions.md
+uvx llm-ide-rules implode codex
 
 # Download everything from default repository
 uvx llm-ide-rules download

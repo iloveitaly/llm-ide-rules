@@ -282,3 +282,55 @@ def opencode(
         # Don't delete instructions.md if it already exists from another process,
         # but here we're bundling from scratch.
         log.info("no OpenCode rules (AGENTS.md) to bundle")
+
+
+def _bundle_agents_md(label: str) -> bool:
+    """Bundle AGENTS.md files into instructions.md."""
+    agents_agent = get_agent("agents")
+    base_dir = find_project_root()
+    instructions_output_path = base_dir / "instructions.md"
+    rules_written = agents_agent.bundle_rules(instructions_output_path)
+
+    if rules_written:
+        success_msg = f"Bundled {label} rules (AGENTS.md) into instructions.md"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+        return True
+
+    log.info("no AGENTS.md files to bundle", provider=label)
+    return False
+
+
+def codex(
+    output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
+) -> None:
+    """Bundle Codex skills into commands.md and AGENTS.md into instructions.md."""
+    agent = get_agent("codex")
+    base_dir = find_project_root()
+
+    log.info(
+        "bundling codex skills",
+        commands_dir=agent.commands_dir,
+    )
+
+    commands_written = False
+    commands_path = base_dir / agent.commands_dir if agent.commands_dir else None
+
+    if commands_path and commands_path.exists():
+        output_path = base_dir / output
+        commands_written = agent.bundle_commands(output_path)
+
+        if commands_written:
+            success_msg = f"Bundled Codex skills into {output}"
+            typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+        else:
+            output_path.unlink(missing_ok=True)
+            log.info("no Codex skills to bundle")
+    else:
+        log.info("codex skills directory not found", commands_dir=str(commands_path))
+
+    rules_written = _bundle_agents_md("Codex")
+
+    if not commands_written and not rules_written:
+        error_msg = "No Codex skills or AGENTS.md files found to bundle"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
+        raise typer.Exit(1)

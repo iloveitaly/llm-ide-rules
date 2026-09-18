@@ -19,6 +19,7 @@ from llm_ide_rules.commands.implode import (
     agents,
     antigravity,
     claude,
+    codex,
     cursor,
     github,
     grok,
@@ -102,6 +103,9 @@ implode_app.command(
 implode_app.command("opencode", help="Bundle OpenCode commands into a single file")(
     opencode
 )
+implode_app.command(
+    "codex", help="Bundle Codex skills and AGENTS.md into single files"
+)(codex)
 implode_app.command("agents", help="Bundle AGENTS.md files into a single file")(agents)
 app.add_typer(implode_app, name="implode")
 

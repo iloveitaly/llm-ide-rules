@@ -12,8 +12,10 @@ from llm_ide_rules.agents.base import (
     write_rule_file,
 )
 from llm_ide_rules.constants import (
+    DOTAGENTS_LAYOUT_CLIENTS,
     EXPLODE_AGENTS,
     VALID_AGENTS,
+    ensure_agents_adapter,
     header_to_filename,
     parse_client_names,
 )
@@ -122,11 +124,7 @@ def explode_implementation(
     if "all" in requested_agents:
         agents_to_process = list(EXPLODE_AGENTS)
     else:
-        agents_to_process = list(requested_agents)
-
-        # OpenCode uses AGENTS.md, so enable the agents adapter automatically
-        if "opencode" in agents_to_process and "agents" not in agents_to_process:
-            agents_to_process.append("agents")
+        agents_to_process = ensure_agents_adapter(list(requested_agents))
 
     # Initialize agents and create directories
     agent_instances = {}
@@ -322,7 +320,7 @@ alwaysApply: true
         if agent_dirs[agent_name]:
             dir_name = (
                 ".agents/"
-                if agent_name in {"antigravity", "grok"}
+                if agent_name in DOTAGENTS_LAYOUT_CLIENTS
                 else f".{agent_name}/"
             )
             created_dirs.append(dir_name)

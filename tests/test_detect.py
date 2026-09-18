@@ -9,6 +9,7 @@ from llm_ide_rules.detect import (
     detect_runtime_agent,
     is_antigravity,
     is_claude_code_cloud,
+    is_codex,
     is_cursor_cloud,
     is_github_copilot_agent,
     is_opencode,
@@ -125,6 +126,20 @@ def test_is_antigravity_from_env():
     assert is_antigravity({"ANTIGRAVITY_PROJECT_ID": "proj-abc"}) is True
 
 
+def test_is_codex_from_env():
+    env = {"CODEX_SANDBOX": "seatbelt"}
+
+    assert is_codex(env) is True
+    assert detect_runtime_agent(env) == "codex"
+    assert is_codex({"CODEX_CI": "1"}) is True
+    assert is_codex({"CODEX_THREAD_ID": "thread-1"}) is True
+
+
+def test_is_codex_rejects_codex_home():
+    assert is_codex({"CODEX_HOME": "/tmp/codex-home"}) is False
+    assert detect_runtime_agent({"CODEX_HOME": "/tmp/codex-home"}) is None
+
+
 def test_detect_runtime_agent_prefers_first_matching_detector():
     env = {
         "CURSOR_CONVERSATION_ID": "bc-test",
@@ -143,6 +158,7 @@ def test_detect_runtime_agent_prefers_first_matching_detector():
         ({"COPILOT_AGENT_SESSION_ID": "sess-1"}, "github"),
         ({"OPENCODE": "1"}, "opencode"),
         ({"ANTIGRAVITY_AGENT": "true"}, "antigravity"),
+        ({"CODEX_THREAD_ID": "thread-1"}, "codex"),
     ],
 )
 def test_resolve_runtime_when_disk_empty(

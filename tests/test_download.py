@@ -164,13 +164,14 @@ def test_download_instruction_types_configuration():
         "claude",
         "antigravity",
         "grok",
+        "codex",
         "opencode",
         "agents",
     ]
     assert all(t in INSTRUCTION_TYPES for t in expected_types)
 
-    # grok shares the .agents/ directory with antigravity; exclude it from defaults to avoid duplicate work
-    assert set(DEFAULT_TYPES) == set(INSTRUCTION_TYPES.keys()) - {"grok"}
+    # grok and codex share the .agents/ directory with antigravity
+    assert set(DEFAULT_TYPES) == set(INSTRUCTION_TYPES.keys()) - {"grok", "codex"}
 
     # Check that each instruction type has proper configuration
     for config in INSTRUCTION_TYPES.values():

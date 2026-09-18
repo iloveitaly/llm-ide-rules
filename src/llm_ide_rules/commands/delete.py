@@ -7,7 +7,11 @@ from typing import Annotated
 import typer
 
 from llm_ide_rules.commands.download import DEFAULT_TYPES, INSTRUCTION_TYPES
-from llm_ide_rules.constants import header_to_filename, parse_client_names
+from llm_ide_rules.constants import (
+    ensure_agents_adapter,
+    header_to_filename,
+    parse_client_names,
+)
 from llm_ide_rules.log import log
 from llm_ide_rules.markdown_parser import parse_sections
 
@@ -204,9 +208,7 @@ def delete_main(
     else:
         instruction_types = parse_client_names(instruction_types)
 
-    # OpenCode uses AGENTS.md, so enable the agents instruction type automatically
-    if "opencode" in instruction_types and "agents" not in instruction_types:
-        instruction_types.append("agents")
+    instruction_types = ensure_agents_adapter(instruction_types)
 
     invalid_types = [t for t in instruction_types if t not in INSTRUCTION_TYPES]
     if invalid_types:

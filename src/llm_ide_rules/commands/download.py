@@ -11,7 +11,12 @@ import requests
 import typer
 
 from llm_ide_rules.commands.explode import explode_implementation
-from llm_ide_rules.constants import VALID_AGENTS, parse_client_names
+from llm_ide_rules.constants import (
+    SHARED_DOTAGENTS_DEFAULT_EXCLUDES,
+    VALID_AGENTS,
+    ensure_agents_adapter,
+    parse_client_names,
+)
 from llm_ide_rules.detect import describe_resolved_agents, resolve_target_agents
 from llm_ide_rules.log import log
 
@@ -77,6 +82,11 @@ INSTRUCTION_TYPES = {
         "files": [],
         "include_patterns": [],
     },
+    "codex": {
+        "directories": [".agents/skills"],
+        "files": [],
+        "include_patterns": [],
+    },
     "agents": {
         "directories": [],
         "files": [],
@@ -86,8 +96,10 @@ INSTRUCTION_TYPES = {
 }
 
 # Default types to download when no specific types are specified
-# Exclude grok from defaults since both antigravity and grok share the .agents/ directory
-DEFAULT_TYPES = [k for k in INSTRUCTION_TYPES if k != "grok"]
+# grok and codex share .agents/ with antigravity; exclude them to avoid duplicate work
+DEFAULT_TYPES = [
+    k for k in INSTRUCTION_TYPES if k not in SHARED_DOTAGENTS_DEFAULT_EXCLUDES
+]
 
 
 def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
@@ -403,9 +415,7 @@ def download_main(
         if message := describe_resolved_agents(source, instruction_types):
             typer.echo(message)
 
-    # OpenCode uses AGENTS.md, so enable the agents instruction type automatically
-    if "opencode" in instruction_types and "agents" not in instruction_types:
-        instruction_types.append("agents")
+    instruction_types = ensure_agents_adapter(instruction_types)
 
     # Validate instruction types
     invalid_types = [t for t in instruction_types if t not in INSTRUCTION_TYPES]

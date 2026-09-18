@@ -34,6 +34,21 @@ def test_find_files_to_delete_cursor():
         assert len(files) == 0
 
 
+def test_find_files_to_delete_codex():
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+
+        skills_dir = temp_path / ".agents" / "skills"
+        skills_dir.mkdir(parents=True)
+        (skills_dir / "fix-tests").mkdir()
+        (skills_dir / "fix-tests" / "SKILL.md").write_text("skill")
+
+        dirs, files = find_files_to_delete(["codex"], temp_path)
+
+        assert dirs == [skills_dir]
+        assert files == []
+
+
 def test_find_files_to_delete_agents():
     """Test finding AGENTS.md file."""
     with tempfile.TemporaryDirectory() as temp_dir:
