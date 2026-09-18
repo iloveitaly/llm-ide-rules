@@ -1,11 +1,17 @@
 from pathlib import Path
 
+import pytest
+
 from llm_ide_rules.constants import EXPLODE_AGENTS
 from llm_ide_rules.detect import (
     describe_resolved_agents,
     detect_active_agents,
     detect_runtime_agent,
+    is_antigravity,
+    is_claude_code_cloud,
     is_cursor_cloud,
+    is_github_copilot_agent,
+    is_opencode,
     resolve_target_agents,
 )
 
@@ -46,6 +52,103 @@ def test_is_cursor_cloud_rejects_bare_cursor_agent():
     assert detect_runtime_agent({}) is None
 
 
+def test_is_claude_code_cloud_from_remote_session_id():
+    env = {"CLAUDE_CODE_REMOTE_SESSION_ID": "sess-1"}
+
+    assert is_claude_code_cloud(env) is True
+    assert detect_runtime_agent(env) == "claude"
+
+
+def test_is_claude_code_cloud_from_environment_kind():
+    assert is_claude_code_cloud({"CLAUDE_CODE_ENVIRONMENT_KIND": "byoc"}) is True
+    assert is_claude_code_cloud({"CLAUDE_CODE_ENVIRONMENT_KIND": "anthropic_cloud"}) is True
+
+
+def test_is_claude_code_cloud_from_remote_entrypoint():
+    assert is_claude_code_cloud({"CLAUDE_CODE_ENTRYPOINT": "remote"}) is True
+    assert is_claude_code_cloud({"CLAUDE_CODE_ENTRYPOINT": "remote_desktop"}) is True
+
+
+def test_is_claude_code_cloud_rejects_local_cli():
+    env = {"CLAUDECODE": "1", "CLAUDE_CODE_ENTRYPOINT": "cli"}
+
+    assert is_claude_code_cloud(env) is False
+    assert detect_runtime_agent(env) is None
+
+
+def test_is_github_copilot_agent_from_session_id():
+    env = {"COPILOT_AGENT_SESSION_ID": "sess-1"}
+
+    assert is_github_copilot_agent(env) is True
+    assert detect_runtime_agent(env) == "github"
+
+
+def test_is_github_copilot_agent_from_actions_actor():
+    env = {"GITHUB_ACTIONS": "true", "GITHUB_ACTOR": "copilot-swe-agent"}
+
+    assert is_github_copilot_agent(env) is True
+    assert detect_runtime_agent(env) == "github"
+
+
+def test_is_github_copilot_agent_from_workflow_ref():
+    env = {
+        "GITHUB_ACTIONS": "1",
+        "GITHUB_WORKFLOW_REF": "github/copilot-swe-agent/.github/workflows/agent.yml@refs/heads/main",
+    }
+
+    assert is_github_copilot_agent(env) is True
+
+
+def test_is_github_copilot_agent_rejects_plain_actions():
+    env = {"GITHUB_ACTIONS": "true", "GITHUB_ACTOR": "octocat"}
+
+    assert is_github_copilot_agent(env) is False
+    assert detect_runtime_agent(env) is None
+
+
+def test_is_opencode_from_env():
+    env = {"OPENCODE": "1"}
+
+    assert is_opencode(env) is True
+    assert detect_runtime_agent(env) == "opencode"
+    assert is_opencode({"OPENCODE_SERVER": "http://127.0.0.1:4096"}) is True
+
+
+def test_is_antigravity_from_env():
+    env = {"ANTIGRAVITY_AGENT": "true"}
+
+    assert is_antigravity(env) is True
+    assert detect_runtime_agent(env) == "antigravity"
+    assert is_antigravity({"ANTIGRAVITY_PROJECT_ID": "proj-abc"}) is True
+
+
+def test_detect_runtime_agent_prefers_first_matching_detector():
+    env = {
+        "CURSOR_CONVERSATION_ID": "bc-test",
+        "CLAUDE_CODE_REMOTE_SESSION_ID": "sess-1",
+        "OPENCODE": "1",
+    }
+
+    assert detect_runtime_agent(env) == "cursor"
+
+
+@pytest.mark.parametrize(
+    ("environ", "agent"),
+    [
+        ({"CURSOR_CONVERSATION_ID": "bc-test"}, "cursor"),
+        ({"CLAUDE_CODE_REMOTE_SESSION_ID": "sess-1"}, "claude"),
+        ({"COPILOT_AGENT_SESSION_ID": "sess-1"}, "github"),
+        ({"OPENCODE": "1"}, "opencode"),
+        ({"ANTIGRAVITY_AGENT": "true"}, "antigravity"),
+    ],
+)
+def test_resolve_runtime_when_disk_empty(tmp_path: Path, environ: dict[str, str], agent: str):
+    agents, source = resolve_target_agents(tmp_path, environ=environ)
+
+    assert source == "runtime"
+    assert agents == [agent]
+
+
 def test_resolve_prefers_disk_over_runtime(tmp_path: Path):
     (tmp_path / ".claude").mkdir()
     (tmp_path / ".github").mkdir()
@@ -58,16 +161,6 @@ def test_resolve_prefers_disk_over_runtime(tmp_path: Path):
 
     assert source == "disk"
     assert agents == ["github", "claude"]
-
-
-def test_resolve_uses_runtime_when_disk_empty(tmp_path: Path):
-    agents, source = resolve_target_agents(
-        tmp_path,
-        environ={"CURSOR_CONVERSATION_ID": "bc-test"},
-    )
-
-    assert source == "runtime"
-    assert agents == ["cursor"]
 
 
 def test_resolve_uses_disk_when_no_runtime(tmp_path: Path):

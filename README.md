@@ -44,7 +44,7 @@ The `llm-ide-rules` CLI provides commands to manage LLM IDE prompts and rules:
 ```sh
 # Convert instruction file to separate rule files.
 # Defaults to already-exploded agents on disk, then the current runtime
-# (e.g. Cursor Cloud), then all supported agents.
+# (e.g. Cursor Cloud, Claude Code cloud), then all supported agents.
 uvx llm-ide-rules explode [input_file]
 
 # Bundle rule files back into a single instruction file
