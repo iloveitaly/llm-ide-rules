@@ -76,6 +76,29 @@ def test_resolve_uses_fallback_when_undetected(tmp_path: Path):
     assert agents == EXPLODE_AGENTS
 
 
+def test_resolve_explicit_all_uses_fallback(tmp_path: Path):
+    agents, source = resolve_target_agents(
+        tmp_path,
+        explicit="all",
+        fallback=["cursor"],
+        environ={"CURSOR_CONVERSATION_ID": "bc-test"},
+    )
+
+    assert source == "explicit"
+    assert agents == ["cursor"]
+
+
+def test_resolve_explicit_list(tmp_path: Path):
+    agents, source = resolve_target_agents(
+        tmp_path,
+        explicit=["claude", "github"],
+        environ={"CURSOR_CONVERSATION_ID": "bc-test"},
+    )
+
+    assert source == "explicit"
+    assert agents == ["claude", "github"]
+
+
 def test_resolve_explicit_agent_wins(tmp_path: Path):
     (tmp_path / ".cursor").mkdir()
 
