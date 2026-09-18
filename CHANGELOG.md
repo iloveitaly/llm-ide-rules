@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.18.0...v0.19.0) (2026-09-18)
+
+
+### Features
+
+* detect Cursor Cloud runtime when exploding rules ([#105](https://github.com/iloveitaly/llm-ide-rules/issues/105)) ([85b5879](https://github.com/iloveitaly/llm-ide-rules/commit/85b5879718cfbb4bd5b5eae4703e93cca4f583a1))
+
 ## [0.18.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.17.0...v0.18.0) (2026-09-13)
 
 
