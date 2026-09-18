@@ -11,7 +11,7 @@ import requests
 import typer
 
 from llm_ide_rules.commands.explode import explode_implementation
-from llm_ide_rules.constants import VALID_AGENTS
+from llm_ide_rules.constants import VALID_AGENTS, parse_client_names
 from llm_ide_rules.log import log
 
 DEFAULT_REPO = "iloveitaly/llm-ide-rules"
@@ -331,7 +331,7 @@ def download_main(
     instruction_types: Annotated[
         list[str] | None,
         typer.Argument(
-            help="Types of instructions to download (cursor, github, claude, opencode, agents, antigravity, grok). Downloads everything by default."
+            help="Types of instructions to download. Space- or comma-separated (cursor,github,claude). Downloads everything by default."
         ),
     ] = None,
     repo: Annotated[
@@ -379,6 +379,7 @@ def download_main(
     \b
     # Download only Cursor and GitHub instructions
     llm_ide_rules download cursor github
+    llm_ide_rules download cursor,github
 
     \b
     # Download from a different repository
@@ -402,6 +403,8 @@ def download_main(
     """
     target_path = Path(target_dir).resolve()
     target_path.mkdir(parents=True, exist_ok=True)
+
+    instruction_types = parse_client_names(instruction_types)
 
     # Use detected types if none specified, falling back to default types
     if not instruction_types:

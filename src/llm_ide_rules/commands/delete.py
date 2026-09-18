@@ -7,7 +7,7 @@ from typing import Annotated
 import typer
 
 from llm_ide_rules.commands.download import DEFAULT_TYPES, INSTRUCTION_TYPES
-from llm_ide_rules.constants import header_to_filename
+from llm_ide_rules.constants import header_to_filename, parse_client_names
 from llm_ide_rules.log import log
 from llm_ide_rules.markdown_parser import parse_sections
 
@@ -147,7 +147,7 @@ def delete_main(
     instruction_types: Annotated[
         list[str] | None,
         typer.Argument(
-            help="Types of instructions to delete (cursor, github, claude, opencode, agents). Deletes everything by default."
+            help="Types of instructions to delete. Space- or comma-separated (cursor,github,claude). Deletes everything by default."
         ),
     ] = None,
     target_dir: Annotated[
@@ -189,6 +189,7 @@ def delete_main(
     \b
     # Delete only Cursor and Claude files (but only if generated)
     llm_ide_rules delete cursor claude
+    llm_ide_rules delete cursor,claude
 
     \b
     # Delete without confirmation prompt
@@ -200,6 +201,8 @@ def delete_main(
     """
     if not instruction_types:
         instruction_types = DEFAULT_TYPES
+    else:
+        instruction_types = parse_client_names(instruction_types)
 
     # OpenCode uses AGENTS.md, so enable the agents instruction type automatically
     if "opencode" in instruction_types and "agents" not in instruction_types:
