@@ -8,17 +8,20 @@ from unittest.mock import patch
 
 import typer
 
-from llm_ide_rules.commands.download import detect_active_agents
 from llm_ide_rules.commands.explode import explode_implementation
 from llm_ide_rules.constants import parse_client_names
-from llm_ide_rules.log import log
+from llm_ide_rules.detect import describe_resolved_agents, resolve_target_agents
 
 
 def ignores_main(
     agents: Annotated[
         list[str] | None,
         typer.Argument(
-            help="Agents to list ignores for (cursor github claude). Defaults to detecting active agents."
+            help=(
+                "Agents to list ignores for (cursor github claude). Defaults to "
+                "already-exploded agents on disk, then the current runtime "
+                "environment, then all."
+            )
         ),
     ] = None,
     input_file: Annotated[
@@ -46,14 +49,10 @@ def ignores_main(
     if agents:
         agents_to_run = parse_client_names(agents)
     else:
-        detected = detect_active_agents(cwd)
-        if detected:
-            log.info("detected active agents in target directory", detected=detected)
-            if not print_output:
-                typer.echo(f"Detected active agents: {', '.join(detected)}")
-            agents_to_run = detected
-        else:
-            agents_to_run = ["all"]
+        agents_to_run, source = resolve_target_agents(cwd, fallback=["all"])
+        message = describe_resolved_agents(source, agents_to_run)
+        if message and not print_output:
+            typer.echo(message)
 
     ignored_files = []
 

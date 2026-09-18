@@ -5,7 +5,7 @@ from typing import Annotated
 
 import typer
 
-from llm_ide_rules.commands.download import detect_active_agents
+from llm_ide_rules.detect import detect_active_agents
 
 
 def exploded_main(

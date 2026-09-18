@@ -543,3 +543,75 @@ This should be ignored.
         remote_command_content = Path(".cursor/commands/remote-command.md").read_text()
         assert "This is a remote command." in remote_command_content
         assert "Local Command" not in remote_command_content
+
+
+def test_explode_infers_already_exploded_agents():
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path(".cursor").mkdir()
+        Path("instructions.md").write_text("## Python\n\nPython rules\n")
+
+        result = runner.invoke(app, ["explode"])
+
+        assert result.exit_code == 0
+        assert "Detected active agents: cursor" in result.stdout
+        assert Path(".cursor/rules/python.mdc").exists()
+        assert not Path(".github").exists()
+        assert not Path(".claude").exists()
+
+
+def test_explode_disk_wins_over_cursor_cloud(monkeypatch):
+    runner = CliRunner()
+    monkeypatch.setenv("CURSOR_CONVERSATION_ID", "bc-test-id")
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path(".claude").mkdir()
+        Path("instructions.md").write_text("## Python\n\nPython rules\n")
+
+        result = runner.invoke(app, ["explode"])
+
+        assert result.exit_code == 0
+        assert "Detected active agents: claude" in result.stdout
+        assert Path(".claude/rules/python.md").exists()
+        assert not Path(".cursor").exists()
+        assert not Path(".github").exists()
+
+
+def test_explode_cursor_cloud_when_disk_empty(monkeypatch):
+    runner = CliRunner()
+    monkeypatch.setenv("CURSOR_CONVERSATION_ID", "bc-test-id")
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path("instructions.md").write_text("## Python\n\nPython rules\n")
+
+        result = runner.invoke(app, ["explode"])
+
+        assert result.exit_code == 0
+        assert "Detected runtime environment: cursor" in result.stdout
+        assert Path(".cursor/rules/python.mdc").exists()
+        assert not Path(".claude").exists()
+        assert not Path(".github").exists()
+
+
+def test_explode_explicit_all_overrides_cursor_cloud(monkeypatch):
+    runner = CliRunner()
+    monkeypatch.setenv("CURSOR_CONVERSATION_ID", "bc-test-id")
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path("instructions.md").write_text("## Python\n\nPython rules\n")
+
+        result = runner.invoke(app, ["explode", "all"])
+
+        assert result.exit_code == 0
+        assert "Detected runtime environment" not in result.stdout
+        assert Path(".cursor/rules/python.mdc").exists()
+        assert Path(".github/instructions/python.instructions.md").exists()

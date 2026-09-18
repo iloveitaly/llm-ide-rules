@@ -354,3 +354,40 @@ Python rules.
         assert result.exit_code == 0
         assert "Detected active agents: cursor" in result.stdout
         assert "Updated .gitignore" in result.stdout
+
+
+def test_ignores_disk_wins_over_cursor_cloud(monkeypatch):
+    runner = CliRunner()
+    monkeypatch.setenv("CURSOR_CONVERSATION_ID", "bc-test-id")
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path(".claude").mkdir()
+        Path("instructions.md").write_text("## Python\nglobs: *.py\n\nPython rules.\n")
+
+        result = runner.invoke(app, ["ignores", "--print"])
+
+        assert result.exit_code == 0
+        output = result.stdout
+        assert ".claude/rules/python.md" in output
+        assert ".cursor" not in output
+        assert ".github" not in output
+
+
+def test_ignores_cursor_cloud_when_disk_empty(monkeypatch):
+    runner = CliRunner()
+    monkeypatch.setenv("CURSOR_CONVERSATION_ID", "bc-test-id")
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path("instructions.md").write_text("## Python\nglobs: *.py\n\nPython rules.\n")
+
+        result = runner.invoke(app, ["ignores", "--print"])
+
+        assert result.exit_code == 0
+        output = result.stdout
+        assert ".cursor/rules/python.mdc" in output
+        assert ".claude" not in output
+        assert ".github" not in output

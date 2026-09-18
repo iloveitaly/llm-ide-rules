@@ -11,6 +11,8 @@ VALID_AGENTS = [
     "all",
 ]
 
+EXPLODE_AGENTS = [name for name in VALID_AGENTS if name != "all"]
+
 
 def parse_client_names(value: str | list[str] | None) -> list[str]:
     """Split comma-separated client names, preserving order and dropping empties."""

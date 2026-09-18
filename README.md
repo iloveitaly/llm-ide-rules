@@ -42,9 +42,11 @@ uvx llm-ide-rules@latest --help
 The `llm-ide-rules` CLI provides commands to manage LLM IDE prompts and rules:
 
 ```sh
-# Convert instruction file to separate rule files
-uvx llm-ide-rules explode [agents...]            # All agents by default
-uvx llm-ide-rules explode cursor claude          # Specific agents
+# Convert instruction file to separate rule files.
+# Defaults to already-exploded agents on disk, then the current runtime
+# (e.g. Cursor Cloud, Claude Code cloud), then all supported agents.
+uvx llm-ide-rules explode [agents...]
+uvx llm-ide-rules explode cursor claude
 uvx llm-ide-rules explode $(llm-ide-rules exploded /path/to/repo)
 uvx llm-ide-rules explode cursor --input path.md
 
@@ -54,17 +56,18 @@ uvx llm-ide-rules implode github [output_file]     # Bundle GitHub/Copilot instr
 uvx llm-ide-rules implode claude [output_file]     # Bundle Claude Code rules + commands
 uvx llm-ide-rules implode opencode [output_file]   # Bundle OpenCode commands
 
-# Download instruction files from repositories
-uvx llm-ide-rules download [instruction_types]    # Download everything by default
-uvx llm-ide-rules download cursor github          # Download specific types
-uvx llm-ide-rules download cursor,github          # Same, comma-separated
-uvx llm-ide-rules download --repo other/repo      # Download from different repo
-uvx llm-ide-rules download --inline               # Explode rules without saving instructions.md or commands.md
+# Download instructions.md/commands.md, then explode for the given agents.
+# Defaults to already-exploded agents on disk, then the current runtime, then all.
+uvx llm-ide-rules download [agents...]
+uvx llm-ide-rules download cursor github
+uvx llm-ide-rules download cursor,github
+uvx llm-ide-rules download --repo other/repo
+uvx llm-ide-rules download --inline               # Explode without saving instructions.md or commands.md
 
-# Delete downloaded instruction files
-uvx llm-ide-rules delete [instruction_types]      # Delete everything by default
-uvx llm-ide-rules delete cursor claude            # Delete specific types
-uvx llm-ide-rules delete cursor,claude            # Same, comma-separated
+# Delete exploded agent files
+uvx llm-ide-rules delete [agents...]              # Delete everything by default
+uvx llm-ide-rules delete cursor claude
+uvx llm-ide-rules delete cursor,claude
 uvx llm-ide-rules delete --yes                    # Skip confirmation prompt
 ```
 
@@ -102,7 +105,7 @@ When you run `llm_ide_rules download` again, the tool will:
 ### Examples
 
 ```sh
-# Explode instructions.md into all supported formats (cursor, github, claude, opencode)
+# Explode instructions.md using disk/runtime detection (or all agents)
 uvx llm-ide-rules explode
 
 # Explode for a specific agent only

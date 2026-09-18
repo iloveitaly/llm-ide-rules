@@ -11,7 +11,13 @@ from llm_ide_rules.agents.base import (
     replace_header_with_proper_casing,
     write_rule_file,
 )
-from llm_ide_rules.constants import VALID_AGENTS, header_to_filename, parse_client_names
+from llm_ide_rules.constants import (
+    EXPLODE_AGENTS,
+    VALID_AGENTS,
+    header_to_filename,
+    parse_client_names,
+)
+from llm_ide_rules.detect import describe_resolved_agents, resolve_target_agents
 from llm_ide_rules.log import log
 from llm_ide_rules.markdown_parser import parse_sections
 
@@ -113,19 +119,11 @@ def explode_implementation(
         working_dir=str(working_dir),
     )
 
-    # Initialize only the agents we need
     if "all" in requested_agents:
-        agents_to_process = [
-            "cursor",
-            "github",
-            "claude",
-            "opencode",
-            "agents",
-            "antigravity",
-            "grok",
-        ]
+        agents_to_process = list(EXPLODE_AGENTS)
     else:
         agents_to_process = list(requested_agents)
+
         # OpenCode uses AGENTS.md, so enable the agents adapter automatically
         if "opencode" in agents_to_process and "agents" not in agents_to_process:
             agents_to_process.append("agents")
@@ -363,7 +361,11 @@ def explode_main(
     agents: Annotated[
         list[str] | None,
         typer.Argument(
-            help="Agents to explode for (cursor github claude). Defaults to all."
+            help=(
+                "Agents to explode for (cursor github claude). Defaults to "
+                "already-exploded agents on disk, then the current runtime "
+                "environment, then all."
+            )
         ),
     ] = None,
     input_file: Annotated[
@@ -372,4 +374,12 @@ def explode_main(
     ] = "instructions.md",
 ) -> None:
     """Convert instruction file to separate rule files."""
-    explode_implementation(input_file, parse_client_names(agents) or "all", Path.cwd())
+    working_dir = Path.cwd()
+    requested_agents = parse_client_names(agents)
+
+    if not requested_agents:
+        requested_agents, source = resolve_target_agents(working_dir)
+        if message := describe_resolved_agents(source, requested_agents):
+            typer.echo(message)
+
+    explode_implementation(input_file, requested_agents, working_dir)
