@@ -61,7 +61,10 @@ def test_is_claude_code_cloud_from_remote_session_id():
 
 def test_is_claude_code_cloud_from_environment_kind():
     assert is_claude_code_cloud({"CLAUDE_CODE_ENVIRONMENT_KIND": "byoc"}) is True
-    assert is_claude_code_cloud({"CLAUDE_CODE_ENVIRONMENT_KIND": "anthropic_cloud"}) is True
+    assert (
+        is_claude_code_cloud({"CLAUDE_CODE_ENVIRONMENT_KIND": "anthropic_cloud"})
+        is True
+    )
 
 
 def test_is_claude_code_cloud_from_remote_entrypoint():
@@ -142,7 +145,9 @@ def test_detect_runtime_agent_prefers_first_matching_detector():
         ({"ANTIGRAVITY_AGENT": "true"}, "antigravity"),
     ],
 )
-def test_resolve_runtime_when_disk_empty(tmp_path: Path, environ: dict[str, str], agent: str):
+def test_resolve_runtime_when_disk_empty(
+    tmp_path: Path, environ: dict[str, str], agent: str
+):
     agents, source = resolve_target_agents(tmp_path, environ=environ)
 
     assert source == "runtime"

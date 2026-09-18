@@ -140,9 +140,7 @@ def is_opencode(environ: Env | None = None) -> bool:
 
 def is_antigravity(environ: Env | None = None) -> bool:
     "return True when this process was spawned by Antigravity"
-    return _any_set(
-        _env(environ), ("ANTIGRAVITY_AGENT", "ANTIGRAVITY_PROJECT_ID")
-    )
+    return _any_set(_env(environ), ("ANTIGRAVITY_AGENT", "ANTIGRAVITY_PROJECT_ID"))
 
 
 RUNTIME_DETECTORS: list[tuple[str, Callable[[Env | None], bool]]] = [

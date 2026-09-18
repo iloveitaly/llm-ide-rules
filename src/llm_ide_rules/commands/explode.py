@@ -11,7 +11,12 @@ from llm_ide_rules.agents.base import (
     replace_header_with_proper_casing,
     write_rule_file,
 )
-from llm_ide_rules.constants import EXPLODE_AGENTS, VALID_AGENTS, header_to_filename, parse_client_names
+from llm_ide_rules.constants import (
+    EXPLODE_AGENTS,
+    VALID_AGENTS,
+    header_to_filename,
+    parse_client_names,
+)
 from llm_ide_rules.detect import describe_resolved_agents, resolve_target_agents
 from llm_ide_rules.log import log
 from llm_ide_rules.markdown_parser import parse_sections
