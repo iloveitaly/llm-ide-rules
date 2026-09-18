@@ -45,6 +45,7 @@ The `llm-ide-rules` CLI provides commands to manage LLM IDE prompts and rules:
 # Convert instruction file to separate rule files
 uvx llm-ide-rules explode [agents...]            # All agents by default
 uvx llm-ide-rules explode cursor claude          # Specific agents
+uvx llm-ide-rules explode $(llm-ide-rules exploded /path/to/repo)
 uvx llm-ide-rules explode cursor --input path.md
 
 # Bundle rule files back into a single instruction file
@@ -109,6 +110,9 @@ uvx llm-ide-rules explode opencode
 
 # Explode for multiple agents
 uvx llm-ide-rules explode cursor claude
+
+# Explode the same agents already in use in another checkout
+uvx llm-ide-rules explode $(llm-ide-rules exploded /path/to/repo)
 
 # Explode a non-default instruction file
 uvx llm-ide-rules explode cursor --input bundled-instructions.md

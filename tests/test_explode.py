@@ -133,6 +133,36 @@ Here are Python rules for development.
         assert not Path(".github/instructions").exists()
 
 
+def test_explode_from_exploded_output():
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as source_dir, tempfile.TemporaryDirectory() as dest_dir:
+        Path(source_dir, ".cursor").mkdir()
+        Path(source_dir, ".claude").mkdir()
+
+        os.chdir(dest_dir)
+        Path("instructions.md").write_text(
+            """# Sample Instructions
+
+## Python
+globs: *.py
+
+Here are Python rules for development.
+"""
+        )
+
+        exploded = runner.invoke(app, ["exploded", source_dir])
+        assert exploded.exit_code == 0
+
+        # same split `$(llm-ide-rules exploded ...)` uses
+        result = runner.invoke(app, ["explode", *exploded.stdout.split()])
+
+        assert result.exit_code == 0
+        assert Path(".cursor/rules/python.mdc").exists()
+        assert Path(".claude/rules/python.md").exists()
+        assert not Path(".github/instructions").exists()
+
+
 def test_explode_custom_input_file():
     runner = CliRunner()
 
