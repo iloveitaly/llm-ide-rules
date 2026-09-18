@@ -75,9 +75,7 @@ Use strict mode.
 
         Path("instructions.md").write_text(original_content)
 
-        explode_result = runner.invoke(
-            app, ["explode", "cursor"]
-        )
+        explode_result = runner.invoke(app, ["explode", "cursor"])
         assert explode_result.exit_code == 0
 
         assert Path(".cursor/rules/python.mdc").exists()
@@ -129,9 +127,7 @@ Create a plan for the implementation.
 """
         Path("commands.md").write_text(commands_content)
 
-        explode_result = runner.invoke(
-            app, ["explode", "cursor"]
-        )
+        explode_result = runner.invoke(app, ["explode", "cursor"])
         assert explode_result.exit_code == 0
 
         assert Path(".cursor/commands/fix-tests.md").exists()
@@ -184,9 +180,7 @@ Use JSX syntax.
 
         Path("instructions.md").write_text(original_content)
 
-        explode_result = runner.invoke(
-            app, ["explode", "github"]
-        )
+        explode_result = runner.invoke(app, ["explode", "github"])
         assert explode_result.exit_code == 0
 
         assert Path(".github/instructions/python.instructions.md").exists()
@@ -237,9 +231,7 @@ Investigate and fix the issue.
 """
         Path("commands.md").write_text(commands_content)
 
-        explode_result = runner.invoke(
-            app, ["explode", "github"]
-        )
+        explode_result = runner.invoke(app, ["explode", "github"])
         assert explode_result.exit_code == 0
 
         assert Path(".github/prompts/fix-tests.prompt.md").exists()
@@ -280,9 +272,7 @@ React rules.
 
         Path("instructions.md").write_text(original_content)
 
-        explode_result = runner.invoke(
-            app, ["explode", "cursor"]
-        )
+        explode_result = runner.invoke(app, ["explode", "cursor"])
         assert explode_result.exit_code == 0
 
         implode_result = runner.invoke(app, ["implode", "cursor", "roundtrip.md"])
@@ -325,9 +315,7 @@ It should be treated as always-apply.
 
         Path("instructions.md").write_text(original_content)
 
-        explode_result = runner.invoke(
-            app, ["explode", "cursor"]
-        )
+        explode_result = runner.invoke(app, ["explode", "cursor"])
         assert explode_result.exit_code == 0
 
         assert Path(".cursor/rules/custom-unmapped-section.mdc").exists()
@@ -378,9 +366,7 @@ That's all.
 
         Path("instructions.md").write_text(original_content)
 
-        explode_result = runner.invoke(
-            app, ["explode", "cursor"]
-        )
+        explode_result = runner.invoke(app, ["explode", "cursor"])
         assert explode_result.exit_code == 0
 
         implode_result = runner.invoke(app, ["implode", "cursor", "roundtrip.md"])
@@ -418,9 +404,7 @@ Run pytest and fix errors.
 """
         Path("commands.md").write_text(commands_content)
 
-        explode_result = runner.invoke(
-            app, ["explode", "claude"]
-        )
+        explode_result = runner.invoke(app, ["explode", "claude"])
         assert explode_result.exit_code == 0
 
         assert Path(".claude/rules/python.md").exists()
@@ -458,9 +442,7 @@ Here are Python rules.
 """
         Path("instructions.md").write_text(original_content)
 
-        explode_result = runner.invoke(
-            app, ["explode", "claude"]
-        )
+        explode_result = runner.invoke(app, ["explode", "claude"])
         assert explode_result.exit_code == 0
 
         assert Path(".claude/rules/typescript.md").exists()
@@ -499,9 +481,7 @@ Run pytest and fix errors.
 """
         Path("commands.md").write_text(commands_content)
 
-        explode_result = runner.invoke(
-            app, ["explode", "opencode"]
-        )
+        explode_result = runner.invoke(app, ["explode", "opencode"])
         assert explode_result.exit_code == 0
 
         assert Path(".opencode/commands/fix-tests.md").exists()

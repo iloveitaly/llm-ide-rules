@@ -294,9 +294,7 @@ Python rules.
 """
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(
-            app, ["ignores", "github", "--print"]
-        )
+        result = runner.invoke(app, ["ignores", "github", "--print"])
 
         assert result.exit_code == 0
         output = result.stdout

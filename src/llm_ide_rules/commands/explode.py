@@ -313,7 +313,7 @@ alwaysApply: true
             )
 
     # Build log message and user output based on processed agents
-    log_data = {"agent": requested_agents}
+    log_data: dict[str, str | list[str]] = {"agent": requested_agents}
     created_dirs = []
 
     for agent_name in agents_to_process:
@@ -372,6 +372,4 @@ def explode_main(
     ] = "instructions.md",
 ) -> None:
     """Convert instruction file to separate rule files."""
-    explode_implementation(
-        input_file, parse_client_names(agents) or "all", Path.cwd()
-    )
+    explode_implementation(input_file, parse_client_names(agents) or "all", Path.cwd())

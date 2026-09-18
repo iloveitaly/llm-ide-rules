@@ -136,7 +136,10 @@ Here are Python rules for development.
 def test_explode_from_exploded_output():
     runner = CliRunner()
 
-    with tempfile.TemporaryDirectory() as source_dir, tempfile.TemporaryDirectory() as dest_dir:
+    with (
+        tempfile.TemporaryDirectory() as source_dir,
+        tempfile.TemporaryDirectory() as dest_dir,
+    ):
         Path(source_dir, ".cursor").mkdir()
         Path(source_dir, ".claude").mkdir()
 
@@ -220,9 +223,7 @@ Python specific rules.
         Path("instructions.md").write_text(instructions_content)
 
         # Scenario A: cursor only - general.mdc SHOULD exist
-        result_cursor = runner.invoke(
-            app, ["explode", "cursor"]
-        )
+        result_cursor = runner.invoke(app, ["explode", "cursor"])
         assert result_cursor.exit_code == 0
         assert Path(".cursor/rules/general.mdc").exists()
 
@@ -232,9 +233,7 @@ Python specific rules.
         shutil.rmtree(".cursor")
 
         # Scenario B: all agents - general.mdc SHOULD ALSO exist
-        result_all = runner.invoke(
-            app, ["explode", "all"]
-        )
+        result_all = runner.invoke(app, ["explode", "all"])
         assert result_all.exit_code == 0
         assert Path(".cursor/rules/general.mdc").exists()
         assert Path("AGENTS.md").exists()
@@ -264,9 +263,7 @@ This section is not in sections.json so it should be treated as always-apply.
         Path("instructions.md").write_text(instructions_content)
 
         # Scenario A: cursor only - custom-unmapped-section.mdc SHOULD exist
-        result_cursor = runner.invoke(
-            app, ["explode", "cursor"]
-        )
+        result_cursor = runner.invoke(app, ["explode", "cursor"])
         assert result_cursor.exit_code == 0
         assert Path(".cursor/rules/custom-unmapped-section.mdc").exists()
         cursor_content = Path(".cursor/rules/custom-unmapped-section.mdc").read_text()
@@ -279,9 +276,7 @@ This section is not in sections.json so it should be treated as always-apply.
         shutil.rmtree(".cursor")
 
         # Scenario B: all agents - custom-unmapped-section.mdc SHOULD exist
-        result_all = runner.invoke(
-            app, ["explode", "all"]
-        )
+        result_all = runner.invoke(app, ["explode", "all"])
 
         assert result_all.exit_code == 0
 

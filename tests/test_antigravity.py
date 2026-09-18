@@ -160,9 +160,7 @@ Use functional components and hooks.
 
             Path("instructions.md").write_text(original_content)
 
-            explode_result = runner.invoke(
-                app, ["explode", "antigravity"]
-            )
+            explode_result = runner.invoke(app, ["explode", "antigravity"])
             assert explode_result.exit_code == 0
 
             assert Path(".agents/rules/python.md").exists()
@@ -218,9 +216,7 @@ Create a plan for the implementation.
 """
             Path("commands.md").write_text(commands_content)
 
-            explode_result = runner.invoke(
-                app, ["explode", "antigravity"]
-            )
+            explode_result = runner.invoke(app, ["explode", "antigravity"])
             assert explode_result.exit_code == 0
 
             assert Path(".agents/skills/fix-tests/SKILL.md").exists()
