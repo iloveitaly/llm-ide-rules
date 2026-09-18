@@ -9,7 +9,6 @@ from llm_ide_rules.agents import get_agent
 from llm_ide_rules.agents.base import (
     BaseAgent,
     replace_header_with_proper_casing,
-    write_rule_file,
 )
 from llm_ide_rules.constants import (
     DOTAGENTS_LAYOUT_CLIENTS,
@@ -193,26 +192,22 @@ def explode_implementation(
         if any(line.strip() for line in section_data.content):
             rules_count += 1
 
-    # Process general instructions for agents that support rules
+    # Preamble (text before the first ##) is an always-apply rule.
+    # GitHub stores it as copilot-instructions.md instead of a rules-dir file.
     if any(line.strip() for line in general):
-        general_header = """
----
-description: General Instructions
-globs: 
-alwaysApply: true
----
-"""
-        if "cursor" in agent_instances:
-            write_rule_file(
-                agent_dirs["cursor"]["rules"] / "general.mdc", general_header, general
-            )
         if "github" in agent_instances:
             agent_instances["github"].write_general_instructions(general, working_dir)
-        if "claude" in agent_instances:
-            agent_instances["claude"].write_rule(
+
+        for agent, rules_dir in get_always_apply_rule_agents(
+            agent_instances, agent_dirs
+        ):
+            if agent.name == "github":
+                continue
+
+            agent.write_rule(
                 general,
                 "general",
-                agent_dirs["claude"]["rules"],
+                rules_dir,
                 glob_pattern=None,
                 description="General Instructions",
             )
