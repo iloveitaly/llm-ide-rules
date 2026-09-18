@@ -483,26 +483,6 @@ def test_download_preserves_custom_instructions(mock_zipfile, mock_requests):
         assert "Old stuff" not in content
 
 
-def test_detect_active_agents(tmp_path: Path):
-    "test detect_active_agents correctly identifies configured agents"
-    from llm_ide_rules.commands.download import detect_active_agents
-
-    assert detect_active_agents(tmp_path) == []
-
-    (tmp_path / ".cursor").mkdir()
-    assert detect_active_agents(tmp_path) == ["cursor"]
-
-    (tmp_path / ".claude").mkdir()
-    assert set(detect_active_agents(tmp_path)) == {"cursor", "claude"}
-
-    # bare .github should not trigger detection
-    (tmp_path / ".github").mkdir()
-    assert set(detect_active_agents(tmp_path)) == {"cursor", "claude"}
-
-    (tmp_path / ".github" / "copilot-instructions.md").touch()
-    assert set(detect_active_agents(tmp_path)) == {"cursor", "claude", "github"}
-
-
 @patch("llm_ide_rules.commands.download.requests.get")
 @patch("llm_ide_rules.commands.download.zipfile.ZipFile")
 def test_download_auto_detects_in_use_agents(
@@ -540,6 +520,47 @@ def test_download_auto_detects_in_use_agents(
     assert "Detected active agents: cursor" in result.stdout
     assert (target_dir / ".cursor" / "rules" / "python.mdc").exists()
     assert not (target_dir / ".claude").exists()
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+def test_download_cursor_cloud_runtime_wins_over_disk(
+    mock_zipfile, mock_requests, tmp_path: Path, monkeypatch
+):
+    "test download command prefers Cursor Cloud runtime over disk detection"
+    monkeypatch.setenv("CURSOR_CONVERSATION_ID", "bc-test-id")
+    runner = CliRunner()
+
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+
+    def mock_extractall(path):
+        extract_path = Path(path)
+        extracted_dir = extract_path / "llm_ide_rules-master"
+        extracted_dir.mkdir(parents=True, exist_ok=True)
+        (extracted_dir / "instructions.md").write_text(
+            "## Python\n\nPython rules\n", encoding="utf-8"
+        )
+
+    mock_zip_instance.extractall = mock_extractall
+
+    target_dir = tmp_path / "project"
+    target_dir.mkdir()
+    (target_dir / ".claude").mkdir()
+    (target_dir / ".github").mkdir()
+    (target_dir / ".github" / "copilot-instructions.md").touch()
+
+    result = runner.invoke(app, ["download", "--target", str(target_dir)])
+
+    assert result.exit_code == 0
+    assert "Detected runtime environment: cursor" in result.stdout
+    assert (target_dir / ".cursor" / "rules" / "python.mdc").exists()
+    assert not (target_dir / ".claude" / "rules").exists()
 
 
 @patch("llm_ide_rules.commands.download.requests.get")

@@ -11,7 +11,8 @@ from llm_ide_rules.agents.base import (
     replace_header_with_proper_casing,
     write_rule_file,
 )
-from llm_ide_rules.constants import VALID_AGENTS, header_to_filename
+from llm_ide_rules.constants import EXPLODE_AGENTS, VALID_AGENTS, header_to_filename
+from llm_ide_rules.environment import resolve_target_agents
 from llm_ide_rules.log import log
 from llm_ide_rules.markdown_parser import parse_sections
 
@@ -78,9 +79,50 @@ def get_always_apply_rule_agents(
     ]
 
 
+def _agents_to_process(agent: str | list[str]) -> list[str]:
+    """Expand an explode agent argument into the concrete agent list."""
+    if isinstance(agent, list):
+        agents_to_process = list(dict.fromkeys(agent))
+
+        # OpenCode uses AGENTS.md, so enable the agents adapter automatically
+        if "opencode" in agents_to_process and "agents" not in agents_to_process:
+            agents_to_process.append("agents")
+
+        return agents_to_process
+
+    if agent == "all":
+        return list(EXPLODE_AGENTS)
+
+    agents_to_process = [agent]
+
+    # OpenCode uses AGENTS.md, so enable the agents adapter automatically
+    if agent == "opencode":
+        agents_to_process.append("agents")
+
+    return agents_to_process
+
+
+def _validate_explode_agents(agent: str | list[str]) -> None:
+    if isinstance(agent, list):
+        invalid_agents = [name for name in agent if name not in EXPLODE_AGENTS]
+        if not invalid_agents:
+            return
+
+        invalid = ", ".join(invalid_agents)
+    elif agent in VALID_AGENTS:
+        return
+    else:
+        invalid = agent
+
+    log.error("invalid agent", agent=agent, valid_agents=VALID_AGENTS)
+    error_msg = f"Invalid agent '{invalid}'. Must be one of: {', '.join(VALID_AGENTS)}"
+    typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
+    raise typer.Exit(1)
+
+
 def explode_implementation(
     input_file: str | Path = "instructions.md",
-    agent: str = "all",
+    agent: str | list[str] = "all",
     working_dir: Path | None = None,
     agents_filename: str = "AGENTS.md",
 ) -> None:
@@ -88,13 +130,7 @@ def explode_implementation(
     if working_dir is None:
         working_dir = Path.cwd()
 
-    if agent not in VALID_AGENTS:
-        log.error("invalid agent", agent=agent, valid_agents=VALID_AGENTS)
-        error_msg = (
-            f"Invalid agent '{agent}'. Must be one of: {', '.join(VALID_AGENTS)}"
-        )
-        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
-        raise typer.Exit(1)
+    _validate_explode_agents(agent)
 
     log.info(
         "starting explode operation",
@@ -103,23 +139,7 @@ def explode_implementation(
         working_dir=str(working_dir),
     )
 
-    # Initialize only the agents we need
-    agents_to_process = []
-    if agent == "all":
-        agents_to_process = [
-            "cursor",
-            "github",
-            "claude",
-            "opencode",
-            "agents",
-            "antigravity",
-            "grok",
-        ]
-    else:
-        agents_to_process = [agent]
-        # OpenCode uses AGENTS.md, so enable the agents adapter automatically
-        if agent in ["opencode"] and "agents" not in agents_to_process:
-            agents_to_process.append("agents")
+    agents_to_process = _agents_to_process(agent)
 
     # Initialize agents and create directories
     agent_instances = {}
@@ -355,13 +375,29 @@ def explode_main(
         str, typer.Argument(help="Input markdown file")
     ] = "instructions.md",
     agent: Annotated[
-        str,
+        str | None,
         typer.Option(
             "--agent",
             "-a",
-            help="Agent to explode for (cursor, github, claude, opencode, or all)",
+            help=(
+                "Agent to explode for (cursor, github, claude, opencode, or all). "
+                "Defaults to the current runtime environment, then already-exploded "
+                "agents on disk, then all."
+            ),
         ),
-    ] = "all",
+    ] = None,
 ) -> None:
     """Convert instruction file to separate rule files."""
-    explode_implementation(input_file, agent, Path.cwd())
+    working_dir = Path.cwd()
+
+    if agent is None:
+        agents, source = resolve_target_agents(working_dir)
+        if source == "runtime":
+            typer.echo(f"Detected runtime environment: {', '.join(agents)}")
+        elif source == "disk":
+            typer.echo(f"Detected active agents: {', '.join(agents)}")
+
+        explode_implementation(input_file, agents, working_dir)
+        return
+
+    explode_implementation(input_file, agent, working_dir)

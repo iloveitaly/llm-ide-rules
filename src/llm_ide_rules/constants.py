@@ -11,6 +11,8 @@ VALID_AGENTS = [
     "all",
 ]
 
+EXPLODE_AGENTS = [name for name in VALID_AGENTS if name != "all"]
+
 
 def header_to_filename(header: str) -> str:
     """Convert a section header to a filename."""

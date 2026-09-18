@@ -8,9 +8,8 @@ from unittest.mock import patch
 
 import typer
 
-from llm_ide_rules.commands.download import detect_active_agents
 from llm_ide_rules.commands.explode import explode_implementation
-from llm_ide_rules.log import log
+from llm_ide_rules.environment import resolve_target_agents
 
 
 def ignores_main(
@@ -22,7 +21,7 @@ def ignores_main(
         typer.Option(
             "--agent",
             "-a",
-            help="Agent to list ignores for (cursor, github, claude, opencode, or all). Defaults to detecting active agents.",
+            help="Agent to list ignores for (cursor, github, claude, opencode, or all). Defaults to the current runtime environment, then already-exploded agents on disk, then all.",
         ),
     ] = None,
     print_output: Annotated[
@@ -46,14 +45,13 @@ def ignores_main(
     if agent:
         agents_to_run = [agent]
     else:
-        detected = detect_active_agents(cwd)
-        if detected:
-            log.info("detected active agents in target directory", detected=detected)
+        agents_to_run, source = resolve_target_agents(cwd, fallback=["all"])
+        if source == "runtime":
             if not print_output:
-                typer.echo(f"Detected active agents: {', '.join(detected)}")
-            agents_to_run = detected
-        else:
-            agents_to_run = ["all"]
+                typer.echo(f"Detected runtime environment: {', '.join(agents_to_run)}")
+        elif source == "disk":
+            if not print_output:
+                typer.echo(f"Detected active agents: {', '.join(agents_to_run)}")
 
     ignored_files = []
 

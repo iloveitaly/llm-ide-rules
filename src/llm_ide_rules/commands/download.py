@@ -12,6 +12,7 @@ import typer
 
 from llm_ide_rules.commands.explode import explode_implementation
 from llm_ide_rules.constants import VALID_AGENTS
+from llm_ide_rules.environment import resolve_target_agents
 from llm_ide_rules.log import log
 
 DEFAULT_REPO = "iloveitaly/llm-ide-rules"
@@ -87,18 +88,6 @@ INSTRUCTION_TYPES = {
 # Default types to download when no specific types are specified
 # Exclude grok from defaults since both antigravity and grok share the .agents/ directory
 DEFAULT_TYPES = [k for k in INSTRUCTION_TYPES if k != "grok"]
-
-
-def detect_active_agents(target_dir: Path) -> list[str]:
-    "detect agents in use in the target directory"
-    from llm_ide_rules.agents import get_all_agents
-
-    detected = []
-    for agent in get_all_agents():
-        if agent.name in INSTRUCTION_TYPES and agent.detect(target_dir):
-            detected.append(agent.name)
-
-    return detected
 
 
 def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
@@ -331,7 +320,7 @@ def download_main(
     instruction_types: Annotated[
         list[str] | None,
         typer.Argument(
-            help="Types of instructions to download (cursor, github, claude, opencode, agents, antigravity, grok). Downloads everything by default."
+            help="Types of instructions to download (cursor, github, claude, opencode, agents, antigravity, grok). Defaults to the current runtime environment, then already-exploded agents on disk, then all."
         ),
     ] = None,
     repo: Annotated[
@@ -403,15 +392,15 @@ def download_main(
     target_path = Path(target_dir).resolve()
     target_path.mkdir(parents=True, exist_ok=True)
 
-    # Use detected types if none specified, falling back to default types
+    # Use runtime environment, then detected types, then default types
     if not instruction_types:
-        detected = detect_active_agents(target_path)
-        if detected:
-            log.info("detected active agents in target directory", detected=detected)
-            typer.echo(f"Detected active agents: {', '.join(detected)}")
-            instruction_types = detected
-        else:
-            instruction_types = DEFAULT_TYPES
+        instruction_types, source = resolve_target_agents(
+            target_path, fallback=DEFAULT_TYPES
+        )
+        if source == "runtime":
+            typer.echo(f"Detected runtime environment: {', '.join(instruction_types)}")
+        elif source == "disk":
+            typer.echo(f"Detected active agents: {', '.join(instruction_types)}")
 
     # OpenCode uses AGENTS.md, so enable the agents instruction type automatically
     if "opencode" in instruction_types and "agents" not in instruction_types:
