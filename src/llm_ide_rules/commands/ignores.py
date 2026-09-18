@@ -9,21 +9,25 @@ from unittest.mock import patch
 import typer
 
 from llm_ide_rules.commands.explode import explode_implementation
+from llm_ide_rules.constants import parse_client_names
 from llm_ide_rules.detect import describe_resolved_agents, resolve_target_agents
 
 
 def ignores_main(
-    input_file: Annotated[
-        str, typer.Argument(help="Input markdown file")
-    ] = "instructions.md",
-    agent: Annotated[
-        str | None,
-        typer.Option(
-            "--agent",
-            "-a",
-            help="Agent to list ignores for (cursor, github, claude, opencode, or all). Defaults to already-exploded agents on disk, then the current runtime environment, then all.",
+    agents: Annotated[
+        list[str] | None,
+        typer.Argument(
+            help=(
+                "Agents to list ignores for (cursor github claude). Defaults to "
+                "already-exploded agents on disk, then the current runtime "
+                "environment, then all."
+            )
         ),
     ] = None,
+    input_file: Annotated[
+        str,
+        typer.Option("--input", "-i", help="Input markdown file"),
+    ] = "instructions.md",
     print_output: Annotated[
         bool,
         typer.Option(
@@ -42,8 +46,8 @@ def ignores_main(
 
     cwd = Path.cwd()
 
-    if agent:
-        agents_to_run = [agent]
+    if agents:
+        agents_to_run = parse_client_names(agents)
     else:
         agents_to_run, source = resolve_target_agents(cwd, fallback=["all"])
         message = describe_resolved_agents(source, agents_to_run)
@@ -78,8 +82,7 @@ def ignores_main(
             redirect_stdout(f_out),
             redirect_stderr(f_err),
         ):
-            for agent_name in agents_to_run:
-                explode_implementation(input_file, agent_name, cwd)
+            explode_implementation(input_file, agents_to_run, cwd)
 
     except typer.Exit as e:
         exit_exception = e

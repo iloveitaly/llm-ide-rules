@@ -45,7 +45,10 @@ The `llm-ide-rules` CLI provides commands to manage LLM IDE prompts and rules:
 # Convert instruction file to separate rule files.
 # Defaults to already-exploded agents on disk, then the current runtime
 # (e.g. Cursor Cloud, Claude Code cloud), then all supported agents.
-uvx llm-ide-rules explode [input_file]
+uvx llm-ide-rules explode [agents...]
+uvx llm-ide-rules explode cursor claude
+uvx llm-ide-rules explode $(llm-ide-rules exploded /path/to/repo)
+uvx llm-ide-rules explode cursor --input path.md
 
 # Bundle rule files back into a single instruction file
 uvx llm-ide-rules implode cursor [output_file]     # Bundle Cursor rules
@@ -56,12 +59,14 @@ uvx llm-ide-rules implode opencode [output_file]   # Bundle OpenCode commands
 # Download instruction files from repositories
 uvx llm-ide-rules download [instruction_types]    # Disk, then runtime, then all
 uvx llm-ide-rules download cursor github          # Download specific types
+uvx llm-ide-rules download cursor,github          # Same, comma-separated
 uvx llm-ide-rules download --repo other/repo      # Download from different repo
 uvx llm-ide-rules download --inline               # Explode rules without saving instructions.md or commands.md
 
 # Delete downloaded instruction files
 uvx llm-ide-rules delete [instruction_types]      # Delete everything by default
 uvx llm-ide-rules delete cursor claude            # Delete specific types
+uvx llm-ide-rules delete cursor,claude            # Same, comma-separated
 uvx llm-ide-rules delete --yes                    # Skip confirmation prompt
 ```
 
@@ -100,10 +105,19 @@ When you run `llm_ide_rules download` again, the tool will:
 
 ```sh
 # Explode instructions.md using disk/runtime detection (or all agents)
-uvx llm-ide-rules explode instructions.md
+uvx llm-ide-rules explode
 
 # Explode for a specific agent only
-uvx llm-ide-rules explode instructions.md --agent opencode
+uvx llm-ide-rules explode opencode
+
+# Explode for multiple agents
+uvx llm-ide-rules explode cursor claude
+
+# Explode the same agents already in use in another checkout
+uvx llm-ide-rules explode $(llm-ide-rules exploded /path/to/repo)
+
+# Explode a non-default instruction file
+uvx llm-ide-rules explode cursor --input bundled-instructions.md
 
 # Bundle Cursor rules back into a single file
 uvx llm-ide-rules implode cursor bundled-instructions.md
@@ -119,6 +133,7 @@ uvx llm-ide-rules download
 
 # Download only specific instruction types
 uvx llm-ide-rules download cursor github
+uvx llm-ide-rules download cursor,github
 
 # Download from a different repository
 uvx llm-ide-rules download --repo other-user/other-repo --target ./my-project

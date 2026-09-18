@@ -25,7 +25,7 @@ Here are Python rules for development.
 """
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
+        result = runner.invoke(app, ["ignores", "--print"])
 
         assert result.exit_code == 0
         output = result.stdout
@@ -58,7 +58,7 @@ Description: Fix failing tests
 """
         Path("commands.md").write_text(commands_content)
 
-        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
+        result = runner.invoke(app, ["ignores", "--print"])
 
         assert result.exit_code == 0
         output = result.stdout
@@ -77,7 +77,7 @@ def test_ignores_missing_file():
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
 
-        result = runner.invoke(app, ["ignores", "nonexistent.md"])
+        result = runner.invoke(app, ["ignores", "--input", "nonexistent.md"])
 
         assert result.exit_code == 1
 
@@ -99,7 +99,7 @@ Python rules.
         Path("instructions.md").write_text(instructions_content)
         Path(".gitignore").write_text("node_modules/\n")
 
-        result = runner.invoke(app, ["ignores", "instructions.md"])
+        result = runner.invoke(app, ["ignores"])
 
         assert result.exit_code == 0
         assert "Updated .gitignore" in result.stdout
@@ -136,7 +136,7 @@ Python rules.
 """
         Path(".gitignore").write_text(initial_gitignore)
 
-        result = runner.invoke(app, ["ignores", "instructions.md"])
+        result = runner.invoke(app, ["ignores"])
 
         assert result.exit_code == 0
         assert "Updated .gitignore" in result.stdout
@@ -170,7 +170,7 @@ Python rules.
 """
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["ignores", "instructions.md"])
+        result = runner.invoke(app, ["ignores"])
         assert result.exit_code == 0
         gitignore_content = Path(".gitignore").read_text()
         assert "/.cursor/rules/python.mdc" in gitignore_content
@@ -181,7 +181,7 @@ Python rules.
         Path("instructions.md").write_text(instructions_content_empty)
 
         # Run ignores again
-        result = runner.invoke(app, ["ignores", "instructions.md"])
+        result = runner.invoke(app, ["ignores"])
         assert result.exit_code == 0
 
         # Verify it's gone from .gitignore
@@ -210,7 +210,7 @@ Python rules.
 """
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
+        result = runner.invoke(app, ["ignores", "--print"])
 
         assert result.exit_code == 0
         output = result.stdout
@@ -239,7 +239,7 @@ Python rules.
 """
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
+        result = runner.invoke(app, ["ignores", "--print"])
 
         assert result.exit_code == 0
         output = result.stdout
@@ -267,7 +267,7 @@ Python rules.
 """
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
+        result = runner.invoke(app, ["ignores", "--print"])
 
         assert result.exit_code == 0
         output = result.stdout
@@ -277,8 +277,33 @@ Python rules.
         assert ".github" not in output
 
 
-def test_ignores_explicit_agent_overrides_detection():
-    """Test that explicit --agent overrides active agent detection."""
+def test_ignores_explicit_agents_override_detection():
+    """Test that explicit agents override active agent detection."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path(".cursor").mkdir()
+        instructions_content = """# Sample Instructions
+
+## Python
+globs: *.py
+
+Python rules.
+"""
+        Path("instructions.md").write_text(instructions_content)
+
+        result = runner.invoke(app, ["ignores", "github", "--print"])
+
+        assert result.exit_code == 0
+        output = result.stdout
+
+        assert ".github/instructions/python.instructions.md" in output
+        assert ".cursor" not in output
+
+
+def test_ignores_space_separated_agents():
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -295,14 +320,16 @@ Python rules.
         Path("instructions.md").write_text(instructions_content)
 
         result = runner.invoke(
-            app, ["ignores", "instructions.md", "--agent", "github", "--print"]
+            app,
+            ["ignores", "cursor", "github", "--print"],
         )
 
         assert result.exit_code == 0
         output = result.stdout
 
+        assert ".cursor/rules/python.mdc" in output
         assert ".github/instructions/python.instructions.md" in output
-        assert ".cursor" not in output
+        assert ".claude" not in output
 
 
 def test_ignores_echoes_detected_agents_when_not_print():
@@ -322,7 +349,7 @@ Python rules.
 """
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["ignores", "instructions.md"])
+        result = runner.invoke(app, ["ignores"])
 
         assert result.exit_code == 0
         assert "Detected active agents: cursor" in result.stdout
@@ -339,7 +366,7 @@ def test_ignores_disk_wins_over_cursor_cloud(monkeypatch):
         Path(".claude").mkdir()
         Path("instructions.md").write_text("## Python\nglobs: *.py\n\nPython rules.\n")
 
-        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
+        result = runner.invoke(app, ["ignores", "--print"])
 
         assert result.exit_code == 0
         output = result.stdout
@@ -357,7 +384,7 @@ def test_ignores_cursor_cloud_when_disk_empty(monkeypatch):
 
         Path("instructions.md").write_text("## Python\nglobs: *.py\n\nPython rules.\n")
 
-        result = runner.invoke(app, ["ignores", "instructions.md", "--print"])
+        result = runner.invoke(app, ["ignores", "--print"])
 
         assert result.exit_code == 0
         output = result.stdout
