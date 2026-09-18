@@ -727,7 +727,8 @@ Here are Python rules for development.
 
         assert result.exit_code == 0
         assert Path(".github/copilot-instructions.md").exists()
-        assert "These are standing project rules." in Path(
-            ".github/copilot-instructions.md"
-        ).read_text()
+        assert (
+            "These are standing project rules."
+            in Path(".github/copilot-instructions.md").read_text()
+        )
         assert not Path(".github/instructions/general.instructions.md").exists()
