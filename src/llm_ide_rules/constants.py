@@ -8,10 +8,31 @@ VALID_AGENTS = [
     "agents",
     "antigravity",
     "grok",
+    "codex",
     "all",
 ]
 
 EXPLODE_AGENTS = [name for name in VALID_AGENTS if name != "all"]
+
+# Standing rules live in AGENTS.md rather than a vendor-specific rules dir
+AGENTS_MD_CLIENTS = frozenset({"opencode", "codex"})
+
+# Clients that explode into the shared .agents layout
+DOTAGENTS_LAYOUT_CLIENTS = frozenset({"antigravity", "grok", "codex"})
+
+# Share .agents/ with antigravity, so skip them from download/delete defaults
+SHARED_DOTAGENTS_DEFAULT_EXCLUDES = frozenset({"grok", "codex"})
+
+
+def ensure_agents_adapter(agent_names: list[str]) -> list[str]:
+    """Append the AGENTS.md adapter when a client stores standing rules there."""
+    if "agents" in agent_names:
+        return list(agent_names)
+
+    if any(name in AGENTS_MD_CLIENTS for name in agent_names):
+        return [*agent_names, "agents"]
+
+    return list(agent_names)
 
 
 def parse_client_names(value: str | list[str] | None) -> list[str]:

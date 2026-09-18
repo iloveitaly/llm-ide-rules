@@ -1,9 +1,11 @@
 """Test explode command functionality."""
 
 import os
+import shutil
 import tempfile
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from llm_ide_rules import app
@@ -228,19 +230,23 @@ Python specific rules.
         assert result_cursor.exit_code == 0
         assert Path(".cursor/rules/general.mdc").exists()
 
-        # Clean up for next run
-        import shutil
-
         shutil.rmtree(".cursor")
 
         # Scenario B: all agents - general.mdc SHOULD ALSO exist
         result_all = runner.invoke(app, ["explode", "all"])
         assert result_all.exit_code == 0
         assert Path(".cursor/rules/general.mdc").exists()
+        assert Path(".claude/rules/general.md").exists()
+        assert Path(".agents/rules/general.md").exists()
+        assert Path(".github/copilot-instructions.md").exists()
+        assert not Path(".github/instructions/general.instructions.md").exists()
         assert Path("AGENTS.md").exists()
         assert (
             "These are general rules for the project" in Path("AGENTS.md").read_text()
         )
+        agents_general = Path(".agents/rules/general.md").read_text()
+        assert "alwaysApply: true" in agents_general
+        assert "These are general rules for the project" in agents_general
 
 
 def test_explode_unmapped_section_as_always_apply():
@@ -271,9 +277,6 @@ This section is not in sections.json so it should be treated as always-apply.
         assert "alwaysApply: true" in cursor_content
         assert "globs: " in cursor_content
 
-        # Clean up
-        import shutil
-
         shutil.rmtree(".cursor")
 
         # Scenario B: all agents - custom-unmapped-section.mdc SHOULD exist
@@ -283,6 +286,10 @@ This section is not in sections.json so it should be treated as always-apply.
 
         # MDC should exist even if AGENTS.md is also generated
         assert Path(".cursor/rules/custom-unmapped-section.mdc").exists()
+        assert Path(".agents/rules/custom-unmapped-section.md").exists()
+        agents_unmapped = Path(".agents/rules/custom-unmapped-section.md").read_text()
+        assert "alwaysApply: true" in agents_unmapped
+        assert "globs: []" in agents_unmapped
 
         # AGENTS.md SHOULD exist and contain the content
         assert Path("AGENTS.md").exists()
@@ -615,3 +622,113 @@ def test_explode_explicit_all_overrides_cursor_cloud(monkeypatch):
         assert "Detected runtime environment" not in result.stdout
         assert Path(".cursor/rules/python.mdc").exists()
         assert Path(".github/instructions/python.instructions.md").exists()
+
+
+@pytest.mark.parametrize("agent_name", ["antigravity", "grok"])
+def test_explode_dotagents_general_and_unglobbed_rules(agent_name):
+    """Preamble and unglobbed H2 sections always-apply for .agents/rules clients."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path("instructions.md").write_text(
+            """# Sample Instructions
+
+These are standing project rules.
+
+## Python
+globs: *.py
+
+Here are Python rules for development.
+
+## Always On
+
+This named section has no glob, so it always applies.
+"""
+        )
+
+        result = runner.invoke(app, ["explode", agent_name])
+
+        assert result.exit_code == 0
+        assert not Path("AGENTS.md").exists()
+
+        general_path = Path(".agents/rules/general.md")
+        assert general_path.exists()
+        general_content = general_path.read_text()
+        assert "alwaysApply: true" in general_content
+        assert "globs: []" in general_content
+        assert "These are standing project rules." in general_content
+
+        unglobbed_path = Path(".agents/rules/always-on.md")
+        assert unglobbed_path.exists()
+        unglobbed_content = unglobbed_path.read_text()
+        assert "alwaysApply: true" in unglobbed_content
+        assert "globs: []" in unglobbed_content
+        assert (
+            "This named section has no glob, so it always applies." in unglobbed_content
+        )
+
+        globbed_path = Path(".agents/rules/python.md")
+        assert globbed_path.exists()
+        globbed_content = globbed_path.read_text()
+        assert "alwaysApply: false" in globbed_content
+        assert 'globs: ["*.py"]' in globbed_content
+
+
+@pytest.mark.parametrize("agent_name", ["antigravity", "grok"])
+def test_roundtrip_dotagents_preserves_preamble(agent_name):
+    """Explode then implode keeps preamble text for antigravity/grok."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path("instructions.md").write_text(
+            """These are standing project rules.
+
+## Python
+globs: *.py
+
+Here are Python rules for development.
+"""
+        )
+
+        explode_result = runner.invoke(app, ["explode", agent_name])
+        assert explode_result.exit_code == 0
+        assert Path(".agents/rules/general.md").exists()
+
+        implode_result = runner.invoke(app, ["implode", agent_name, "roundtrip.md"])
+        assert implode_result.exit_code == 0
+
+        roundtrip = Path("roundtrip.md").read_text()
+        assert "These are standing project rules." in roundtrip
+        assert "## Python" in roundtrip
+        assert "globs: *.py" in roundtrip
+
+
+def test_explode_github_preamble_stays_in_copilot_instructions():
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path("instructions.md").write_text(
+            """These are standing project rules.
+
+## Python
+globs: *.py
+
+Here are Python rules for development.
+"""
+        )
+
+        result = runner.invoke(app, ["explode", "github"])
+
+        assert result.exit_code == 0
+        assert Path(".github/copilot-instructions.md").exists()
+        assert (
+            "These are standing project rules."
+            in Path(".github/copilot-instructions.md").read_text()
+        )
+        assert not Path(".github/instructions/general.instructions.md").exists()

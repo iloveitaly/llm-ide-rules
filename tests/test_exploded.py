@@ -41,6 +41,16 @@ def test_exploded_multiple_clients(tmp_path: Path):
     assert lines == ["cursor", "claude", "antigravity"]
 
 
+def test_exploded_codex_client(tmp_path: Path):
+    runner = CliRunner()
+    (tmp_path / ".codex").mkdir()
+
+    result = runner.invoke(app, ["exploded", "--target", str(tmp_path)])
+
+    assert result.exit_code == 0
+    assert result.stdout == "codex\n"
+
+
 def test_exploded_target_argument(tmp_path: Path):
     "test exploded command accepts target directory as positional argument"
     runner = CliRunner()

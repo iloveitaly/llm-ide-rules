@@ -382,6 +382,59 @@ def test_implode_opencode_basic_functionality():
             assert "Here are instructions to fix tests." in content
 
 
+def test_implode_codex_basic_functionality():
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        skill_dir = Path(".agents/skills/fix-tests")
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text(
+            """---
+name: fix-tests
+description: Fix failing tests
+---
+
+# Fix Tests
+
+Here are instructions to fix tests.
+"""
+        )
+        Path("AGENTS.md").write_text("General Codex rules.\n")
+
+        result = runner.invoke(app, ["implode", "codex"])
+
+        assert result.exit_code == 0
+        assert "Bundled Codex skills into commands.md" in result.stdout
+        assert "Bundled Codex rules (AGENTS.md) into instructions.md" in result.stdout
+        assert Path("commands.md").exists()
+        assert Path("instructions.md").exists()
+
+        commands_content = Path("commands.md").read_text()
+        assert "## Fix Tests" in commands_content
+        assert "Here are instructions to fix tests." in commands_content
+        assert "General Codex rules." in Path("instructions.md").read_text()
+
+
+def test_implode_codex_help():
+    runner = CliRunner()
+    result = runner.invoke(app, ["implode", "codex", "--help"])
+    assert result.exit_code == 0
+    assert "Bundle Codex" in result.stdout
+
+
+def test_implode_codex_missing_directory():
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        result = runner.invoke(app, ["implode", "codex", "bundled.md"])
+
+        assert result.exit_code == 1
+
+
 def test_implode_opencode_help():
     """Test that implode opencode subcommand shows help."""
     runner = CliRunner()
