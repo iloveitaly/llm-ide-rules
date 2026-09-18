@@ -568,7 +568,7 @@ Here are TypeScript rules for development."""
             f.write(original_content)
 
         explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "cursor"]
+            app, ["explode", "cursor"]
         )
         assert explode_result.exit_code == 0
 

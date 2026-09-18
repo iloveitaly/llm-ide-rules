@@ -46,7 +46,7 @@ def test_integration_full_lifecycle(monkeypatch):
 
         # 3. Explode
         # Explode doesn't take --target, it operates on CWD
-        explode_result = runner.invoke(app, ["explode", "instructions.md"])
+        explode_result = runner.invoke(app, ["explode"])
         if explode_result.exit_code != 0:
             print("EXPLODE FAILED:", explode_result.stdout)
             print("EXPLODE EXCEPTION:", explode_result.exception)

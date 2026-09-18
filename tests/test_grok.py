@@ -161,7 +161,7 @@ Use functional components and hooks.
             Path("instructions.md").write_text(original_content)
 
             explode_result = runner.invoke(
-                app, ["explode", "instructions.md", "--agent", "grok"]
+                app, ["explode", "grok"]
             )
             assert explode_result.exit_code == 0
 
@@ -217,7 +217,7 @@ Create a plan for the implementation.
             Path("commands.md").write_text(commands_content)
 
             explode_result = runner.invoke(
-                app, ["explode", "instructions.md", "--agent", "grok"]
+                app, ["explode", "grok"]
             )
             assert explode_result.exit_code == 0
 

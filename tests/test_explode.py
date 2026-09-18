@@ -15,7 +15,8 @@ def test_explode_help():
     result = runner.invoke(app, ["explode", "--help"])
     assert result.exit_code == 0
     assert "Convert instruction file to separate rule files" in result.stdout
-    assert "agent" in result.stdout
+    assert "Agents to explode for" in result.stdout
+    assert "--input" in result.stdout
 
 
 def test_explode_basic_functionality():
@@ -40,7 +41,7 @@ Here are React rules for frontend development.
 
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["explode", "instructions.md"])
+        result = runner.invoke(app, ["explode"])
 
         assert result.exit_code == 0
         assert "Created" in result.stdout
@@ -94,7 +95,7 @@ Here are instructions to plan only.
 """
         Path("commands.md").write_text(commands_content)
 
-        result = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
+        result = runner.invoke(app, ["explode", "cursor"])
 
         assert result.exit_code == 0
 
@@ -103,12 +104,12 @@ Here are instructions to plan only.
         assert Path(".cursor/commands/fix-tests.md").exists()
         assert Path(".cursor/commands/plan-only.md").exists()
 
-        # Other agents should not have been created because we specified --agent cursor
+        # Other agents should not have been created because we specified cursor
         assert not Path(".claude/commands/fix-tests.md").exists()
         assert not Path(".github/prompts/fix-tests.prompt.md").exists()
 
 
-def test_explode_comma_separated_agents():
+def test_explode_space_separated_agents():
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -124,9 +125,7 @@ Here are Python rules for development.
 """
         )
 
-        result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "cursor,claude"]
-        )
+        result = runner.invoke(app, ["explode", "cursor", "claude"])
 
         assert result.exit_code == 0
         assert Path(".cursor/rules/python.mdc").exists()
@@ -134,13 +133,13 @@ Here are Python rules for development.
         assert not Path(".github/instructions").exists()
 
 
-def test_explode_comma_separated_agents_with_spaces():
+def test_explode_custom_input_file():
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
 
-        Path("instructions.md").write_text(
+        Path("custom.md").write_text(
             """# Sample Instructions
 
 ## Python
@@ -150,17 +149,14 @@ Here are Python rules for development.
 """
         )
 
-        result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "cursor, claude"]
-        )
+        result = runner.invoke(app, ["explode", "cursor", "--input", "custom.md"])
 
         assert result.exit_code == 0
         assert Path(".cursor/rules/python.mdc").exists()
-        assert Path(".claude/rules/python.md").exists()
-        assert not Path(".github/instructions").exists()
+        assert not Path(".claude/rules").exists()
 
 
-def test_explode_invalid_comma_separated_agent():
+def test_explode_invalid_agent():
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -168,9 +164,7 @@ def test_explode_invalid_comma_separated_agent():
 
         Path("instructions.md").write_text("# Sample Instructions\n")
 
-        result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "cursor,nope"]
-        )
+        result = runner.invoke(app, ["explode", "cursor", "nope"])
 
         assert result.exit_code == 1
         assert "Invalid agent 'nope'" in result.stderr
@@ -197,7 +191,7 @@ Python specific rules.
 
         # Scenario A: cursor only - general.mdc SHOULD exist
         result_cursor = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "cursor"]
+            app, ["explode", "cursor"]
         )
         assert result_cursor.exit_code == 0
         assert Path(".cursor/rules/general.mdc").exists()
@@ -209,7 +203,7 @@ Python specific rules.
 
         # Scenario B: all agents - general.mdc SHOULD ALSO exist
         result_all = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "all"]
+            app, ["explode", "all"]
         )
         assert result_all.exit_code == 0
         assert Path(".cursor/rules/general.mdc").exists()
@@ -241,7 +235,7 @@ This section is not in sections.json so it should be treated as always-apply.
 
         # Scenario A: cursor only - custom-unmapped-section.mdc SHOULD exist
         result_cursor = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "cursor"]
+            app, ["explode", "cursor"]
         )
         assert result_cursor.exit_code == 0
         assert Path(".cursor/rules/custom-unmapped-section.mdc").exists()
@@ -256,7 +250,7 @@ This section is not in sections.json so it should be treated as always-apply.
 
         # Scenario B: all agents - custom-unmapped-section.mdc SHOULD exist
         result_all = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "all"]
+            app, ["explode", "all"]
         )
 
         assert result_all.exit_code == 0
@@ -293,7 +287,7 @@ Here are custom rules.
 
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["explode", "instructions.md"])
+        result = runner.invoke(app, ["explode"])
 
         assert result.exit_code == 0
 
@@ -348,7 +342,7 @@ This should work with extra whitespace after colon.
 
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
+        result = runner.invoke(app, ["explode", "cursor"])
 
         assert result.exit_code == 0
 
@@ -391,7 +385,7 @@ def test_explode_nonexistent_file():
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
 
-        result = runner.invoke(app, ["explode", "nonexistent.md"])
+        result = runner.invoke(app, ["explode", "--input", "nonexistent.md"])
 
         assert result.exit_code == 1
 
@@ -419,7 +413,7 @@ Here are Python rules for the root.
 """
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["explode", "instructions.md"])
+        result = runner.invoke(app, ["explode"])
 
         assert result.exit_code == 0
 
@@ -457,7 +451,7 @@ Here are unmapped rules.
 """
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["explode", "instructions.md"])
+        result = runner.invoke(app, ["explode"])
 
         assert result.exit_code == 0
 
@@ -506,7 +500,7 @@ This should be ignored.
 """
         Path("commands.md").write_text(commands_content)
 
-        result = runner.invoke(app, ["explode", "instructions.md", "--agent", "cursor"])
+        result = runner.invoke(app, ["explode", "cursor"])
 
         assert result.exit_code == 0
 

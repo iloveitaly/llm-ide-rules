@@ -360,17 +360,18 @@ alwaysApply: true
 
 
 def explode_main(
-    input_file: Annotated[
-        str, typer.Argument(help="Input markdown file")
-    ] = "instructions.md",
-    agent: Annotated[
-        str,
-        typer.Option(
-            "--agent",
-            "-a",
-            help="Agents to explode for. Comma-separated (cursor,github,claude) or all.",
+    agents: Annotated[
+        list[str] | None,
+        typer.Argument(
+            help="Agents to explode for (cursor github claude). Defaults to all."
         ),
-    ] = "all",
+    ] = None,
+    input_file: Annotated[
+        str,
+        typer.Option("--input", "-i", help="Input markdown file"),
+    ] = "instructions.md",
 ) -> None:
     """Convert instruction file to separate rule files."""
-    explode_implementation(input_file, agent, Path.cwd())
+    explode_implementation(
+        input_file, parse_client_names(agents) or "all", Path.cwd()
+    )

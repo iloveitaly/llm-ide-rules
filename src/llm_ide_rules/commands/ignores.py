@@ -15,17 +15,16 @@ from llm_ide_rules.log import log
 
 
 def ignores_main(
-    input_file: Annotated[
-        str, typer.Argument(help="Input markdown file")
-    ] = "instructions.md",
-    agent: Annotated[
-        str | None,
-        typer.Option(
-            "--agent",
-            "-a",
-            help="Agents to list ignores for. Comma-separated (cursor,github,claude) or all. Defaults to detecting active agents.",
+    agents: Annotated[
+        list[str] | None,
+        typer.Argument(
+            help="Agents to list ignores for (cursor github claude). Defaults to detecting active agents."
         ),
     ] = None,
+    input_file: Annotated[
+        str,
+        typer.Option("--input", "-i", help="Input markdown file"),
+    ] = "instructions.md",
     print_output: Annotated[
         bool,
         typer.Option(
@@ -44,8 +43,8 @@ def ignores_main(
 
     cwd = Path.cwd()
 
-    if agent:
-        agents_to_run = parse_client_names(agent)
+    if agents:
+        agents_to_run = parse_client_names(agents)
     else:
         detected = detect_active_agents(cwd)
         if detected:

@@ -76,7 +76,7 @@ Use strict mode.
         Path("instructions.md").write_text(original_content)
 
         explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "cursor"]
+            app, ["explode", "cursor"]
         )
         assert explode_result.exit_code == 0
 
@@ -130,7 +130,7 @@ Create a plan for the implementation.
         Path("commands.md").write_text(commands_content)
 
         explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "cursor"]
+            app, ["explode", "cursor"]
         )
         assert explode_result.exit_code == 0
 
@@ -185,7 +185,7 @@ Use JSX syntax.
         Path("instructions.md").write_text(original_content)
 
         explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "github"]
+            app, ["explode", "github"]
         )
         assert explode_result.exit_code == 0
 
@@ -238,7 +238,7 @@ Investigate and fix the issue.
         Path("commands.md").write_text(commands_content)
 
         explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "github"]
+            app, ["explode", "github"]
         )
         assert explode_result.exit_code == 0
 
@@ -281,7 +281,7 @@ React rules.
         Path("instructions.md").write_text(original_content)
 
         explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "cursor"]
+            app, ["explode", "cursor"]
         )
         assert explode_result.exit_code == 0
 
@@ -326,7 +326,7 @@ It should be treated as always-apply.
         Path("instructions.md").write_text(original_content)
 
         explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "cursor"]
+            app, ["explode", "cursor"]
         )
         assert explode_result.exit_code == 0
 
@@ -379,7 +379,7 @@ That's all.
         Path("instructions.md").write_text(original_content)
 
         explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "cursor"]
+            app, ["explode", "cursor"]
         )
         assert explode_result.exit_code == 0
 
@@ -419,7 +419,7 @@ Run pytest and fix errors.
         Path("commands.md").write_text(commands_content)
 
         explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "claude"]
+            app, ["explode", "claude"]
         )
         assert explode_result.exit_code == 0
 
@@ -459,7 +459,7 @@ Here are Python rules.
         Path("instructions.md").write_text(original_content)
 
         explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "claude"]
+            app, ["explode", "claude"]
         )
         assert explode_result.exit_code == 0
 
@@ -500,7 +500,7 @@ Run pytest and fix errors.
         Path("commands.md").write_text(commands_content)
 
         explode_result = runner.invoke(
-            app, ["explode", "instructions.md", "--agent", "opencode"]
+            app, ["explode", "opencode"]
         )
         assert explode_result.exit_code == 0
 

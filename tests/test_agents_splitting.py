@@ -41,7 +41,7 @@ Always apply rules.
 
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["explode", "instructions.md", "--agent", "agents"])
+        result = runner.invoke(app, ["explode", "agents"])
 
         assert result.exit_code == 0
 
@@ -93,7 +93,7 @@ Should fall back to src/.
 
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["explode", "instructions.md", "--agent", "agents"])
+        result = runner.invoke(app, ["explode", "agents"])
 
         assert result.exit_code == 0
 
@@ -133,7 +133,7 @@ Rule 2.
 
         Path("instructions.md").write_text(instructions_content)
 
-        result = runner.invoke(app, ["explode", "instructions.md", "--agent", "agents"])
+        result = runner.invoke(app, ["explode", "agents"])
 
         assert result.exit_code == 0
 

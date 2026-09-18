@@ -43,7 +43,9 @@ The `llm-ide-rules` CLI provides commands to manage LLM IDE prompts and rules:
 
 ```sh
 # Convert instruction file to separate rule files
-uvx llm-ide-rules explode [input_file]
+uvx llm-ide-rules explode [agents...]            # All agents by default
+uvx llm-ide-rules explode cursor claude          # Specific agents
+uvx llm-ide-rules explode cursor --input path.md
 
 # Bundle rule files back into a single instruction file
 uvx llm-ide-rules implode cursor [output_file]     # Bundle Cursor rules
@@ -100,13 +102,16 @@ When you run `llm_ide_rules download` again, the tool will:
 
 ```sh
 # Explode instructions.md into all supported formats (cursor, github, claude, opencode)
-uvx llm-ide-rules explode instructions.md
+uvx llm-ide-rules explode
 
 # Explode for a specific agent only
-uvx llm-ide-rules explode instructions.md --agent opencode
+uvx llm-ide-rules explode opencode
 
 # Explode for multiple agents
-uvx llm-ide-rules explode instructions.md --agent cursor,claude
+uvx llm-ide-rules explode cursor claude
+
+# Explode a non-default instruction file
+uvx llm-ide-rules explode cursor --input bundled-instructions.md
 
 # Bundle Cursor rules back into a single file
 uvx llm-ide-rules implode cursor bundled-instructions.md
