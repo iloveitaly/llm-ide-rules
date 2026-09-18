@@ -7,6 +7,7 @@ Coding instructions for all programming languages:
 - Prefer `continue` within a loop vs nested if statements.
 - Prefer smaller functions over larger functions. Break up logic into smaller chunks with well-named functions.
 - Prefer constants with separators: `10_000` is preferred to `10000` (or `10_00` over `1000` in the case of a integer representing cents).
+- Prefix feature-flag style constants with `{DISABLED,ENABLED}_`
 - When I ask you to write code, prioritize simplicity and legibility over covering all edge cases, handling all errors, etc.
 - When a particular need can be met with a mature, reasonably adopted and maintained package, I would prefer to use that package rather than engineering my own solution.
 - Never add error handling to catch an error without being asked to do so. Fail hard and early with assertions and allow exceptions to propagate.
@@ -135,9 +136,11 @@ op.execute(
 - Do not try/except `Model.one` when using a parameter from the request to pull a record. Let this exception bubble up.
 - Use `model_id: Annotated[TypeID, Path()]` to represent a model ID as a URL path parameter
 - Use the typed route helpers in `app/generated/fastapi_typed_routes.py` for all URL generation.
+- User-facing errors must not name internals. 3rd party API errors (Stripe, Clerk, etc) or internal implementation jargon should exist in error messages displayed to the browser. Think hard about user-facing error messages and make it clear what the user should do next.
 
 
 ## Justfiles
+
 
 
 - Never use `just_executable()` to reference the executable for `just`. If `just` DNE, then something is wrong adn you should stop your work and let me know.
@@ -184,6 +187,12 @@ Here's how the python application is organized:
 - When referencing a command, use the full-qualified name, e.g. `app.commands.transcript_deletion.perform`.
 - When queuing a job or `perform`ing it in a test, use the full-qualified name, e.g. `app.jobs.transcript_deletion.perform`.
 - `app/cli/` is for scripts or CLI tools that are specific to the application.
+- Webhooks should be fired in the model layer, not in a router or command.
+
+### 3rd Party APIs
+
+- Always use an official client library if it exists.
+- Be thoughtful about metadata fields. Only put data there for (a) reporting or (b) a joining key a downstream consumer actually reads. Do not duplicate keys or data in metadata fields without a clear and documented purpose.
 
 ### Python Test Code Organization
 
@@ -258,6 +267,7 @@ When writing database models:
 * Use `ModelName.foreign_key()` when generating a foreign key field
 * Store currency as an integer, e.g. $1 = 100.
 * `before_save`, `after_save(self):`, `after_updated(self):` are lifecycle methods (modelled after ActiveRecord) you can use.
+* Prefer to add constraints to the model over the frontend.
 
 Example:
 
@@ -371,6 +381,9 @@ params = f.compact({"city": city, "stateCode": stateCode})
 - If URL parameters or query string values need to be checked before rendering the page, do this in a `clientLoader` and not in a `useEffect`
 - Never worry about generating types using `pnpm`
 - Use [`<AllMeta />`](web/app/components/shared/AllMeta.tsx) instead of MetaFunction or individual `<meta />` tags
+- Move derived config and business rules to the backend (computed fields, calculations, etc). Do not grow client-only sources of truth.
+- Use outlets to store global config (such as Stripe keys, application settings, etc).
+- Hide repeated mobile/desktop conditional styling behind a helper; individual components should not re-encode breakpoints
 - Use the following pattern to reference query string values (i.e. `?theQueryStringParam=value`)
 
 ```typescript
@@ -588,3 +601,9 @@ Here's how frontend code is organized in `web/app/`:
 * Use `Temporal` for any date or time manipulation. You can assume it's available in the browser.
 * DateTime objects should always be converted to UTC before included in any API request. Never send a timestamp with the user's timezone.
 * Unless otherwise specified, do not shift server-provided times based on the user's timezone.
+
+
+## Frontend Tests
+
+
+- Do not add unit tests that duplicate Playwright coverage. Only add unit tests for edge cases which are not covered by Playwright.

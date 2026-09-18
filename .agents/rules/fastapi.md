@@ -14,3 +14,4 @@ alwaysApply: false
 - Do not try/except `Model.one` when using a parameter from the request to pull a record. Let this exception bubble up.
 - Use `model_id: Annotated[TypeID, Path()]` to represent a model ID as a URL path parameter
 - Use the typed route helpers in `app/generated/fastapi_typed_routes.py` for all URL generation.
+- User-facing errors must not name internals. 3rd party API errors (Stripe, Clerk, etc) or internal implementation jargon should exist in error messages displayed to the browser. Think hard about user-facing error messages and make it clear what the user should do next.

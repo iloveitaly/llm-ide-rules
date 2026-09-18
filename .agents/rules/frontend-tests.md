@@ -1,0 +1,10 @@
+---
+description: Frontend Tests
+globs: ["**/*.test.tsx"]
+alwaysApply: false
+---
+
+## Frontend Tests
+
+
+- Do not add unit tests that duplicate Playwright coverage. Only add unit tests for edge cases which are not covered by Playwright.

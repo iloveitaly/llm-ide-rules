@@ -14,6 +14,9 @@ applyTo: "web/app/routes/**/*.tsx"
 - If URL parameters or query string values need to be checked before rendering the page, do this in a `clientLoader` and not in a `useEffect`
 - Never worry about generating types using `pnpm`
 - Use [`<AllMeta />`](web/app/components/shared/AllMeta.tsx) instead of MetaFunction or individual `<meta />` tags
+- Move derived config and business rules to the backend (computed fields, calculations, etc). Do not grow client-only sources of truth.
+- Use outlets to store global config (such as Stripe keys, application settings, etc).
+- Hide repeated mobile/desktop conditional styling behind a helper; individual components should not re-encode breakpoints
 - Use the following pattern to reference query string values (i.e. `?theQueryStringParam=value`)
 
 ```typescript

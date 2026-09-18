@@ -26,6 +26,7 @@ paths:
 - End all Playwright tests with `from pytest_playwright_artifacts import assert_no_console_errors` and `assert_no_console_errors(request)` (capture is the plugin's `playwright_console_logging` fixture).
   - Test-Specific Ignores: Pass `ignore=[...]` to `assert_no_console_errors` per `pytest-playwright-artifacts` (regex strings, compiled patterns, or `{"file": "...", "message": "..."}` dicts); add a comment explaining why.
   - Global Ignores: Use `playwright_console_ignore` under `[tool.pytest.ini_options]` in `pyproject.toml` (see `pytest-playwright-artifacts` README).
+- Do not change playwright launch flags or configuration to make one test easier.
 
 ### Example Integration Test
 

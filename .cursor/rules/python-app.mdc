@@ -30,6 +30,12 @@ Here's how the python application is organized:
 - When referencing a command, use the full-qualified name, e.g. `app.commands.transcript_deletion.perform`.
 - When queuing a job or `perform`ing it in a test, use the full-qualified name, e.g. `app.jobs.transcript_deletion.perform`.
 - `app/cli/` is for scripts or CLI tools that are specific to the application.
+- Webhooks should be fired in the model layer, not in a router or command.
+
+### 3rd Party APIs
+
+- Always use an official client library if it exists.
+- Be thoughtful about metadata fields. Only put data there for (a) reporting or (b) a joining key a downstream consumer actually reads. Do not duplicate keys or data in metadata fields without a clear and documented purpose.
 
 ### Python Test Code Organization
 
@@ -104,6 +110,7 @@ When writing database models:
 * Use `ModelName.foreign_key()` when generating a foreign key field
 * Store currency as an integer, e.g. $1 = 100.
 * `before_save`, `after_save(self):`, `after_updated(self):` are lifecycle methods (modelled after ActiveRecord) you can use.
+* Prefer to add constraints to the model over the frontend.
 
 Example:
 

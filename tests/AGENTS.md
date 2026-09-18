@@ -21,6 +21,7 @@
 - End all Playwright tests with `from pytest_playwright_artifacts import assert_no_console_errors` and `assert_no_console_errors(request)` (capture is the plugin's `playwright_console_logging` fixture).
   - Test-Specific Ignores: Pass `ignore=[...]` to `assert_no_console_errors` per `pytest-playwright-artifacts` (regex strings, compiled patterns, or `{"file": "...", "message": "..."}` dicts); add a comment explaining why.
   - Global Ignores: Use `playwright_console_ignore` under `[tool.pytest.ini_options]` in `pyproject.toml` (see `pytest-playwright-artifacts` README).
+- Do not change playwright launch flags or configuration to make one test easier.
 
 ### Example Integration Test
 
@@ -117,6 +118,8 @@ def test_streaming_checkout_creates_user_and_links_order(
   - Note that when writing route tests a `db_session` is not needed for the logic inside of the route.
 - When testing Stripe, use the sandbox API. Never mock out Stripe interactions unless explicitly told to.
 - Omit obvious docstrs and comments. Add comments for non-obvious but easy-to-miss lines that are key to what the test is checking.
+- Do not add multiple tests for a one-line change.
+- If test state setup requires more than three distinct factories, you should probably create a new factory to represent this particular state.
 
 ### Example Test
 
