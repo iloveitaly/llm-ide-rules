@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.20.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.20.0...v0.20.1) (2026-09-22)
+
+
+### Documentation
+
+* update coding guidelines and docstring rules ([6cdf576](https://github.com/iloveitaly/llm-ide-rules/commit/6cdf5761a2aec0b480b5dd589b01abe25b8e439d))
+* update Python docstring formatting guidelines ([77077de](https://github.com/iloveitaly/llm-ide-rules/commit/77077de2805c0ae116a98d5662eca77dbd8b3490))
+
 ## [0.20.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.19.0...v0.20.0) (2026-09-18)
 
 
