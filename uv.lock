@@ -322,7 +322,7 @@ wheels = [
 
 [[package]]
 name = "llm-ide-rules"
-version = "0.20.0"
+version = "0.20.1"
 source = { editable = "." }
 dependencies = [
     { name = "json5" },
