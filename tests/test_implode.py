@@ -49,6 +49,42 @@ def test_implode_preserves_custom_instructions():
         assert "Old rules" not in content
 
 
+def test_implode_does_not_accumulate_newlines_on_repeated_runs():
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        output_file = Path("instructions.md")
+
+        cursor_rules_dir = Path(".cursor/rules")
+        cursor_rules_dir.mkdir(parents=True)
+        (cursor_rules_dir / "python.mdc").write_text(
+            "---\ndescription: Python\n---\n## Python\n\nRule content",
+            encoding="utf-8",
+        )
+
+        # run implode 3 times
+        for _ in range(3):
+            result = runner.invoke(app, ["implode", "cursor", str(output_file)])
+            assert result.exit_code == 0
+
+        content1 = output_file.read_text(encoding="utf-8")
+        assert content1.endswith("<!-- END CLONED INSTRUCTIONS -->\n")
+        assert not content1.endswith("<!-- END CLONED INSTRUCTIONS -->\n\n")
+
+        # add custom content and run 3 more times
+        output_file.write_text(f"{content1}\n# My Custom Rules\n", encoding="utf-8")
+
+        for _ in range(3):
+            result = runner.invoke(app, ["implode", "cursor", str(output_file)])
+            assert result.exit_code == 0
+
+        content2 = output_file.read_text(encoding="utf-8")
+        assert "<!-- END CLONED INSTRUCTIONS -->\n\n# My Custom Rules\n" in content2
+        assert "<!-- END CLONED INSTRUCTIONS -->\n\n\n" not in content2
+
+
 def test_implode_cursor_help():
     """Test that implode cursor subcommand shows help."""
     runner = CliRunner()

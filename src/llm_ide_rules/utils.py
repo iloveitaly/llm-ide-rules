@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from llm_ide_rules.constants import COMMANDS_MARKER, INSTRUCTIONS_MARKER
+
 
 def modify_json_file(file_path: Path, updates: dict[str, Any]) -> bool:
     """Modify a JSON/JSONC file by adding MISSING keys using string manipulation to preserve comments.
@@ -129,3 +131,37 @@ def find_project_root(start_path: Path | None = None) -> Path:
             return parent
 
     return start_path  # Fallback to current directory
+
+
+def preserve_custom_content(
+    base_content: str,
+    existing_content: str,
+    default_marker: str = INSTRUCTIONS_MARKER,
+) -> str:
+    "combine base content with preserved custom content from existing file"
+    marker = default_marker
+    if default_marker not in existing_content and COMMANDS_MARKER in existing_content:
+        marker = COMMANDS_MARKER
+
+    local_custom_content = ""
+    if marker in existing_content:
+        local_custom_content = existing_content.split(marker, 1)[1]
+    elif default_marker in existing_content:
+        local_custom_content = existing_content.split(default_marker, 1)[1]
+
+    # strip any marker already present in base_content
+    if marker in base_content:
+        base_content = base_content.split(marker, 1)[0]
+    if default_marker in base_content:
+        base_content = base_content.split(default_marker, 1)[0]
+    if COMMANDS_MARKER in base_content:
+        base_content = base_content.split(COMMANDS_MARKER, 1)[0]
+
+    cleaned_base = base_content.rstrip()
+    custom_content = local_custom_content.strip()
+
+    base_part = f"{cleaned_base}\n\n{marker}\n" if cleaned_base else f"{marker}\n"
+    if custom_content:
+        return f"{base_part}\n{custom_content}\n"
+
+    return base_part

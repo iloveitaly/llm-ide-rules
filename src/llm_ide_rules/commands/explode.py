@@ -11,8 +11,10 @@ from llm_ide_rules.agents.base import (
     replace_header_with_proper_casing,
 )
 from llm_ide_rules.constants import (
+    COMMANDS_MARKER,
     DOTAGENTS_LAYOUT_CLIENTS,
     EXPLODE_AGENTS,
+    INSTRUCTIONS_MARKER,
     VALID_AGENTS,
     ensure_agents_adapter,
     header_to_filename,
@@ -150,7 +152,7 @@ def explode_implementation(
         input_text = input_path.read_text()
 
         # Strip marker and everything after it if present
-        marker = "<!-- END CLONED INSTRUCTIONS -->"
+        marker = INSTRUCTIONS_MARKER
         if marker in input_text:
             log.info(
                 "ignoring content after marker in instructions file", marker=marker
@@ -169,7 +171,7 @@ def explode_implementation(
         log.info("found commands file", commands_file=str(commands_path))
 
         # Also strip marker for commands.md
-        commands_marker = "<!-- END CLONED COMMANDS -->"
+        commands_marker = COMMANDS_MARKER
         if commands_marker in commands_text:
             log.info(
                 "ignoring content after marker in commands file",

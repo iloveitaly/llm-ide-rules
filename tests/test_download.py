@@ -486,6 +486,77 @@ def test_download_preserves_custom_instructions(mock_zipfile, mock_requests):
 
 @patch("llm_ide_rules.commands.download.requests.get")
 @patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+def test_download_does_not_accumulate_newlines_on_repeated_runs(
+    mock_zipfile, mock_requests
+):
+    runner = CliRunner()
+
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        def mock_extractall(path):
+            extract_path = Path(path)
+            extracted_dir = extract_path / "llm_ide_rules-master"
+            extracted_dir.mkdir(parents=True, exist_ok=True)
+            (extracted_dir / "instructions.md").write_text(
+                "# Remote Instructions\n\nRule 1\n", encoding="utf-8"
+            )
+            (extracted_dir / "commands.md").write_text(
+                "# Remote Commands\n\nCommand 1\n", encoding="utf-8"
+            )
+            (extracted_dir / ".cursor").mkdir(parents=True, exist_ok=True)
+            (extracted_dir / ".cursor" / "rules").mkdir(parents=True, exist_ok=True)
+
+        mock_zip_instance.extractall = mock_extractall
+
+        # run download 3 times without custom content
+        for _ in range(3):
+            result = runner.invoke(app, ["download", "cursor"])
+            assert result.exit_code == 0
+
+        inst_content = Path("instructions.md").read_text(encoding="utf-8")
+        cmd_content = Path("commands.md").read_text(encoding="utf-8")
+
+        assert inst_content == (
+            "# Remote Instructions\n\nRule 1\n\n<!-- END CLONED INSTRUCTIONS -->\n"
+        )
+        assert cmd_content == (
+            "# Remote Commands\n\nCommand 1\n\n<!-- END CLONED INSTRUCTIONS -->\n"
+        )
+
+        # append custom content to both files and run 3 more times
+        Path("instructions.md").write_text(
+            f"{inst_content}\n# Custom Instruction\n", encoding="utf-8"
+        )
+        Path("commands.md").write_text(
+            f"{cmd_content}\n# Custom Command\n", encoding="utf-8"
+        )
+
+        for _ in range(3):
+            result = runner.invoke(app, ["download", "cursor"])
+            assert result.exit_code == 0
+
+        inst_with_custom = Path("instructions.md").read_text(encoding="utf-8")
+        cmd_with_custom = Path("commands.md").read_text(encoding="utf-8")
+
+        assert inst_with_custom == (
+            "# Remote Instructions\n\nRule 1\n\n<!-- END CLONED INSTRUCTIONS -->\n\n# Custom Instruction\n"
+        )
+        assert cmd_with_custom == (
+            "# Remote Commands\n\nCommand 1\n\n<!-- END CLONED INSTRUCTIONS -->\n\n# Custom Command\n"
+        )
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
 def test_download_auto_detects_in_use_agents(
     mock_zipfile, mock_requests, tmp_path: Path
 ):

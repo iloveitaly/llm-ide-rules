@@ -432,3 +432,55 @@ def test_agent_detect_methods(tmp_path: Path):
     agents_file.touch()
     assert agents.detect(tmp_path)
     agents_file.unlink()
+
+
+def test_preserve_custom_content_idempotent():
+    from llm_ide_rules.utils import preserve_custom_content
+
+    base = "# Remote Instructions\n\nRule 1\n"
+    # first pass on fresh file
+    content_pass1 = preserve_custom_content(base, "")
+    assert (
+        content_pass1
+        == "# Remote Instructions\n\nRule 1\n\n<!-- END CLONED INSTRUCTIONS -->\n"
+    )
+
+    # repeated passes without custom content must be byte-for-byte identical
+    content_pass2 = preserve_custom_content(base, content_pass1)
+    assert content_pass2 == content_pass1
+
+    content_pass3 = preserve_custom_content(base, content_pass2)
+    assert content_pass3 == content_pass1
+
+    # with custom content
+    custom_rule = "# Custom Rules\n\nMy custom rule"
+    with_custom = f"{content_pass1}\n{custom_rule}\n"
+    custom_pass1 = preserve_custom_content(base, with_custom)
+    assert (
+        custom_pass1
+        == f"# Remote Instructions\n\nRule 1\n\n<!-- END CLONED INSTRUCTIONS -->\n\n{custom_rule}\n"
+    )
+
+    # repeated passes with custom content must be byte-for-byte identical
+    custom_pass2 = preserve_custom_content(base, custom_pass1)
+    assert custom_pass2 == custom_pass1
+
+    custom_pass3 = preserve_custom_content(base, custom_pass2)
+    assert custom_pass3 == custom_pass1
+
+
+def test_preserve_custom_content_handles_commands_marker():
+    from llm_ide_rules.constants import COMMANDS_MARKER
+    from llm_ide_rules.utils import preserve_custom_content
+
+    base = "# Remote Commands\n\nCommand 1\n"
+    existing = f"# Existing\n\n{COMMANDS_MARKER}\n\n# Local Command\n"
+    result = preserve_custom_content(base, existing)
+    assert (
+        result
+        == f"# Remote Commands\n\nCommand 1\n\n{COMMANDS_MARKER}\n\n# Local Command\n"
+    )
+
+    # repeated pass must be identical
+    result2 = preserve_custom_content(base, result)
+    assert result2 == result

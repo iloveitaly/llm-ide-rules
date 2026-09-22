@@ -19,6 +19,7 @@ from llm_ide_rules.constants import (
 )
 from llm_ide_rules.detect import describe_resolved_agents, resolve_target_agents
 from llm_ide_rules.log import log
+from llm_ide_rules.utils import preserve_custom_content
 
 DEFAULT_REPO = "iloveitaly/llm-ide-rules"
 DEFAULT_BRANCH = "master"
@@ -507,13 +508,9 @@ def download_main(
                     log.info("copying source file", source=str(src), target=str(dst))
                     dst.parent.mkdir(parents=True, exist_ok=True)
 
-                marker = "<!-- END CLONED INSTRUCTIONS -->"
-                local_custom_content = ""
-
+                local_content = ""
                 if dst.exists():
                     local_content = dst.read_text(encoding="utf-8")
-                    if marker in local_content:
-                        local_custom_content = local_content.split(marker, 1)[1]
 
                 remote_content = src.read_text(encoding="utf-8")
                 if (
@@ -525,8 +522,8 @@ def download_main(
 
                     remote_content, omitted_headers = filter_markdown_by_globs(
                         remote_content,
-                        exclude_globs=exclude_glob_list,
-                        include_globs=include_glob_list,
+                        exclude_glob_list,
+                        include_glob_list,
                     )
                     if omitted_headers:
                         log.info(
@@ -535,10 +532,7 @@ def download_main(
                             omitted=omitted_headers,
                         )
 
-                if marker not in remote_content:
-                    remote_content += f"\n\n{marker}\n"
-
-                file_content = remote_content + local_custom_content
+                file_content = preserve_custom_content(remote_content, local_content)
 
                 if inline:
                     assert staging_dir is not None
