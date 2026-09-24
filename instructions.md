@@ -138,8 +138,13 @@ globs: app/routes/**/*.py
 - Use the typed route helpers in `app/generated/fastapi_typed_routes.py` for all URL generation.
 - User-facing errors must not name internals. 3rd party API errors (Stripe, Clerk, etc) or internal implementation jargon should exist in error messages displayed to the browser. Think hard about user-facing error messages and make it clear what the user should do next.
 
-## Justfiles
+## Frontend Tests
 
+globs: **/*.test.tsx
+
+- Do not add unit tests that duplicate Playwright coverage. Only add unit tests for edge cases which are not covered by Playwright.
+
+## Justfiles
 
 globs: just/*.just
 
@@ -158,7 +163,6 @@ set shell := ["zsh", "-ceuB", "-o", "pipefail", "-o", "extended_glob"]
 # determines what shell to use for [script]
 set script-interpreter := ["zsh", "-euB", "-o", "pipefail", "-o", "extended_glob"]
 ```
-
 
 ## Pytest Integration Tests
 
@@ -698,7 +702,6 @@ const {
   clearErrors,
 } = form
 
-
 async function onSubmit(values: z.infer<typeof formSchema>) {
   clearErrors("root")
 
@@ -772,8 +775,4 @@ Here's how frontend code is organized in `web/app/`:
 * DateTime objects should always be converted to UTC before included in any API request. Never send a timestamp with the user's timezone.
 * Unless otherwise specified, do not shift server-provided times based on the user's timezone.
 
-## Frontend Tests
-
-globs: **/*.test.tsx
-
-- Do not add unit tests that duplicate Playwright coverage. Only add unit tests for edge cases which are not covered by Playwright.
+<!-- END CLONED INSTRUCTIONS -->
