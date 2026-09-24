@@ -3,7 +3,6 @@ applyTo: "tests/**/*.py"
 ---
 ## Pytest Tests
 
-
 - Look first to `app.factories.*` instead of `app.models.*` to generate any required database state
   - For example, to create and persist a `Distribution` record `DistributionFactory.save()`
   - If a factory doesn't exist for the model you are working with, create one.

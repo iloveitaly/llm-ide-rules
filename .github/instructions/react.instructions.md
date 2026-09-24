@@ -3,7 +3,6 @@ applyTo: "**/*.tsx"
 ---
 ## React
 
-
 - You are using the latest version of React (v19)
 - Do not write any backend code. Just frontend logic.
 - If a complex skeleton is needed, create a component function `LoadingSkeleton` in the same file.
@@ -66,7 +65,6 @@ const {
   setError,
   clearErrors,
 } = form
-
 
 async function onSubmit(values: z.infer<typeof formSchema>) {
   clearErrors("root")

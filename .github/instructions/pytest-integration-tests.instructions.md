@@ -3,7 +3,6 @@ applyTo: "tests/integration/**/*.py"
 ---
 ## Pytest Integration Tests
 
-
 - Look to `app/factories/` to generate any required database state
   - Here's an example of how to create + persist a factory `DistributionFactory.save(domain=PYTHON_TEST_SERVER_HOST)`
 - Add the `server` factory to each test

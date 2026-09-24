@@ -69,7 +69,6 @@ Pay careful attention to these instructions when running tests, generating datab
 
 ## Alembic Migrations
 
-
 ### Default Content for New Non-Nullable Columns
 
 To add a non-nullable column and set a specific value for all existing rows without a persistent server default:
@@ -128,7 +127,6 @@ op.execute(
 
 ## Fastapi
 
-
 - When throwing a `HTTPException`, do not add a `detail=` and use a named status code (`status.HTTP_400_BAD_REQUEST`)
 - Do not return a `dict`, instead create a `class RouteNameResponse`
   - Locate these classes right above the `def route_name():` function which uses them.
@@ -139,9 +137,12 @@ op.execute(
 - User-facing errors must not name internals. 3rd party API errors (Stripe, Clerk, etc) or internal implementation jargon should exist in error messages displayed to the browser. Think hard about user-facing error messages and make it clear what the user should do next.
 
 
+## Frontend Tests
+
+- Do not add unit tests that duplicate Playwright coverage. Only add unit tests for edge cases which are not covered by Playwright.
+
+
 ## Justfiles
-
-
 
 - Never use `just_executable()` to reference the executable for `just`. If `just` DNE, then something is wrong adn you should stop your work and let me know.
 - You should not have to mutate `$PATH`. If you cannot find an expected binary, stop your work and let me know.
@@ -161,7 +162,6 @@ set script-interpreter := ["zsh", "-euB", "-o", "pipefail", "-o", "extended_glob
 
 
 ## Python App
-
 
 Here's how the python application is organized:
 
@@ -299,7 +299,6 @@ class Distribution(BaseModel, TimestampsMixin, SoftDeletionMixin, table=True):
 
 ## Python
 
-
 When writing Python:
 
 * Assume the latest python, version 3.13.
@@ -369,7 +368,6 @@ params = f.compact({"city": city, "stateCode": stateCode})
 
 
 ## React Router
-
 
 - You are using the latest version of React Router (v7).
 - Always include the suffix `Page` when naming the default export of a route.
@@ -464,7 +462,6 @@ function TheComponent() {
 
 ## React
 
-
 - You are using the latest version of React (v19)
 - Do not write any backend code. Just frontend logic.
 - If a complex skeleton is needed, create a component function `LoadingSkeleton` in the same file.
@@ -528,7 +525,6 @@ const {
   clearErrors,
 } = form
 
-
 async function onSubmit(values: z.infer<typeof formSchema>) {
   clearErrors("root")
 
@@ -567,12 +563,10 @@ return (
 
 ## Shell
 
-
 - Assume zsh for any shell scripts. The latest version of modern utilities like ripgrep (rg), fdfind (fd), bat, httpie (http), zq (zed), jq, procs, rsync are installed and you can request I install additional utilities.
 
 
 ## Typescript
-
 
 - Use `pnpm` or `pnpx` and not `npm` or `npx`.
   - Use `just js_shadcn`, `just pnpm`, and `just js_lint` instead of executing these operations exactly. @just/javascript.just
@@ -601,9 +595,3 @@ Here's how frontend code is organized in `web/app/`:
 * Use `Temporal` for any date or time manipulation. You can assume it's available in the browser.
 * DateTime objects should always be converted to UTC before included in any API request. Never send a timestamp with the user's timezone.
 * Unless otherwise specified, do not shift server-provided times based on the user's timezone.
-
-
-## Frontend Tests
-
-
-- Do not add unit tests that duplicate Playwright coverage. Only add unit tests for edge cases which are not covered by Playwright.

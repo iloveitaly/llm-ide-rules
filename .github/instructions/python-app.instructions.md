@@ -3,7 +3,6 @@ applyTo: "**/*.py"
 ---
 ## Python App
 
-
 Here's how the python application is organized:
 
 - `app/lib/` is for code that is not specified to this application and with some effort could extracted into a external package.
