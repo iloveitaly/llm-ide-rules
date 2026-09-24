@@ -157,10 +157,13 @@ def get_ordered_files(
 
     If section_globs_keys is None, returns files sorted alphabetically.
     """
-    if not section_globs_keys:
-        return sorted(file_list, key=lambda p: p.name)
+    key_func = lambda p: p.parent.name if p.name == "SKILL.md" else p.name
+    stem_func = lambda p: p.parent.name if p.name == "SKILL.md" else p.stem
 
-    file_dict = {f.stem: f for f in file_list}
+    if not section_globs_keys:
+        return sorted(file_list, key=key_func)
+
+    file_dict = {stem_func(f): f for f in file_list}
     ordered_files = []
 
     for section_name in section_globs_keys:
@@ -169,7 +172,7 @@ def get_ordered_files(
             ordered_files.append(file_dict[filename])
             del file_dict[filename]
 
-    remaining_files = sorted(file_dict.values(), key=lambda p: p.name)
+    remaining_files = sorted(file_dict.values(), key=key_func)
     ordered_files.extend(remaining_files)
 
     return ordered_files
@@ -282,8 +285,14 @@ def extract_description_and_filter_content(
                 break
 
     if description and description_line is not None:
+        end_idx = description_line + 1
+        if description_line > 0 and not trimmed_content[description_line - 1].strip():
+            while (
+                end_idx < len(trimmed_content) and not trimmed_content[end_idx].strip()
+            ):
+                end_idx += 1
         filtered_content = (
-            trimmed_content[:description_line] + trimmed_content[description_line + 1 :]
+            trimmed_content[:description_line] + trimmed_content[end_idx:]
         )
         filtered_content = trim_content(filtered_content)
     else:

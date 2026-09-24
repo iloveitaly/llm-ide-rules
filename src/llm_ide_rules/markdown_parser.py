@@ -48,7 +48,24 @@ def extract_glob_directive(
 
         if line.lower().startswith("globs:"):
             glob_value = line[6:].strip()
-            filtered_content = content_lines[:i] + content_lines[i + 1 :]
+            end_idx = i + 1
+            while end_idx < len(content_lines) and not content_lines[end_idx].strip():
+                end_idx += 1
+
+            has_newlines = any(l.endswith("\n") for l in content_lines)
+            blank_line = "\n" if has_newlines else ""
+            header_line = content_lines[header_idx]
+            if has_newlines and not header_line.endswith("\n"):
+                header_line += "\n"
+
+            if end_idx < len(content_lines):
+                filtered_content = (
+                    content_lines[:header_idx]
+                    + [header_line, blank_line]
+                    + content_lines[end_idx:]
+                )
+            else:
+                filtered_content = content_lines[:header_idx] + [header_line]
             return filtered_content, glob_value
 
         break

@@ -13,6 +13,36 @@ from llm_ide_rules.agents.base import (
 )
 
 
+def extract_frontmatter_description(lines: list[str]) -> str | None:
+    """Extract description from YAML frontmatter lines, supporting multiline/folded scalars."""
+    if not lines or lines[0].strip() != "---":
+        return None
+
+    for i in range(1, len(lines)):
+        line = lines[i].strip()
+        if line == "---":
+            break
+        if line.startswith("description:"):
+            raw_val = line[len("description:") :].strip().strip('"').strip("'")
+            if raw_val in (">-", ">", "|", "|-", ""):
+                desc_lines = []
+                for j in range(i + 1, len(lines)):
+                    next_raw = lines[j]
+                    stripped = next_raw.strip()
+                    if stripped == "---":
+                        break
+                    if next_raw and not next_raw[0].isspace() and ":" in stripped:
+                        break
+                    if stripped:
+                        desc_lines.append(stripped)
+                if raw_val in ("|", "|-"):
+                    return "\n".join(desc_lines)
+                return " ".join(desc_lines)
+            return raw_val
+
+    return None
+
+
 class DotAgentsBaseAgent(BaseAgent):
     """Base agent for tools using the .agents specification."""
 
@@ -96,7 +126,13 @@ class DotAgentsBaseAgent(BaseAgent):
                     content_parts.append("globs: manual\n")
                     has_meta = True
 
-                if desc:
+                stem_title = resolve_header_from_stem(
+                    rule_file.stem, section_globs if section_globs else {}
+                )
+                if desc and desc.strip().lower() not in (
+                    header.strip().lower(),
+                    stem_title.strip().lower(),
+                ):
                     content_parts.append(f"Description: {desc}\n")
                     has_meta = True
 
@@ -124,7 +160,7 @@ class DotAgentsBaseAgent(BaseAgent):
         if not lines or lines[0].strip() != "---":
             return None, None, False
 
-        description = None
+        description = extract_frontmatter_description(lines)
         glob_pattern = None
         always_apply = False
 
@@ -132,9 +168,7 @@ class DotAgentsBaseAgent(BaseAgent):
             line = lines[i].strip()
             if line == "---":
                 break
-            if line.startswith("description:"):
-                description = line[len("description:") :].strip().strip('"').strip("'")
-            elif line.startswith("alwaysApply:"):
+            if line.startswith("alwaysApply:"):
                 val = line[len("alwaysApply:") :].strip().lower()
                 always_apply = val == "true"
             elif line.startswith("globs:"):
@@ -185,16 +219,8 @@ class DotAgentsBaseAgent(BaseAgent):
             if not file_content:
                 continue
 
-            desc = None
             lines = file_content.splitlines()
-            if lines and lines[0].strip() == "---":
-                for i in range(1, len(lines)):
-                    line = lines[i].strip()
-                    if line == "---":
-                        break
-                    # name: in frontmatter is unused; headers come from H1 or stem
-                    if line.startswith("description:"):
-                        desc = line[len("description:") :].strip().strip('"').strip("'")
+            desc = extract_frontmatter_description(lines)
 
             content = strip_yaml_frontmatter(file_content)
 
@@ -211,11 +237,18 @@ class DotAgentsBaseAgent(BaseAgent):
             content = "\n".join(content_lines)
 
             if desc and f"Description: {desc}" not in content:
-                lines = content.splitlines()
-                if lines and lines[0].startswith("## "):
-                    lines.insert(1, f"Description: {desc}")
-                    lines.insert(2, "")
-                    content = "\n".join(lines)
+                stem_title = resolve_header_from_stem(
+                    skill_file.parent.name, section_globs if section_globs else {}
+                )
+                if desc.strip().lower() not in (
+                    header_name.strip().lower(),
+                    stem_title.strip().lower(),
+                ):
+                    lines = content.splitlines()
+                    if lines and lines[0].startswith("## "):
+                        lines.insert(1, f"Description: {desc}")
+                        lines.insert(2, "")
+                        content = "\n".join(lines)
 
             # Collapse consecutive empty lines in content
             content_lines = content.splitlines()

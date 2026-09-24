@@ -62,6 +62,16 @@ def test_extract_glob_directive_with_empty_lines():
 
     assert pattern == "**/*.py"
     assert "globs: **/*.py\n" not in filtered
+    assert filtered == ["## Python\n", "\n", "Some content\n"]
+
+
+def test_extract_glob_directive_preserves_single_blank_line():
+    """Test that removing globs directive does not leave double blank lines."""
+    content = ["## Python\n", "\n", "globs: **/*.py\n", "\n", "Some content\n"]
+    filtered, pattern = extract_glob_directive(content)
+
+    assert pattern == "**/*.py"
+    assert filtered == ["## Python\n", "\n", "Some content\n"]
 
 
 def test_extract_glob_directive_manual():

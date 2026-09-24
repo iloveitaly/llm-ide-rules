@@ -242,3 +242,87 @@ Create a plan for the implementation.
                 assert original_normalized == roundtrip_normalized
         finally:
             os.chdir(original_cwd)
+
+
+def test_extract_frontmatter_description():
+    """Test extracting single-line and multiline frontmatter descriptions."""
+    from llm_ide_rules.agents.dotagents import extract_frontmatter_description
+
+    # Single-line
+    lines = ["---", "name: test-skill", "description: Simple description", "---"]
+    assert extract_frontmatter_description(lines) == "Simple description"
+
+    # Folded scalar >-
+    lines_folded = [
+        "---",
+        "name: copier-sync",
+        "description: >-",
+        "  First line of description,",
+        "  second line of description.",
+        "---",
+    ]
+    assert (
+        extract_frontmatter_description(lines_folded)
+        == "First line of description, second line of description."
+    )
+
+    # Literal scalar |
+    lines_literal = [
+        "---",
+        "name: multiline-skill",
+        "description: |",
+        "  Line 1",
+        "  Line 2",
+        "---",
+    ]
+    assert extract_frontmatter_description(lines_literal) == "Line 1\nLine 2"
+
+    # Empty frontmatter
+    assert extract_frontmatter_description([]) is None
+    assert extract_frontmatter_description(["not frontmatter"]) is None
+
+
+def test_get_ordered_files_skill_paths():
+    """Test get_ordered_files correctly handles SKILL.md paths by using parent directory name."""
+    from llm_ide_rules.agents.base import get_ordered_files
+
+    skills = [
+        Path(".agents/skills/zebra/SKILL.md"),
+        Path(".agents/skills/apple/SKILL.md"),
+        Path(".agents/skills/banana/SKILL.md"),
+    ]
+
+    # Alphabetical by parent directory name
+    ordered = get_ordered_files(skills)
+    assert [p.parent.name for p in ordered] == ["apple", "banana", "zebra"]
+
+    # Explicit ordering via section_globs_keys
+    custom_ordered = get_ordered_files(skills, ["Zebra", "Apple"])
+    assert [p.parent.name for p in custom_ordered] == ["zebra", "apple", "banana"]
+
+
+def test_bundle_rules_skips_title_description():
+    """Test bundle_rules skips Description when it matches the title/name, but preserves distinct descriptions."""
+    agent = AntigravityAgent()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        rules_dir = temp_path / ".agents/rules"
+        rules_dir.mkdir(parents=True)
+
+        # Rule whose description is just the name
+        (rules_dir / "react.md").write_text(
+            "---\ndescription: React\nglobs: []\nalwaysApply: true\n---\n\n## React\n\nReact instructions.\n"
+        )
+        # Rule with a distinct description
+        (rules_dir / "python.md").write_text(
+            "---\ndescription: Python coding style\nglobs: []\nalwaysApply: true\n---\n\n## Python\n\nPython instructions.\n"
+        )
+
+        output_file = temp_path / "instructions.md"
+        agent.bundle_rules(output_file)
+
+        bundled = output_file.read_text()
+        assert "## React" in bundled
+        assert "Description: React" not in bundled
+        assert "## Python" in bundled
+        assert "Description: Python coding style" in bundled

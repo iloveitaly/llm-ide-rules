@@ -309,6 +309,7 @@ def test_extract_description_and_filter_content_skip_headers():
     assert description == "Fix failing tests"
     assert "## Fix Tests\n" in filtered
     assert "Description:" not in "".join(filtered)
+    assert filtered == ["## Fix Tests\n", "\n", "Run pytest\n"]
 
 
 def test_extract_description_and_filter_content_empty():
