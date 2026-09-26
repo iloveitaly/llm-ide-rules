@@ -209,9 +209,7 @@ def copy_instruction_files(
             target_file = target_dir / file_name
 
             if source_file.exists():
-                log.info(
-                    "copying file", source=source_file, target=target_file
-                )
+                log.info("copying file", source=source_file, target=target_file)
 
                 # create parent directories if needed
                 target_file.parent.mkdir(parents=True, exist_ok=True)
@@ -264,9 +262,7 @@ def copy_recursive_files(
             )
             continue
 
-        log.info(
-            "copying recursive file", source=source_file, target=target_file
-        )
+        log.info("copying recursive file", source=source_file, target=target_file)
 
         # copy file (parent directory already exists)
         target_file.write_bytes(source_file.read_bytes())

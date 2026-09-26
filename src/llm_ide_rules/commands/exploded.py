@@ -1,6 +1,5 @@
 "exploded command: list clients that were exploded/active in the target directory"
 
-
 from pathlib import Path
 from typing import Annotated
 

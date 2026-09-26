@@ -328,11 +328,7 @@ def extract_description_and_filter_content(
 
     for i, line in enumerate(trimmed_content):
         stripped_line = line.strip()
-        if (
-            not stripped_line
-            or stripped_line.startswith("#")
-            or stripped_line.startswith("##")
-        ):
+        if not stripped_line or stripped_line.startswith("#"):
             continue
 
         if stripped_line.startswith("Description:"):

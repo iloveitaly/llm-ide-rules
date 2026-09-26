@@ -78,8 +78,7 @@ Here are Python rules for development.
             assert result.exit_code == 0
             assert Path("AGENTS.md").exists()
             assert (
-                "These are general Antigravity rules."
-                in Path("AGENTS.md").read_text()
+                "These are general Antigravity rules." in Path("AGENTS.md").read_text()
             )
             assert "## Python" in Path("AGENTS.md").read_text()
             assert not Path(".agents/rules").exists()
@@ -189,9 +188,7 @@ Use functional components and hooks.
             assert "Here are Python rules for development." in roundtrip_content
             assert "Use Python 3.13 and prefer Pathlib." in roundtrip_content
             assert "## React" in roundtrip_content
-            assert (
-                "Here are React rules for frontend development." in roundtrip_content
-            )
+            assert "Here are React rules for frontend development." in roundtrip_content
             assert "Use functional components and hooks." in roundtrip_content
         finally:
             os.chdir(original_cwd)

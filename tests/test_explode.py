@@ -133,7 +133,9 @@ Instructions without explicit description.
 """
         )
 
-        result = runner.invoke(app, ["explode", "antigravity", "claude", "opencode", "github"])
+        result = runner.invoke(
+            app, ["explode", "antigravity", "claude", "opencode", "github"]
+        )
         assert result.exit_code == 0
 
         # Antigravity (.agents/skills)

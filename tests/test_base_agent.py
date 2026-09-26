@@ -617,4 +617,3 @@ def test_github_write_command_description_handling(tmp_path: Path):
     assert "mode: 'agent'" in content_no_desc
     assert "description:" not in content_no_desc
     assert "Plan Only" in content_no_desc
-

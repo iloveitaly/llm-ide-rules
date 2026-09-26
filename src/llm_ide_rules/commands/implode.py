@@ -78,7 +78,9 @@ def github(
 
     rules_path = base_dir / rules_dir
     if not rules_path.exists():
-        log.error("github instructions directory not found", instructions_dir=rules_path)
+        log.error(
+            "github instructions directory not found", instructions_dir=rules_path
+        )
         error_msg = f"GitHub instructions directory not found: {rules_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
@@ -170,9 +172,7 @@ def _bundle_dot_agents(
 
     rules_path = base_dir / rules_dir
     if not rules_path.exists():
-        log.error(
-            "rules directory not found", provider=label, rules_dir=rules_path
-        )
+        log.error("rules directory not found", provider=label, rules_dir=rules_path)
         error_msg = f"{label.title()} rules directory not found: {rules_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
@@ -224,9 +224,7 @@ def antigravity(
             commands_output_path.unlink(missing_ok=True)
             log.info("no Antigravity skills to bundle")
     else:
-        log.info(
-            "antigravity skills directory not found", commands_dir=commands_path
-        )
+        log.info("antigravity skills directory not found", commands_dir=commands_path)
 
     rules_written = _bundle_agents_md("Antigravity", output)
 
@@ -286,9 +284,7 @@ def opencode(
 
     commands_path = base_dir / agent.commands_dir if agent.commands_dir else None
     if not commands_path or not commands_path.exists():
-        log.error(
-            "opencode commands directory not found", commands_dir=commands_path
-        )
+        log.error("opencode commands directory not found", commands_dir=commands_path)
         error_msg = f"OpenCode commands directory not found: {commands_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
