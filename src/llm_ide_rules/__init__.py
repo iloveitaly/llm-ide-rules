@@ -95,7 +95,7 @@ implode_app.command(
 )(claude)
 implode_app.command(
     "antigravity",
-    help="Bundle Antigravity (.agents) rules and skills into single files",
+    help="Bundle Antigravity skills and AGENTS.md into single files",
 )(antigravity)
 implode_app.command(
     "grok", help="Bundle Grok (.agents) rules and skills into single files"

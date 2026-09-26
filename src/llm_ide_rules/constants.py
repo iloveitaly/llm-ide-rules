@@ -15,7 +15,7 @@ VALID_AGENTS = [
 EXPLODE_AGENTS = [name for name in VALID_AGENTS if name != "all"]
 
 # Standing rules live in AGENTS.md rather than a vendor-specific rules dir
-AGENTS_MD_CLIENTS = frozenset({"opencode", "codex"})
+AGENTS_MD_CLIENTS = frozenset({"opencode", "codex", "antigravity"})
 
 # Clients that explode into the shared .agents layout
 DOTAGENTS_LAYOUT_CLIENTS = frozenset({"antigravity", "grok", "codex"})

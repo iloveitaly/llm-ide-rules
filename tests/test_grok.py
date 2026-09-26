@@ -129,6 +129,33 @@ def test_grok_write_command():
         assert "Run fab deploy." in content
 
 
+def test_grok_write_command_without_description():
+    """Test that GrokAgent omits description in frontmatter when not provided."""
+    agent = GrokAgent()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        commands_dir = temp_path / ".agents/skills"
+
+        agent.write_command(
+            content_lines=[
+                "## Deploy App\n",
+                "\n",
+                "Run fab deploy.\n",
+            ],
+            filename="deploy-app",
+            commands_dir=commands_dir,
+            section_name="Deploy App",
+        )
+
+        skill_file = commands_dir / "deploy-app/SKILL.md"
+        assert skill_file.exists()
+        content = skill_file.read_text()
+        assert "name: deploy-app" in content
+        assert "description:" not in content
+        assert "# Deploy App" in content
+        assert "Run fab deploy." in content
+
+
 def test_roundtrip_grok_instructions():
     """Test explode -> implode grok produces equivalent instructions.md."""
     runner = CliRunner()
@@ -240,3 +267,30 @@ Create a plan for the implementation.
                 assert original_normalized == roundtrip_normalized
         finally:
             os.chdir(original_cwd)
+
+
+def test_bundle_rules_skips_title_description():
+    """Test bundle_rules skips Description when it matches the title/name, but preserves distinct descriptions."""
+    agent = GrokAgent()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        rules_dir = temp_path / ".agents/rules"
+        rules_dir.mkdir(parents=True)
+
+        # Rule whose description is just the name
+        (rules_dir / "react.md").write_text(
+            "---\ndescription: React\nglobs: []\nalwaysApply: true\n---\n\n## React\n\nReact instructions.\n"
+        )
+        # Rule with a distinct description
+        (rules_dir / "python.md").write_text(
+            "---\ndescription: Python coding style\nglobs: []\nalwaysApply: true\n---\n\n## Python\n\nPython instructions.\n"
+        )
+
+        output_file = temp_path / "instructions.md"
+        agent.bundle_rules(output_file)
+
+        bundled = output_file.read_text()
+        assert "## React" in bundled
+        assert "Description: React" not in bundled
+        assert "## Python" in bundled
+        assert "Description: Python coding style" in bundled

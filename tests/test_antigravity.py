@@ -8,6 +8,7 @@ from typer.testing import CliRunner
 
 from llm_ide_rules import app
 from llm_ide_rules.agents.antigravity import AntigravityAgent
+from llm_ide_rules.constants import ensure_agents_adapter
 
 
 def normalize_whitespace(text: str) -> str:
@@ -44,61 +45,46 @@ def extract_sections(text: str) -> dict[str, str]:
     return sections
 
 
-def test_antigravity_write_rule():
-    """Test that AntigravityAgent writes rules with correct YAML frontmatter."""
+def test_antigravity_does_not_write_rules_dir():
     agent = AntigravityAgent()
+
+    assert agent.rules_dir is None
+    assert agent.commands_dir == ".agents/skills"
+
+
+def test_explode_antigravity_writes_agents_md_not_rules():
+    runner = CliRunner()
+
     with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
-        rules_dir = temp_path / ".agents/rules"
+        original_cwd = os.getcwd()
+        os.chdir(temp_dir)
+        try:
+            Path("instructions.md").write_text(
+                """# Sample Instructions
 
-        # 1. Test standard rule with glob pattern
-        agent.write_rule(
-            content_lines=["## Python\n", "Python rules here.\n"],
-            filename="python",
-            rules_dir=rules_dir,
-            glob_pattern="*.py",
-            description="Python development rules",
-        )
+These are general Antigravity rules.
 
-        rule_file = rules_dir / "python.md"
-        assert rule_file.exists()
-        content = rule_file.read_text()
-        assert "description: Python development rules" in content
-        assert 'globs: ["*.py"]' in content
-        assert "alwaysApply: false" in content
-        assert "Python rules here." in content
+## Python
 
-        # 2. Test manual rule
-        agent.write_rule(
-            content_lines=["## React\n", "React rules.\n"],
-            filename="react",
-            rules_dir=rules_dir,
-            glob_pattern="manual",
-            description="React frontend rules",
-        )
+globs: *.py
+Description: Python rule description
 
-        rule_file = rules_dir / "react.md"
-        assert rule_file.exists()
-        content = rule_file.read_text()
-        assert "description: React frontend rules" in content
-        assert "globs: []" in content
-        assert "alwaysApply: false" in content
+Here are Python rules for development.
+"""
+            )
 
-        # 3. Test general/always-apply rule
-        agent.write_rule(
-            content_lines=["General rules.\n"],
-            filename="general",
-            rules_dir=rules_dir,
-            glob_pattern=None,
-            description="General rules",
-        )
+            result = runner.invoke(app, ["explode", "antigravity"])
 
-        rule_file = rules_dir / "general.md"
-        assert rule_file.exists()
-        content = rule_file.read_text()
-        assert "description: General rules" in content
-        assert "globs: []" in content
-        assert "alwaysApply: true" in content
+            assert result.exit_code == 0
+            assert Path("AGENTS.md").exists()
+            assert (
+                "These are general Antigravity rules."
+                in Path("AGENTS.md").read_text()
+            )
+            assert "## Python" in Path("AGENTS.md").read_text()
+            assert not Path(".agents/rules").exists()
+        finally:
+            os.chdir(original_cwd)
 
 
 def test_antigravity_write_command():
@@ -125,6 +111,33 @@ def test_antigravity_write_command():
         content = skill_file.read_text()
         assert "name: deploy-app" in content
         assert "description: How to deploy" in content
+        assert "# Deploy App" in content
+        assert "Run fab deploy." in content
+
+
+def test_antigravity_write_command_without_description():
+    """Test that AntigravityAgent omits description in frontmatter when not provided."""
+    agent = AntigravityAgent()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        commands_dir = temp_path / ".agents/skills"
+
+        agent.write_command(
+            content_lines=[
+                "## Deploy App\n",
+                "\n",
+                "Run fab deploy.\n",
+            ],
+            filename="deploy-app",
+            commands_dir=commands_dir,
+            section_name="Deploy App",
+        )
+
+        skill_file = commands_dir / "deploy-app/SKILL.md"
+        assert skill_file.exists()
+        content = skill_file.read_text()
+        assert "name: deploy-app" in content
+        assert "description:" not in content
         assert "# Deploy App" in content
         assert "Run fab deploy." in content
 
@@ -163,8 +176,8 @@ Use functional components and hooks.
             explode_result = runner.invoke(app, ["explode", "antigravity"])
             assert explode_result.exit_code == 0
 
-            assert Path(".agents/rules/python.md").exists()
-            assert Path(".agents/rules/react.md").exists()
+            assert Path("AGENTS.md").exists()
+            assert not Path(".agents/rules").exists()
 
             implode_result = runner.invoke(
                 app, ["implode", "antigravity", "roundtrip.md"]
@@ -172,16 +185,14 @@ Use functional components and hooks.
             assert implode_result.exit_code == 0
 
             roundtrip_content = Path("roundtrip.md").read_text()
-
-            original_sections = extract_sections(original_content)
-            roundtrip_sections = extract_sections(roundtrip_content)
-
-            assert set(original_sections.keys()) == set(roundtrip_sections.keys())
-
-            for section_name in original_sections:
-                assert normalize_whitespace(
-                    original_sections[section_name]
-                ) == normalize_whitespace(roundtrip_sections[section_name])
+            assert "## Python" in roundtrip_content
+            assert "Here are Python rules for development." in roundtrip_content
+            assert "Use Python 3.13 and prefer Pathlib." in roundtrip_content
+            assert "## React" in roundtrip_content
+            assert (
+                "Here are React rules for frontend development." in roundtrip_content
+            )
+            assert "Use functional components and hooks." in roundtrip_content
         finally:
             os.chdir(original_cwd)
 
@@ -221,6 +232,7 @@ Create a plan for the implementation.
 
             assert Path(".agents/skills/fix-tests/SKILL.md").exists()
             assert Path(".agents/skills/plan-only/SKILL.md").exists()
+            assert not Path(".agents/rules").exists()
 
             implode_result = runner.invoke(app, ["implode", "antigravity"])
             assert implode_result.exit_code == 0
@@ -242,6 +254,32 @@ Create a plan for the implementation.
                 assert original_normalized == roundtrip_normalized
         finally:
             os.chdir(original_cwd)
+
+
+def test_explode_antigravity_runtime_when_disk_empty(monkeypatch):
+    runner = CliRunner()
+    monkeypatch.setenv("ANTIGRAVITY_AGENT", "true")
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        original_cwd = os.getcwd()
+        os.chdir(temp_dir)
+        try:
+            Path("instructions.md").write_text("## Python\n\nPython rules\n")
+
+            result = runner.invoke(app, ["explode"])
+
+            assert result.exit_code == 0
+            assert "Detected runtime environment: antigravity" in result.stdout
+            assert Path("AGENTS.md").exists()
+            assert not Path(".agents/rules").exists()
+            assert not Path(".cursor").exists()
+        finally:
+            os.chdir(original_cwd)
+
+
+def test_ensure_agents_adapter_appends_for_antigravity():
+    assert ensure_agents_adapter(["antigravity"]) == ["antigravity", "agents"]
+    assert ensure_agents_adapter(["antigravity", "agents"]) == ["antigravity", "agents"]
 
 
 def test_extract_frontmatter_description():
@@ -299,30 +337,3 @@ def test_get_ordered_files_skill_paths():
     # Explicit ordering via section_globs_keys
     custom_ordered = get_ordered_files(skills, ["Zebra", "Apple"])
     assert [p.parent.name for p in custom_ordered] == ["zebra", "apple", "banana"]
-
-
-def test_bundle_rules_skips_title_description():
-    """Test bundle_rules skips Description when it matches the title/name, but preserves distinct descriptions."""
-    agent = AntigravityAgent()
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
-        rules_dir = temp_path / ".agents/rules"
-        rules_dir.mkdir(parents=True)
-
-        # Rule whose description is just the name
-        (rules_dir / "react.md").write_text(
-            "---\ndescription: React\nglobs: []\nalwaysApply: true\n---\n\n## React\n\nReact instructions.\n"
-        )
-        # Rule with a distinct description
-        (rules_dir / "python.md").write_text(
-            "---\ndescription: Python coding style\nglobs: []\nalwaysApply: true\n---\n\n## Python\n\nPython instructions.\n"
-        )
-
-        output_file = temp_path / "instructions.md"
-        agent.bundle_rules(output_file)
-
-        bundled = output_file.read_text()
-        assert "## React" in bundled
-        assert "Description: React" not in bundled
-        assert "## Python" in bundled
-        assert "Description: Python coding style" in bundled

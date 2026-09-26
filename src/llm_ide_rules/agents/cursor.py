@@ -136,6 +136,9 @@ class CursorAgent(BaseAgent):
             if not content:
                 continue
 
+            content = strip_yaml_frontmatter(content)
+            content = strip_header(content)
+
             header = resolve_header_from_stem(
                 command_file.stem, section_globs if section_globs else {}
             )

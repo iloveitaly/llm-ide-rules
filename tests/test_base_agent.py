@@ -485,3 +485,136 @@ def test_preserve_custom_content_handles_commands_marker():
     # repeated pass must be identical
     result2 = preserve_custom_content(base, result)
     assert result2 == result
+
+
+def test_claude_write_command_description_handling(tmp_path: Path):
+    from llm_ide_rules.agents.claude import ClaudeAgent
+
+    agent = ClaudeAgent()
+    commands_dir = tmp_path / ".claude/commands"
+
+    # With description
+    agent.write_command(
+        content_lines=[
+            "## Fix Tests\n",
+            "Description: Fix failing test suite\n",
+            "\n",
+            "Run pytest.\n",
+        ],
+        filename="fix-tests",
+        commands_dir=commands_dir,
+        section_name="Fix Tests",
+    )
+    cmd_file = commands_dir / "fix-tests.md"
+    assert cmd_file.exists()
+    content = cmd_file.read_text()
+    assert content.startswith("---\ndescription: Fix failing test suite\n---\n\n")
+    assert "Run pytest." in content
+    assert "Description:" not in content.split("---")[2]
+
+    # Without description
+    agent.write_command(
+        content_lines=[
+            "## Plan Only\n",
+            "\n",
+            "Generate plan only.\n",
+        ],
+        filename="plan-only",
+        commands_dir=commands_dir,
+        section_name="Plan Only",
+    )
+    cmd_file_no_desc = commands_dir / "plan-only.md"
+    assert cmd_file_no_desc.exists()
+    content_no_desc = cmd_file_no_desc.read_text()
+    assert "---" not in content_no_desc
+    assert "description:" not in content_no_desc
+    assert "Plan Only" in content_no_desc
+    assert "Generate plan only." in content_no_desc
+
+
+def test_opencode_write_command_description_handling(tmp_path: Path):
+    from llm_ide_rules.agents.opencode import OpenCodeAgent
+
+    agent = OpenCodeAgent()
+    commands_dir = tmp_path / ".opencode/commands"
+
+    # With description
+    agent.write_command(
+        content_lines=[
+            "## Fix Tests\n",
+            "Description: Fix failing test suite\n",
+            "\n",
+            "Run pytest.\n",
+        ],
+        filename="fix-tests",
+        commands_dir=commands_dir,
+        section_name="Fix Tests",
+    )
+    cmd_file = commands_dir / "fix-tests.md"
+    assert cmd_file.exists()
+    content = cmd_file.read_text()
+    assert content.startswith("---\ndescription: Fix failing test suite\n---\n\n")
+    assert "Run pytest." in content
+
+    # Without description
+    agent.write_command(
+        content_lines=[
+            "## Plan Only\n",
+            "\n",
+            "Generate plan only.\n",
+        ],
+        filename="plan-only",
+        commands_dir=commands_dir,
+        section_name="Plan Only",
+    )
+    cmd_file_no_desc = commands_dir / "plan-only.md"
+    assert cmd_file_no_desc.exists()
+    content_no_desc = cmd_file_no_desc.read_text()
+    assert "---" not in content_no_desc
+    assert "description:" not in content_no_desc
+    assert "Plan Only" in content_no_desc
+
+
+def test_github_write_command_description_handling(tmp_path: Path):
+    from llm_ide_rules.agents.github import GitHubAgent
+
+    agent = GitHubAgent()
+    commands_dir = tmp_path / ".github/prompts"
+
+    # With description
+    agent.write_command(
+        content_lines=[
+            "## Fix Tests\n",
+            "Description: Fix failing test suite\n",
+            "\n",
+            "Run pytest.\n",
+        ],
+        filename="fix-tests",
+        commands_dir=commands_dir,
+        section_name="Fix Tests",
+    )
+    cmd_file = commands_dir / "fix-tests.prompt.md"
+    assert cmd_file.exists()
+    content = cmd_file.read_text()
+    assert "mode: 'agent'" in content
+    assert "description: 'Fix failing test suite'" in content
+    assert "Run pytest." in content
+
+    # Without description
+    agent.write_command(
+        content_lines=[
+            "## Plan Only\n",
+            "\n",
+            "Generate plan only.\n",
+        ],
+        filename="plan-only",
+        commands_dir=commands_dir,
+        section_name="Plan Only",
+    )
+    cmd_file_no_desc = commands_dir / "plan-only.prompt.md"
+    assert cmd_file_no_desc.exists()
+    content_no_desc = cmd_file_no_desc.read_text()
+    assert "mode: 'agent'" in content_no_desc
+    assert "description:" not in content_no_desc
+    assert "Plan Only" in content_no_desc
+

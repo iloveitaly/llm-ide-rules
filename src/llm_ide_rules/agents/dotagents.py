@@ -5,42 +5,13 @@ from pathlib import Path
 from llm_ide_rules.agents.base import (
     BaseAgent,
     extract_description_and_filter_content,
+    extract_frontmatter_description,
     get_ordered_files,
     resolve_header_from_stem,
     strip_header,
     strip_yaml_frontmatter,
     trim_content,
 )
-
-
-def extract_frontmatter_description(lines: list[str]) -> str | None:
-    """Extract description from YAML frontmatter lines, supporting multiline/folded scalars."""
-    if not lines or lines[0].strip() != "---":
-        return None
-
-    for i in range(1, len(lines)):
-        line = lines[i].strip()
-        if line == "---":
-            break
-        if line.startswith("description:"):
-            raw_val = line[len("description:") :].strip().strip('"').strip("'")
-            if raw_val in (">-", ">", "|", "|-", ""):
-                desc_lines = []
-                for j in range(i + 1, len(lines)):
-                    next_raw = lines[j]
-                    stripped = next_raw.strip()
-                    if stripped == "---":
-                        break
-                    if next_raw and not next_raw[0].isspace() and ":" in stripped:
-                        break
-                    if stripped:
-                        desc_lines.append(stripped)
-                if raw_val in ("|", "|-"):
-                    return "\n".join(desc_lines)
-                return " ".join(desc_lines)
-            return raw_val
-
-    return None
 
 
 class DotAgentsBaseAgent(BaseAgent):
@@ -317,8 +288,6 @@ class DotAgentsBaseAgent(BaseAgent):
         desc, filtered_content = extract_description_and_filter_content(
             content_lines, ""
         )
-        if not desc:
-            desc = section_name or filename.replace("-", " ").title()
 
         # Find the header
         header = None
@@ -340,7 +309,10 @@ class DotAgentsBaseAgent(BaseAgent):
                 continue
             final_content.append(line)
 
-        frontmatter = f"---\nname: {filename}\ndescription: {desc}\n---\n\n"
+        if desc:
+            frontmatter = f"---\nname: {filename}\ndescription: {desc}\n---\n\n"
+        else:
+            frontmatter = f"---\nname: {filename}\n---\n\n"
 
         trimmed = trim_content(final_content)
         filepath.parent.mkdir(parents=True, exist_ok=True)

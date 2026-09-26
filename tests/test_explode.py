@@ -112,6 +112,66 @@ Here are instructions to plan only.
         assert not Path(".github/prompts/fix-tests.prompt.md").exists()
 
 
+def test_explode_commands_without_description_omits_frontmatter_description():
+    """Test explode with commands with and without explicit Description: line."""
+    runner = CliRunner()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.chdir(temp_dir)
+
+        Path("instructions.md").write_text("## General\nGeneral instructions\n")
+        Path("commands.md").write_text(
+            """## With Desc
+
+Description: Explicit description
+
+Instructions with description.
+
+## No Desc
+
+Instructions without explicit description.
+"""
+        )
+
+        result = runner.invoke(app, ["explode", "antigravity", "claude", "opencode", "github"])
+        assert result.exit_code == 0
+
+        # Antigravity (.agents/skills)
+        ag_with = Path(".agents/skills/with-desc/SKILL.md").read_text()
+        assert "name: with-desc" in ag_with
+        assert "description: Explicit description" in ag_with
+
+        ag_no = Path(".agents/skills/no-desc/SKILL.md").read_text()
+        assert "name: no-desc" in ag_no
+        assert "description:" not in ag_no
+
+        # Claude (.claude/commands)
+        claude_with = Path(".claude/commands/with-desc.md").read_text()
+        assert "description: Explicit description" in claude_with
+
+        claude_no = Path(".claude/commands/no-desc.md").read_text()
+        assert "---" not in claude_no
+        assert "description:" not in claude_no
+        assert "Instructions without explicit description." in claude_no
+
+        # OpenCode (.opencode/commands)
+        opencode_with = Path(".opencode/commands/with-desc.md").read_text()
+        assert "description: Explicit description" in opencode_with
+
+        opencode_no = Path(".opencode/commands/no-desc.md").read_text()
+        assert "---" not in opencode_no
+        assert "description:" not in opencode_no
+
+        # GitHub (.github/prompts)
+        gh_with = Path(".github/prompts/with-desc.prompt.md").read_text()
+        assert "mode: 'agent'" in gh_with
+        assert "description: 'Explicit description'" in gh_with
+
+        gh_no = Path(".github/prompts/no-desc.prompt.md").read_text()
+        assert "mode: 'agent'" in gh_no
+        assert "description:" not in gh_no
+
+
 def test_explode_space_separated_agents():
     runner = CliRunner()
 
@@ -624,7 +684,7 @@ def test_explode_explicit_all_overrides_cursor_cloud(monkeypatch):
         assert Path(".github/instructions/python.instructions.md").exists()
 
 
-@pytest.mark.parametrize("agent_name", ["antigravity", "grok"])
+@pytest.mark.parametrize("agent_name", ["grok"])
 def test_explode_dotagents_general_and_unglobbed_rules(agent_name):
     """Preamble and unglobbed H2 sections always-apply for .agents/rules clients."""
     runner = CliRunner()
@@ -676,9 +736,9 @@ This named section has no glob, so it always applies.
         assert 'globs: ["*.py"]' in globbed_content
 
 
-@pytest.mark.parametrize("agent_name", ["antigravity", "grok"])
+@pytest.mark.parametrize("agent_name", ["grok"])
 def test_roundtrip_dotagents_preserves_preamble(agent_name):
-    """Explode then implode keeps preamble text for antigravity/grok."""
+    """Explode then implode keeps preamble text for grok."""
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:

@@ -151,9 +151,9 @@ def claude(
 
 def _bundle_dot_agents(
     output: str = "instructions.md",
-    label: str = "antigravity",
+    label: str = "grok",
 ) -> None:
-    """Shared implementation for .agents layout providers (antigravity, grok)."""
+    """Shared implementation for .agents layout providers (grok)."""
     agent = get_agent(label)
     base_dir = find_project_root()
 
@@ -201,8 +201,39 @@ def antigravity(
         str, typer.Argument(help="Output file for instructions")
     ] = "instructions.md",
 ) -> None:
-    """Bundle Antigravity (.agents) rules into instructions.md and skills into commands.md."""
-    _bundle_dot_agents(output, "antigravity")
+    """Bundle Antigravity skills into commands.md and AGENTS.md into instructions.md."""
+    agent = get_agent("antigravity")
+    base_dir = find_project_root()
+
+    log.info(
+        "bundling antigravity skills",
+        commands_dir=agent.commands_dir,
+    )
+
+    commands_written = False
+    commands_path = base_dir / agent.commands_dir if agent.commands_dir else None
+
+    if commands_path and commands_path.exists():
+        commands_output_path = base_dir / "commands.md"
+        commands_written = agent.bundle_commands(commands_output_path)
+
+        if commands_written:
+            success_msg = "Bundled Antigravity skills into commands.md"
+            typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+        else:
+            commands_output_path.unlink(missing_ok=True)
+            log.info("no Antigravity skills to bundle")
+    else:
+        log.info(
+            "antigravity skills directory not found", commands_dir=str(commands_path)
+        )
+
+    rules_written = _bundle_agents_md("Antigravity", output)
+
+    if not commands_written and not rules_written:
+        error_msg = "No Antigravity skills or AGENTS.md files found to bundle"
+        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
+        raise typer.Exit(1)
 
 
 def grok(
@@ -284,15 +315,15 @@ def opencode(
         log.info("no OpenCode rules (AGENTS.md) to bundle")
 
 
-def _bundle_agents_md(label: str) -> bool:
-    """Bundle AGENTS.md files into instructions.md."""
+def _bundle_agents_md(label: str, output: str = "instructions.md") -> bool:
+    """Bundle AGENTS.md files into instructions.md (or specified output)."""
     agents_agent = get_agent("agents")
     base_dir = find_project_root()
-    instructions_output_path = base_dir / "instructions.md"
+    instructions_output_path = base_dir / output
     rules_written = agents_agent.bundle_rules(instructions_output_path)
 
     if rules_written:
-        success_msg = f"Bundled {label} rules (AGENTS.md) into instructions.md"
+        success_msg = f"Bundled {label} rules (AGENTS.md) into {output}"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
         return True
 

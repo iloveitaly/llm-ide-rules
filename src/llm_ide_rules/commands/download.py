@@ -69,7 +69,7 @@ INSTRUCTION_TYPES = {
         "include_patterns": [],
     },
     "antigravity": {
-        "directories": [".agents/rules", ".agents/skills"],
+        "directories": [".agents/skills"],
         "files": [],
         "include_patterns": [],
     },

@@ -5,6 +5,7 @@ from pathlib import Path
 from llm_ide_rules.agents.base import (
     BaseAgent,
     extract_description_and_filter_content,
+    extract_frontmatter_description,
     get_ordered_files_github,
     resolve_header_from_stem,
     strip_header,
@@ -133,17 +134,28 @@ class GitHubAgent(BaseAgent):
 
         content_parts: list[str] = []
         for prompt_file in ordered_prompts:
-            content = prompt_file.read_text().strip()
-            if not content:
+            file_content = prompt_file.read_text().strip()
+            if not file_content:
                 continue
 
-            content = strip_yaml_frontmatter(content)
+            desc = extract_frontmatter_description(file_content.splitlines())
+            content = strip_yaml_frontmatter(file_content)
             content = strip_header(content)
             base_stem = prompt_file.stem.replace(".prompt", "")
             header = resolve_header_from_stem(
                 base_stem, section_globs if section_globs else {}
             )
             content_parts.append(f"## {header}\n\n")
+
+            stem_title = resolve_header_from_stem(
+                base_stem, section_globs if section_globs else {}
+            )
+            if desc and desc.strip().lower() not in (
+                header.strip().lower(),
+                stem_title.strip().lower(),
+            ):
+                content_parts.append(f"Description: {desc}\n\n")
+
             content_parts.append(content)
             content_parts.append("\n\n")
 
@@ -190,7 +202,10 @@ applyTo: "{glob_pattern}"
             content_lines, ""
         )
 
-        frontmatter = f"---\nmode: 'agent'\ndescription: '{description}'\n---\n"
+        if description:
+            frontmatter = f"---\nmode: 'agent'\ndescription: '{description}'\n---\n"
+        else:
+            frontmatter = "---\nmode: 'agent'\n---\n"
         filepath.parent.mkdir(parents=True, exist_ok=True)
         filepath.write_text(frontmatter + "".join(filtered_content))
 

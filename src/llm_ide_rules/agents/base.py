@@ -129,6 +129,36 @@ class BaseAgent(ABC):
         output_file.write_text(file_content, encoding="utf-8")
 
 
+def extract_frontmatter_description(lines: list[str]) -> str | None:
+    """Extract description from YAML frontmatter lines, supporting multiline/folded scalars."""
+    if not lines or lines[0].strip() != "---":
+        return None
+
+    for i in range(1, len(lines)):
+        line = lines[i].strip()
+        if line == "---":
+            break
+        if line.startswith("description:"):
+            raw_val = line[len("description:") :].strip().strip('"').strip("'")
+            if raw_val in (">-", ">", "|", "|-", ""):
+                desc_lines = []
+                for j in range(i + 1, len(lines)):
+                    next_raw = lines[j]
+                    stripped = next_raw.strip()
+                    if stripped == "---":
+                        break
+                    if next_raw and not next_raw[0].isspace() and ":" in stripped:
+                        break
+                    if stripped:
+                        desc_lines.append(stripped)
+                if raw_val in ("|", "|-"):
+                    return "\n".join(desc_lines)
+                return " ".join(desc_lines)
+            return raw_val
+
+    return None
+
+
 def strip_yaml_frontmatter(text: str) -> str:
     """Strip YAML frontmatter from text."""
     lines = text.splitlines()

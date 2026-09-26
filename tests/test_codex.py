@@ -78,6 +78,32 @@ def test_codex_write_command():
         assert "Run fab deploy." in content
 
 
+def test_codex_write_command_without_description():
+    """Test that CodexAgent omits description in frontmatter when not provided."""
+    agent = CodexAgent()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        commands_dir = Path(temp_dir) / ".agents/skills"
+
+        agent.write_command(
+            content_lines=[
+                "## Deploy App\n",
+                "\n",
+                "Run fab deploy.\n",
+            ],
+            filename="deploy-app",
+            commands_dir=commands_dir,
+            section_name="Deploy App",
+        )
+
+        skill_file = commands_dir / "deploy-app/SKILL.md"
+        assert skill_file.exists()
+        content = skill_file.read_text()
+        assert "name: deploy-app" in content
+        assert "description:" not in content
+        assert "# Deploy App" in content
+        assert "Run fab deploy." in content
+
+
 def test_explode_codex_writes_agents_md_not_rules():
     runner = CliRunner()
 
