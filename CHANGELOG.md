@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.21.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.20.1...v0.21.0) (2026-09-26)
+
+
+### Features
+
+* support AGENTS.md for Antigravity and preserve command descriptions ([df709f6](https://github.com/iloveitaly/llm-ide-rules/commit/df709f618a5dd6e3e06aacacda1044b56b954c3b))
+
+
+### Bug Fixes
+
+* normalize whitespace and support multiline frontmatter ([c3296a0](https://github.com/iloveitaly/llm-ide-rules/commit/c3296a0643483c6228b9a3c87cb058b1e8dfcc80))
+
+
+### Documentation
+
+* add class aliasing convention guidelines ([e84fe3f](https://github.com/iloveitaly/llm-ide-rules/commit/e84fe3fb1a474e5463b81ebf0fa6e1887351ba19))
+* add class aliasing rule and clean up prompt frontmatter ([294ebb2](https://github.com/iloveitaly/llm-ide-rules/commit/294ebb2b0e254fb4cd795e194aa838e6bdc46a3e))
+* reorganize frontend test guidelines in AGENTS.md ([7cf2595](https://github.com/iloveitaly/llm-ide-rules/commit/7cf25957d1b16f574b48ca9bb8f5f62c0cc07133))
+* reorganize frontend testing instructions ([92778ca](https://github.com/iloveitaly/llm-ide-rules/commit/92778ca34f00fec0638963d9e5c9013e74c7dc9f))
+
 ## [0.20.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.20.0...v0.20.1) (2026-09-22)
 
 
