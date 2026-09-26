@@ -1,4 +1,4 @@
-"""Explode command: Convert instruction file to separate rule files."""
+"explode command: convert instruction file to separate rule files"
 
 from pathlib import Path
 from typing import Annotated
@@ -31,7 +31,8 @@ def process_command_section(
     agents: list[BaseAgent],
     dirs: dict[str, Path],
 ) -> bool:
-    """Process a section as a command for all agents."""
+    "process a section as a command for all agents"
+
     if not any(line.strip() for line in section_content):
         return False
 
@@ -52,7 +53,8 @@ def process_unmapped_as_always_apply(
     section_content: list[str],
     rule_agents: list[tuple[BaseAgent, Path]],
 ) -> bool:
-    """Process an unmapped section as an always-apply rule."""
+    "process an unmapped section as an always-apply rule"
+
     if not any(line.strip() for line in section_content):
         return False
 
@@ -74,7 +76,8 @@ def process_unmapped_as_always_apply(
 def get_always_apply_rule_agents(
     agent_instances: dict[str, BaseAgent], agent_dirs: dict[str, dict[str, Path]]
 ) -> list[tuple[BaseAgent, Path]]:
-    """Return rule-capable agents that should receive always-apply sections."""
+    "return rule-capable agents that should receive always-apply sections"
+
     eligible_agent_names = [
         agent_name
         for agent_name in agent_instances
@@ -93,7 +96,8 @@ def explode_implementation(
     working_dir: Path | None = None,
     agents_filename: str = "AGENTS.md",
 ) -> None:
-    """Core implementation of explode command."""
+    "core implementation of explode command"
+
     if working_dir is None:
         working_dir = Path.cwd()
 
@@ -119,7 +123,7 @@ def explode_implementation(
         "starting explode operation",
         input_file=input_file,
         agent=requested_agents,
-        working_dir=str(working_dir),
+        working_dir=working_dir,
     )
 
     if "all" in requested_agents:
@@ -127,7 +131,7 @@ def explode_implementation(
     else:
         agents_to_process = ensure_agents_adapter(list(requested_agents))
 
-    # Initialize agents and create directories
+    # initialize agents and create directories
     agent_instances = {}
     agent_dirs = {}
 
@@ -151,7 +155,7 @@ def explode_implementation(
     try:
         input_text = input_path.read_text()
 
-        # Strip marker and everything after it if present
+        # strip marker and everything after it if present
         marker = INSTRUCTIONS_MARKER
         if marker in input_text:
             log.info(
@@ -159,7 +163,7 @@ def explode_implementation(
             )
             input_text = input_text.split(marker, 1)[0]
     except FileNotFoundError as e:
-        log.error("input file not found", input_file=str(input_path))
+        log.error("input file not found", input_file=input_path)
         error_msg = f"Input file not found: {input_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1) from e
@@ -168,9 +172,9 @@ def explode_implementation(
     commands_text = ""
     if commands_path.exists():
         commands_text = commands_path.read_text()
-        log.info("found commands file", commands_file=str(commands_path))
+        log.info("found commands file", commands_file=commands_path)
 
-        # Also strip marker for commands.md
+        # also strip marker for commands.md
         commands_marker = COMMANDS_MARKER
         if commands_marker in commands_text:
             log.info(
@@ -182,10 +186,10 @@ def explode_implementation(
             log.info("ignoring content after marker in commands file", marker=marker)
             commands_text = commands_text.split(marker, 1)[0]
 
-    # Parse instructions
+    # parse instructions
     general, instruction_sections = parse_sections(input_text)
 
-    # Calculate counts for reporting
+    # calculate counts for reporting
     rules_count = 0
     if any(line.strip() for line in general):
         rules_count += 1
@@ -194,8 +198,8 @@ def explode_implementation(
         if any(line.strip() for line in section_data.content):
             rules_count += 1
 
-    # Preamble (text before the first ##) is an always-apply rule.
-    # GitHub stores it as copilot-instructions.md instead of a rules-dir file.
+    # preamble (text before the first ##) is an always-apply rule
+    # github stores it as copilot-instructions.md instead of a rules-dir file
     if any(line.strip() for line in general):
         if "github" in agent_instances:
             agent_instances["github"].write_general_instructions(general, working_dir)
@@ -214,7 +218,7 @@ def explode_implementation(
                 description="General Instructions",
             )
 
-    # Process sections for agents that support rules
+    # process sections for agents that support rules
     rules_sections: dict[str, list[str]] = {}
     section_globs: dict[str, str | None] = {}
 
@@ -232,7 +236,7 @@ def explode_implementation(
         section_content = replace_header_with_proper_casing(content, section_name)
 
         if glob_pattern is None:
-            # No directive = alwaysApply
+            # no directive = alwaysApply
             rule_agents = get_always_apply_rule_agents(agent_instances, agent_dirs)
 
             if rule_agents:
@@ -242,7 +246,7 @@ def explode_implementation(
                     rule_agents,
                 )
         else:
-            # Has glob pattern or is manual = file-specific rule
+            # has glob pattern or is manual = file-specific rule
             for agent_name, agent_instance in agent_instances.items():
                 if "rules" not in agent_dirs[agent_name]:
                     continue
@@ -255,14 +259,14 @@ def explode_implementation(
                     description=section_name,
                 )
 
-    # Process commands for all agents
+    # process commands for all agents
     command_sections_data = {}
     command_sections = {}
     commands_count = 0
     if commands_text:
         _, command_sections_data = parse_sections(commands_text)
 
-        # Calculate commands count
+        # calculate commands count
         for section_data in command_sections_data.values():
             if any(line.strip() for line in section_data.content):
                 commands_count += 1
@@ -284,9 +288,9 @@ def explode_implementation(
                 section_name, section_data.content, agents_with_commands, command_dirs
             )
 
-    # Generate root documentation for agents that support it
+    # generate root documentation for agents that support it
     for agent_name, agent_inst in agent_instances.items():
-        # Special case for 'agents' adapter to use custom filename
+        # special case for 'agents' adapter to use custom filename
         if agent_name == "agents":
             agent_inst.generate_root_doc(
                 general,
@@ -305,15 +309,15 @@ def explode_implementation(
                 section_globs=section_globs,
             )
 
-    # Build log message and user output based on processed agents
-    log_data: dict[str, str | list[str]] = {"agent": requested_agents}
+    # build log message and user output based on processed agents
+    log_data: dict[str, object] = {"agent": requested_agents}
     created_dirs = []
 
     for agent_name in agents_to_process:
         if "rules" in agent_dirs[agent_name]:
-            log_data[f"{agent_name}_rules"] = str(agent_dirs[agent_name]["rules"])
+            log_data[f"{agent_name}_rules"] = agent_dirs[agent_name]["rules"]
         if "commands" in agent_dirs[agent_name]:
-            log_data[f"{agent_name}_commands"] = str(agent_dirs[agent_name]["commands"])
+            log_data[f"{agent_name}_commands"] = agent_dirs[agent_name]["commands"]
         if agent_dirs[agent_name]:
             dir_name = (
                 ".agents/"
@@ -325,7 +329,7 @@ def explode_implementation(
 
     created_dirs = list(dict.fromkeys(created_dirs))
 
-    # Build summary message
+    # build summary message
     parts = []
     if rules_count > 0:
         rules_word = "rule" if rules_count == 1 else "rules"
@@ -341,15 +345,16 @@ def explode_implementation(
 
     counts_msg = "Created " + " and ".join(parts)
 
-    if created_dirs:
-        if len(created_dirs) == 1:
-            success_msg = f"{counts_msg} in {created_dirs[0]} directory"
-        else:
-            success_msg = f"{counts_msg} across {len(created_dirs)} directories"
-        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-    else:
+    if not created_dirs:
         success_msg = f"{counts_msg} in root documentation files"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+        return
+
+    if len(created_dirs) == 1:
+        success_msg = f"{counts_msg} in {created_dirs[0]} directory"
+    else:
+        success_msg = f"{counts_msg} across {len(created_dirs)} directories"
+    typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
 
 
 def explode_main(
@@ -368,7 +373,8 @@ def explode_main(
         typer.Option("--input", "-i", help="Input markdown file"),
     ] = "instructions.md",
 ) -> None:
-    """Convert instruction file to separate rule files."""
+    "convert instruction file to separate rule files"
+
     working_dir = Path.cwd()
     requested_agents = parse_client_names(agents)
 

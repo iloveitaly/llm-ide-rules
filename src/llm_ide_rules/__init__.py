@@ -1,4 +1,4 @@
-"""LLM Rules CLI package for managing IDE prompts and rules."""
+"LLM Rules CLI package for managing IDE prompts and rules"
 
 import os
 
@@ -29,7 +29,8 @@ from llm_ide_rules.version import __version__
 
 
 def version_callback(value: bool):
-    """Callback to display the version and exit."""
+    "callback to display the version and exit"
+
     if value:
         print(f"llm-ide-rules version {__version__}")
         raise typer.Exit()
@@ -60,7 +61,8 @@ def main_callback(
         ),
     ] = None,
 ):
-    """Global CLI options."""
+    "global CLI options"
+
     if verbose:
         os.environ["LOG_LEVEL"] = "DEBUG"
         import structlog_config
@@ -68,7 +70,7 @@ def main_callback(
         structlog_config.configure_logger()
 
 
-# Add commands directly
+# add commands directly
 app.command("explode", help="Convert instruction file to separate rule files")(
     explode_main
 )
@@ -82,7 +84,7 @@ app.command("download", help="Download LLM instruction files from GitHub reposit
 app.command("delete", help="Remove downloaded LLM instruction files")(delete_main)
 app.command("config", help="Configure agents to use AGENTS.md")(config_main)
 
-# Create implode sub-typer
+# create implode sub-typer
 implode_app = typer.Typer(help="Bundle rule files into a single instruction file")
 implode_app.command(
     "cursor", help="Bundle Cursor rules and commands into a single file"
@@ -111,7 +113,8 @@ app.add_typer(implode_app, name="implode")
 
 
 def main():
-    """Main entry point for the CLI."""
+    "main entry point for the CLI"
+
     app()
 
 

@@ -1,4 +1,4 @@
-"""Command to configure agents to use AGENTS.md."""
+"command to configure agents to use AGENTS.md"
 
 from pathlib import Path
 from typing import Annotated
@@ -14,9 +14,8 @@ def config_main(
         typer.Argument(help="Specific agent to configure (cursor, github, etc.)"),
     ] = None,
 ):
-    """
-    Configure agents to use AGENTS.md as their context source.
-    """
+    "configure agents to use AGENTS.md as their context source"
+
     base_dir = Path.cwd()
 
     agents_to_configure = []
@@ -39,8 +38,9 @@ def config_main(
                 typer.echo(
                     typer.style(f"Configured {agent_inst.name}", fg=typer.colors.GREEN)
                 )
-            else:
-                msg = f"Skipped {agent_inst.name} (no changes needed or not applicable)"
-                typer.echo(typer.style(msg, fg=typer.colors.YELLOW))
+                continue
+
+            msg = f"Skipped {agent_inst.name} (no changes needed or not applicable)"
+            typer.echo(typer.style(msg, fg=typer.colors.YELLOW))
         except (OSError, ValueError, KeyError, TypeError) as e:
             typer.echo(f"Failed to configure {agent_inst.name}: {e}", err=True)

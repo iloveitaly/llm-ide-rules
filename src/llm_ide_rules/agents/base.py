@@ -1,4 +1,4 @@
-"""Base agent class and shared utilities for LLM IDE rules."""
+"base agent class and shared utilities for LLM IDE rules"
 
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -8,7 +8,7 @@ from llm_ide_rules.utils import preserve_custom_content
 
 
 class BaseAgent(ABC):
-    """Base class for all IDE agents."""
+    "base class for all IDE agents"
 
     name: str
     rules_dir: str | None = None
@@ -23,14 +23,14 @@ class BaseAgent(ABC):
         section_globs: dict[str, str | None] | None = None,
         filename: str = "AGENTS.md",
     ) -> bool:
-        """Bundle rule files into a single output file."""
+        "bundle rule files into a single output file"
         ...
 
     @abstractmethod
     def bundle_commands(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
-        """Bundle command files into a single output file."""
+        "bundle command files into a single output file"
         ...
 
     @abstractmethod
@@ -42,7 +42,7 @@ class BaseAgent(ABC):
         glob_pattern: str | None = None,
         description: str | None = None,
     ) -> None:
-        """Write a single rule file."""
+        "write a single rule file"
         ...
 
     @abstractmethod
@@ -53,11 +53,12 @@ class BaseAgent(ABC):
         commands_dir: Path,
         section_name: str | None = None,
     ) -> None:
-        """Write a single command file."""
+        "write a single command file"
         ...
 
     def detect(self, base_dir: Path) -> bool:
         "detect if this agent is in use in the given directory"
+
         return False
 
     def configure_agents_md(self, base_dir: Path) -> bool:
@@ -66,6 +67,7 @@ class BaseAgent(ABC):
         Returns:
             bool: True if configuration was applied, False otherwise.
         """
+
         return False
 
     def generate_root_doc(
@@ -77,7 +79,8 @@ class BaseAgent(ABC):
         section_globs: dict[str, str | None] | None = None,
         filename: str = "AGENTS.md",
     ) -> None:
-        """Generate a root documentation file (e.g. CLAUDE.md) if supported."""
+        "generate a root documentation file (e.g. CLAUDE.md) if supported"
+
         return
 
     def build_root_doc_content(
@@ -85,17 +88,18 @@ class BaseAgent(ABC):
         general_lines: list[str],
         rules_sections: dict[str, list[str]],
     ) -> str:
-        """Build the content string for a root documentation file by aggregating rules."""
+        "build the content string for a root documentation file by aggregating rules"
+
         content = []
 
-        # Add general instructions
+        # add general instructions
         if general_lines:
             trimmed = trim_content(general_lines)
             if trimmed:
                 content.extend(trimmed)
                 content.append("\n\n")
 
-        # Add sections in document order (dict maintains insertion order in Python 3.7+)
+        # add sections in document order
         for lines in rules_sections.values():
             trimmed = trim_content(lines)
             if trimmed:
@@ -105,19 +109,22 @@ class BaseAgent(ABC):
         return "".join(content).strip() + "\n" if content else ""
 
     def get_rules_path(self, base_dir: Path) -> Path:
-        """Get the full path to the rules directory."""
+        "get the full path to the rules directory"
+
         if not self.rules_dir:
             raise NotImplementedError(f"{self.name} does not support rules")
         return base_dir / self.rules_dir
 
     def get_commands_path(self, base_dir: Path) -> Path:
-        """Get the full path to the commands directory."""
+        "get the full path to the commands directory"
+
         if not self.commands_dir:
             raise NotImplementedError(f"{self.name} does not support commands")
         return base_dir / self.commands_dir
 
     def _write_bundled_content(self, output_file: Path, content: str) -> None:
-        """Write bundled content to output file, preserving custom instructions after marker."""
+        "write bundled content to output file, preserving custom instructions after marker"
+
         local_content = ""
         if output_file.exists():
             try:
@@ -130,7 +137,8 @@ class BaseAgent(ABC):
 
 
 def extract_frontmatter_description(lines: list[str]) -> str | None:
-    """Extract description from YAML frontmatter lines, supporting multiline/folded scalars."""
+    "extract description from YAML frontmatter lines, supporting multiline/folded scalars"
+
     if not lines or lines[0].strip() != "---":
         return None
 
@@ -160,7 +168,8 @@ def extract_frontmatter_description(lines: list[str]) -> str | None:
 
 
 def strip_yaml_frontmatter(text: str) -> str:
-    """Strip YAML frontmatter from text."""
+    "strip YAML frontmatter from text"
+
     lines = text.splitlines()
     if lines and lines[0].strip() == "---":
         for i in range(1, len(lines)):
@@ -170,7 +179,8 @@ def strip_yaml_frontmatter(text: str) -> str:
 
 
 def strip_header(text: str) -> str:
-    """Remove the first markdown header (## Header) from text if present."""
+    "remove the first markdown header (## Header) from text if present"
+
     lines = text.splitlines()
     if lines and lines[0].startswith("## "):
         remaining_lines = lines[1:]
@@ -180,6 +190,14 @@ def strip_header(text: str) -> str:
     return text
 
 
+def _file_sort_key(p: Path) -> str:
+    return p.parent.name if p.name == "SKILL.md" else p.name
+
+
+def _file_stem_key(p: Path) -> str:
+    return p.parent.name if p.name == "SKILL.md" else p.stem
+
+
 def get_ordered_files(
     file_list: list[Path], section_globs_keys: list[str] | None = None
 ) -> list[Path]:
@@ -187,13 +205,11 @@ def get_ordered_files(
 
     If section_globs_keys is None, returns files sorted alphabetically.
     """
-    key_func = lambda p: p.parent.name if p.name == "SKILL.md" else p.name
-    stem_func = lambda p: p.parent.name if p.name == "SKILL.md" else p.stem
 
     if not section_globs_keys:
-        return sorted(file_list, key=key_func)
+        return sorted(file_list, key=_file_sort_key)
 
-    file_dict = {stem_func(f): f for f in file_list}
+    file_dict = {_file_stem_key(f): f for f in file_list}
     ordered_files = []
 
     for section_name in section_globs_keys:
@@ -202,10 +218,14 @@ def get_ordered_files(
             ordered_files.append(file_dict[filename])
             del file_dict[filename]
 
-    remaining_files = sorted(file_dict.values(), key=key_func)
+    remaining_files = sorted(file_dict.values(), key=_file_sort_key)
     ordered_files.extend(remaining_files)
 
     return ordered_files
+
+
+def _github_name_key(p: Path) -> str:
+    return p.name
 
 
 def get_ordered_files_github(
@@ -215,8 +235,9 @@ def get_ordered_files_github(
 
     If section_globs_keys is None, returns files sorted alphabetically.
     """
+
     if not section_globs_keys:
-        return sorted(file_list, key=lambda p: p.name)
+        return sorted(file_list, key=_github_name_key)
 
     file_dict = {}
     for f in file_list:
@@ -231,7 +252,7 @@ def get_ordered_files_github(
             ordered_files.append(file_dict[filename])
             del file_dict[filename]
 
-    remaining_files = sorted(file_dict.values(), key=lambda p: p.name)
+    remaining_files = sorted(file_dict.values(), key=_github_name_key)
     ordered_files.extend(remaining_files)
 
     return ordered_files
@@ -243,6 +264,7 @@ def resolve_header_from_stem(stem: str, section_globs: dict[str, str | None]) ->
     Prefer exact header names from section_globs (preserves acronyms like FastAPI, TypeScript).
     Fallback to title-casing the filename when not found in section_globs.
     """
+
     for section_name in section_globs:
         if header_to_filename(section_name) == stem:
             return section_name
@@ -251,7 +273,8 @@ def resolve_header_from_stem(stem: str, section_globs: dict[str, str | None]) ->
 
 
 def trim_content(content_lines: list[str]) -> list[str]:
-    """Remove leading and trailing empty lines from content."""
+    "remove leading and trailing empty lines from content"
+
     start = 0
     for i, line in enumerate(content_lines):
         if line.strip():
@@ -270,7 +293,8 @@ def trim_content(content_lines: list[str]) -> list[str]:
 
 
 def write_rule_file(path: Path, header_yaml: str, content_lines: list[str]) -> None:
-    """Write a rule file with front matter and content."""
+    "write a rule file with front matter and content"
+
     trimmed_content = trim_content(content_lines)
     output = header_yaml.strip() + "\n" + "".join(trimmed_content)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -280,7 +304,8 @@ def write_rule_file(path: Path, header_yaml: str, content_lines: list[str]) -> N
 def replace_header_with_proper_casing(
     content_lines: list[str], proper_header: str
 ) -> list[str]:
-    """Replace the first header in content with the properly cased version."""
+    "replace the first header in content with the properly cased version"
+
     if not content_lines:
         return content_lines
 
@@ -295,7 +320,8 @@ def replace_header_with_proper_casing(
 def extract_description_and_filter_content(
     content_lines: list[str], default_description: str
 ) -> tuple[str, list[str]]:
-    """Extract description from first non-empty line that starts with 'Description:' and return filtered content."""
+    "extract description from first non-empty line that starts with 'Description:' and return filtered content"
+
     trimmed_content = trim_content(content_lines)
     description = ""
     description_line = None
@@ -303,16 +329,16 @@ def extract_description_and_filter_content(
     for i, line in enumerate(trimmed_content):
         stripped_line = line.strip()
         if (
-            stripped_line
-            and not stripped_line.startswith("#")
-            and not stripped_line.startswith("##")
+            not stripped_line
+            or stripped_line.startswith("#")
+            or stripped_line.startswith("##")
         ):
-            if stripped_line.startswith("Description:"):
-                description = stripped_line[len("Description:") :].strip()
-                description_line = i
-                break
-            else:
-                break
+            continue
+
+        if stripped_line.startswith("Description:"):
+            description = stripped_line[len("Description:") :].strip()
+            description_line = i
+        break
 
     if description and description_line is not None:
         end_idx = description_line + 1

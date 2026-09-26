@@ -1,4 +1,4 @@
-"""Shared constants for explode and implode functionality."""
+"shared constants for explode and implode functionality"
 
 VALID_AGENTS = [
     "cursor",
@@ -14,13 +14,13 @@ VALID_AGENTS = [
 
 EXPLODE_AGENTS = [name for name in VALID_AGENTS if name != "all"]
 
-# Standing rules live in AGENTS.md rather than a vendor-specific rules dir
+# standing rules live in AGENTS.md rather than a vendor-specific rules dir
 AGENTS_MD_CLIENTS = frozenset({"opencode", "codex", "antigravity"})
 
-# Clients that explode into the shared .agents layout
+# clients that explode into the shared .agents layout
 DOTAGENTS_LAYOUT_CLIENTS = frozenset({"antigravity", "grok", "codex"})
 
-# Share .agents/ with antigravity, so skip them from download/delete defaults
+# share .agents/ with antigravity, so skip them from download/delete defaults
 SHARED_DOTAGENTS_DEFAULT_EXCLUDES = frozenset({"grok", "codex"})
 
 # persistent markers for user custom instructions and commands
@@ -29,7 +29,8 @@ COMMANDS_MARKER = "<!-- END CLONED COMMANDS -->"
 
 
 def ensure_agents_adapter(agent_names: list[str]) -> list[str]:
-    """Append the AGENTS.md adapter when a client stores standing rules there."""
+    "append the AGENTS.md adapter when a client stores standing rules there"
+
     if "agents" in agent_names:
         return list(agent_names)
 
@@ -40,7 +41,8 @@ def ensure_agents_adapter(agent_names: list[str]) -> list[str]:
 
 
 def parse_client_names(value: str | list[str] | None) -> list[str]:
-    """Split comma-separated client names, preserving order and dropping empties."""
+    "split comma-separated client names, preserving order and dropping empties"
+
     if value is None:
         return []
 
@@ -56,10 +58,12 @@ def parse_client_names(value: str | list[str] | None) -> list[str]:
 
 
 def header_to_filename(header: str) -> str:
-    """Convert a section header to a filename."""
+    "convert a section header to a filename"
+
     return header.lower().replace(" ", "-")
 
 
 def filename_to_header(filename: str) -> str:
-    """Convert a filename back to a section header."""
+    "convert a filename back to a section header"
+
     return filename.replace("-", " ").title()

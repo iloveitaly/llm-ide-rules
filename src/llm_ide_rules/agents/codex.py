@@ -1,4 +1,4 @@
-"""Codex CLI agent implementation."""
+"codex CLI agent implementation"
 
 from pathlib import Path
 
@@ -16,9 +16,11 @@ class CodexAgent(DotAgentsBaseAgent):
     rules_dir = None
 
     def configure_agents_md(self, base_dir: Path) -> bool:
-        """Codex has native support for AGENTS.md."""
+        "codex has native support for AGENTS.md"
+
         return True
 
     def detect(self, base_dir: Path) -> bool:
         "detect if Codex is in use in the given directory"
+
         return (base_dir / ".codex").exists()

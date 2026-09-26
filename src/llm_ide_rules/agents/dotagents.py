@@ -1,4 +1,4 @@
-"""Shared base agent implementation for .agents layout."""
+"shared base agent implementation for .agents layout"
 
 from pathlib import Path
 
@@ -15,7 +15,7 @@ from llm_ide_rules.agents.base import (
 
 
 class DotAgentsBaseAgent(BaseAgent):
-    """Base agent for tools using the .agents specification."""
+    "base agent for tools using the .agents specification"
 
     rules_dir = ".agents/rules"
     commands_dir = ".agents/skills"
@@ -28,7 +28,8 @@ class DotAgentsBaseAgent(BaseAgent):
         section_globs: dict[str, str | None] | None = None,
         filename: str = "AGENTS.md",
     ) -> bool:
-        """Bundle .agents rule files (.md) into a single output file."""
+        "bundle .agents rule files (.md) into a single output file"
+
         rules_dir = self.rules_dir
         if not rules_dir:
             return False
@@ -72,7 +73,7 @@ class DotAgentsBaseAgent(BaseAgent):
             content = strip_yaml_frontmatter(file_content)
             content = strip_header(content)
 
-            # Collapse consecutive empty lines in content
+            # collapse consecutive empty lines in content
             content_lines = content.splitlines()
             cleaned_lines = []
             for line in content_lines:
@@ -127,6 +128,7 @@ class DotAgentsBaseAgent(BaseAgent):
         Returns:
             tuple: (description, glob_pattern, always_apply)
         """
+
         lines = content.splitlines()
         if not lines or lines[0].strip() != "---":
             return None, None, False
@@ -144,7 +146,7 @@ class DotAgentsBaseAgent(BaseAgent):
                 always_apply = val == "true"
             elif line.startswith("globs:"):
                 globs_val = line[len("globs:") :].strip()
-                # Parse either inline list ["*.py"] or [] or list on next lines
+                # parse either inline list ["*.py"] or [] or list on next lines
                 if globs_val.startswith("[") and globs_val.endswith("]"):
                     inner = globs_val[1:-1].strip()
                     if inner:
@@ -166,7 +168,8 @@ class DotAgentsBaseAgent(BaseAgent):
     def bundle_commands(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
-        """Bundle .agents skill files (SKILL.md) into a single output file."""
+        "bundle .agents skill files (SKILL.md) into a single output file"
+
         commands_dir = self.commands_dir
         if not commands_dir:
             return False
@@ -179,7 +182,7 @@ class DotAgentsBaseAgent(BaseAgent):
         if not skill_files:
             return False
 
-        # Order by parent directory name (which is the skill/stem name)
+        # order by parent directory name (which is the skill/stem name)
         ordered_skills = get_ordered_files(
             skill_files, list(section_globs.keys()) if section_globs else None
         )
@@ -221,7 +224,7 @@ class DotAgentsBaseAgent(BaseAgent):
                         lines.insert(2, "")
                         content = "\n".join(lines)
 
-            # Collapse consecutive empty lines in content
+            # collapse consecutive empty lines in content
             content_lines = content.splitlines()
             cleaned_lines = []
             for line in content_lines:
@@ -249,7 +252,8 @@ class DotAgentsBaseAgent(BaseAgent):
         glob_pattern: str | None = None,
         description: str | None = None,
     ) -> None:
-        """Write a .agents rule file (.md) with YAML frontmatter."""
+        "write a .agents rule file (.md) with YAML frontmatter"
+
         extension = self.rule_extension or ".md"
         filepath = rules_dir / f"{filename}{extension}"
 
@@ -282,14 +286,15 @@ class DotAgentsBaseAgent(BaseAgent):
         commands_dir: Path,
         section_name: str | None = None,
     ) -> None:
-        """Write a .agents skill file (.agents/skills/<filename>/SKILL.md) with YAML frontmatter."""
+        "write a .agents skill file (.agents/skills/<filename>/SKILL.md) with YAML frontmatter"
+
         filepath = commands_dir / filename / "SKILL.md"
 
         desc, filtered_content = extract_description_and_filter_content(
             content_lines, ""
         )
 
-        # Find the header
+        # find the header
         header = None
         for line in content_lines:
             if line.startswith("## "):
@@ -299,7 +304,7 @@ class DotAgentsBaseAgent(BaseAgent):
         if not header:
             header = section_name or filename.replace("-", " ").title()
 
-        # Replace first ## Header with # Header
+        # replace first ## header with # header
         final_content = []
         found_header = False
         for line in filtered_content:
@@ -320,4 +325,5 @@ class DotAgentsBaseAgent(BaseAgent):
 
     def detect(self, base_dir: Path) -> bool:
         "detect if .agents layout is in use in the given directory"
+
         return (base_dir / ".agents").exists()

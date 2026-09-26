@@ -19,13 +19,13 @@ from llm_ide_rules.agents import get_all_agents
 from llm_ide_rules.constants import EXPLODE_AGENTS
 from llm_ide_rules.log import log
 
-# Documented default metadata socket on Cursor-managed Cloud Agent VMs
+# documented default metadata socket on cursor-managed cloud agent VMs
 CURSOR_CLOUD_SOCKET = "/run/cursor/api.sock"
 
-# Cloud Agent ids (`bcId`) are injected as CURSOR_CONVERSATION_ID
+# cloud agent ids (bcId) are injected as CURSOR_CONVERSATION_ID
 CURSOR_CLOUD_AGENT_ID_PREFIX = "bc-"
 
-# Claude Code maps these kinds/entrypoints to a remote/cloud session
+# claude code maps these kinds/entrypoints to a remote/cloud session
 CLAUDE_CLOUD_ENV_KINDS = frozenset({"byoc", "anthropic_cloud"})
 CLAUDE_REMOTE_ENTRYPOINTS = frozenset(
     {
@@ -77,7 +77,7 @@ def is_cursor_cloud(environ: Env | None = None) -> bool:
     """
     env = _env(environ)
 
-    # Local CLI marker is a hard veto so we never treat a laptop session as cloud
+    # local cli marker is a hard veto so we never treat a laptop session as cloud
     if _is_truthy(env.get("CURSOR_AGENT_CLI_LOCAL_MODE")):
         return False
 
@@ -134,19 +134,21 @@ def is_github_copilot_agent(environ: Env | None = None) -> bool:
 
 
 def is_opencode(environ: Env | None = None) -> bool:
-    "return True when this process was spawned by OpenCode"
+    "return true when this process was spawned by OpenCode"
+
     return _any_set(_env(environ), OPENCODE_ENV_VARS)
 
 
 def is_antigravity(environ: Env | None = None) -> bool:
-    "return True when this process was spawned by Antigravity"
+    "return true when this process was spawned by Antigravity"
+
     return _any_set(_env(environ), ("ANTIGRAVITY_AGENT", "ANTIGRAVITY_PROJECT_ID"))
 
 
 def is_codex(environ: Env | None = None) -> bool:
-    "return True when this process was spawned by Codex"
+    "return true when this process was spawned by Codex"
 
-    # CODEX_HOME is the user config dir (~/.codex), not a runtime signal
+    # codex_home is the user config dir (~/.codex), not a runtime signal
     return _any_set(_env(environ), ("CODEX_SANDBOX", "CODEX_CI", "CODEX_THREAD_ID"))
 
 
@@ -161,7 +163,8 @@ RUNTIME_DETECTORS: list[tuple[str, Callable[[Env | None], bool]]] = [
 
 
 def detect_runtime_agent(environ: Env | None = None) -> str | None:
-    """Return the agent name if the runtime can be detected with certainty."""
+    "return the agent name if the runtime can be detected with certainty"
+
     for agent_name, detector in RUNTIME_DETECTORS:
         if detector(environ):
             return agent_name
@@ -171,6 +174,7 @@ def detect_runtime_agent(environ: Env | None = None) -> str | None:
 
 def detect_active_agents(target_dir: Path) -> list[str]:
     "detect agents in use in the target directory"
+
     detected = []
     explode_agent_names = set(EXPLODE_AGENTS)
 
@@ -219,7 +223,8 @@ def resolve_target_agents(
 
 
 def describe_resolved_agents(source: str, agents: list[str]) -> str | None:
-    """User-facing reason for a default agent selection, if one should be shown."""
+    "user-facing reason for a default agent selection, if one should be shown"
+
     if source == "runtime":
         return f"Detected runtime environment: {', '.join(agents)}"
 

@@ -1,4 +1,4 @@
-"""GitHub/Copilot agent implementation."""
+"github/Copilot agent implementation"
 
 from pathlib import Path
 
@@ -16,7 +16,7 @@ from llm_ide_rules.constants import header_to_filename
 
 
 class GitHubAgent(BaseAgent):
-    """Agent for GitHub Copilot."""
+    "agent for GitHub Copilot"
 
     name = "github"
     rules_dir = ".github/instructions"
@@ -30,7 +30,7 @@ class GitHubAgent(BaseAgent):
         section_globs: dict[str, str | None] | None = None,
         filename: str = "AGENTS.md",
     ) -> bool:
-        """Bundle GitHub instruction files into a single output file."""
+        "bundle GitHub instruction files into a single output file"
         rules_dir = self.rules_dir
         if not rules_dir:
             return False
@@ -82,7 +82,8 @@ class GitHubAgent(BaseAgent):
         return True
 
     def _extract_apply_to_from_frontmatter(self, content: str) -> str | None:
-        """Extract applyTo pattern from YAML frontmatter."""
+        "extract applyTo pattern from YAML frontmatter"
+
         lines = content.splitlines()
         if not lines or lines[0].strip() != "---":
             return None
@@ -99,7 +100,8 @@ class GitHubAgent(BaseAgent):
     def bundle_commands(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
-        """Bundle GitHub prompt files into a single output file."""
+        "bundle GitHub prompt files into a single output file"
+
         commands_dir = self.commands_dir
         if not commands_dir:
             return False
@@ -173,7 +175,8 @@ class GitHubAgent(BaseAgent):
         glob_pattern: str | None = None,
         description: str | None = None,
     ) -> None:
-        """Write a GitHub instruction file (.instructions.md) with YAML frontmatter."""
+        "write a GitHub instruction file (.instructions.md) with YAML frontmatter"
+
         extension = self.rule_extension or ".instructions.md"
         filepath = rules_dir / f"{filename}{extension}"
 
@@ -194,7 +197,8 @@ applyTo: "{glob_pattern}"
         commands_dir: Path,
         section_name: str | None = None,
     ) -> None:
-        """Write a GitHub prompt file (.prompt.md) with YAML frontmatter."""
+        "write a GitHub prompt file (.prompt.md) with YAML frontmatter"
+
         extension = self.command_extension or ".prompt.md"
         filepath = commands_dir / f"{filename}{extension}"
 
@@ -212,12 +216,14 @@ applyTo: "{glob_pattern}"
     def write_general_instructions(
         self, content_lines: list[str], base_dir: Path
     ) -> None:
-        """Write the general copilot-instructions.md file (no frontmatter)."""
+        "write the general copilot-instructions.md file (no frontmatter)"
+
         filepath = base_dir / ".github" / "copilot-instructions.md"
         write_rule_file(filepath, "", content_lines)
 
     def configure_agents_md(self, base_dir: Path) -> bool:
-        """Configure VS Code to use AGENTS.md."""
+        "configure VS Code to use AGENTS.md"
+
         from llm_ide_rules.utils import modify_json_file
 
         settings_path = base_dir / ".vscode" / "settings.json"
@@ -228,6 +234,7 @@ applyTo: "{glob_pattern}"
 
     def detect(self, base_dir: Path) -> bool:
         "detect if GitHub Copilot is in use in the given directory"
+
         github_dir = base_dir / ".github"
         return (
             (github_dir / "copilot-instructions.md").exists()

@@ -1,4 +1,4 @@
-"""Antigravity CLI agent implementation."""
+"antigravity CLI agent implementation"
 
 from pathlib import Path
 
@@ -16,11 +16,13 @@ class AntigravityAgent(DotAgentsBaseAgent):
     rules_dir = None
 
     def configure_agents_md(self, base_dir: Path) -> bool:
-        """Antigravity has native support for AGENTS.md."""
+        "antigravity has native support for AGENTS.md"
+
         return True
 
     def detect(self, base_dir: Path) -> bool:
         "detect if Antigravity is in use in the given directory"
+
         return (
             super().detect(base_dir)
             or (base_dir / ".gemini").exists()

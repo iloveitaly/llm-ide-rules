@@ -1,4 +1,4 @@
-"""Claude Code agent implementation."""
+"claude code agent implementation"
 
 from pathlib import Path
 
@@ -15,7 +15,7 @@ from llm_ide_rules.agents.base import (
 
 
 class ClaudeAgent(BaseAgent):
-    """Agent for Claude Code."""
+    "agent for Claude Code"
 
     name = "claude"
     rules_dir = ".claude/rules"
@@ -29,7 +29,7 @@ class ClaudeAgent(BaseAgent):
         section_globs: dict[str, str | None] | None = None,
         filename: str = "AGENTS.md",
     ) -> bool:
-        """Bundle Claude Code rule files (.md) into a single output file."""
+        "bundle Claude Code rule files (.md) into a single output file"
         rules_dir = self.rules_dir
         if not rules_dir:
             return False
@@ -89,7 +89,8 @@ class ClaudeAgent(BaseAgent):
         return True
 
     def _extract_paths_from_frontmatter(self, content: str) -> list[str]:
-        """Extract paths entries from YAML frontmatter."""
+        "extract paths entries from YAML frontmatter"
+
         lines = content.splitlines()
         if not lines or lines[0].strip() != "---":
             return []
@@ -125,7 +126,8 @@ class ClaudeAgent(BaseAgent):
     def bundle_commands(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
-        """Bundle Claude Code command files (.md) into a single output file."""
+        "bundle Claude Code command files (.md) into a single output file"
+
         commands_dir = self.commands_dir
         if not commands_dir:
             return False
@@ -187,7 +189,8 @@ class ClaudeAgent(BaseAgent):
         glob_pattern: str | None = None,
         description: str | None = None,
     ) -> None:
-        """Write a Claude Code rule file (.md)."""
+        "write a Claude Code rule file (.md)"
+
         extension = self.rule_extension or ".md"
         filepath = rules_dir / f"{filename}{extension}"
 
@@ -211,7 +214,8 @@ class ClaudeAgent(BaseAgent):
         commands_dir: Path,
         section_name: str | None = None,
     ) -> None:
-        """Write a Claude Code command file (.md) with YAML frontmatter."""
+        "write a Claude Code command file (.md) with YAML frontmatter"
+
         extension = self.command_extension or ".md"
         filepath = commands_dir / f"{filename}{extension}"
 
@@ -233,15 +237,18 @@ class ClaudeAgent(BaseAgent):
         section_globs: dict[str, str | None] | None = None,
         filename: str = "AGENTS.md",
     ) -> None:
-        """Claude rules replace CLAUDE.md generation."""
+        "claude rules replace CLAUDE.md generation"
+
         return
 
     def configure_agents_md(self, base_dir: Path) -> bool:
-        """Claude no longer needs AGENTS.md mirroring files."""
+        "claude no longer needs AGENTS.md mirroring files"
+
         return False
 
     def detect(self, base_dir: Path) -> bool:
         "detect if Claude Code is in use in the given directory"
+
         return (
             (base_dir / ".claude").exists()
             or (base_dir / "CLAUDE.md").exists()

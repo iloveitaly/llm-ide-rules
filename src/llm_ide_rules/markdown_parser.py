@@ -1,4 +1,4 @@
-"""Markdown parsing utilities using markdown-it-py."""
+"markdown parsing utilities using markdown-it-py"
 
 import fnmatch
 from collections.abc import Sequence
@@ -8,7 +8,7 @@ from markdown_it import MarkdownIt
 
 
 class SectionData(NamedTuple):
-    """Data for a parsed section."""
+    "data for a parsed section"
 
     content: list[str]
     glob_pattern: str | None
@@ -85,11 +85,11 @@ def parse_sections(text: str) -> tuple[list[str], dict[str, SectionData]]:
     tokens = md.parse(text)
     lines = text.splitlines(keepends=True)
 
-    # Find all H2 headers
+    # find all h2 headers
     section_starts = []
     for i, token in enumerate(tokens):
-        # Get the content of the header
-        # The next token is usually inline, which contains the text
+        # get the content of the header
+        # the next token is usually inline, which contains the text
         if (
             token.type == "heading_open"
             and token.tag == "h2"
@@ -105,23 +105,23 @@ def parse_sections(text: str) -> tuple[list[str], dict[str, SectionData]]:
     if not section_starts:
         return lines, {}
 
-    # Extract general content (everything before first H2)
+    # extract general content (everything before first h2)
     first_section_start = section_starts[0][0]
     general_lines = lines[:first_section_start]
 
-    # Extract named sections
+    # extract named sections
     sections = {}
     for i, (start_line, header_name) in enumerate(section_starts):
-        # End line is the start of the next section, or end of file
+        # end line is the start of the next section, or end of file
         if i + 1 < len(section_starts):
             end_line = section_starts[i + 1][0]
         else:
             end_line = len(lines)
 
-        # Extract all lines for this section
+        # extract all lines for this section
         section_content = lines[start_line:end_line]
 
-        # Extract glob directive if present
+        # extract glob directive if present
         filtered_content, glob_pattern = extract_glob_directive(section_content)
 
         sections[header_name] = SectionData(
@@ -136,7 +136,8 @@ def filter_markdown_by_globs(
     exclude_globs: Sequence[str] | None = None,
     include_globs: Sequence[str] | None = None,
 ) -> tuple[str, list[str]]:
-    """Filter markdown sections based on exclude and include glob patterns."""
+    "filter markdown sections based on exclude and include glob patterns"
+
     exclude_patterns = (
         [p.strip() for raw in exclude_globs for p in raw.split(",") if p.strip()]
         if exclude_globs

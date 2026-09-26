@@ -1,20 +1,21 @@
-"""Utility functions for LLM IDE rules."""
+"utility functions for LLM IDE rules"
 
 import re
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
 
 from llm_ide_rules.constants import COMMANDS_MARKER, INSTRUCTIONS_MARKER
 
 
-def modify_json_file(file_path: Path, updates: dict[str, Any]) -> bool:
+def modify_json_file(file_path: Path, updates: Mapping[str, object]) -> bool:
     """Modify a JSON/JSONC file by adding MISSING keys using string manipulation to preserve comments.
 
     Returns:
         bool: True if changes were written to the file, False otherwise.
     """
+
     if not file_path.exists():
-        # Create new file with standard JSON if it doesn't exist
+        # create new file with standard json if it doesn't exist
         import json
 
         file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -25,7 +26,7 @@ def modify_json_file(file_path: Path, updates: dict[str, Any]) -> bool:
     content = original_content
 
     for key, value in updates.items():
-        # Prepare the value representation (basic JSON serialization)
+        # prepare the value representation (basic json serialization)
         if isinstance(value, bool):
             val_str = "true" if value else "false"
         elif isinstance(value, (int, float)):
@@ -37,47 +38,63 @@ def modify_json_file(file_path: Path, updates: dict[str, Any]) -> bool:
 
             val_str = json.dumps(value)
 
-        # Updated pattern:
-        # 1. Match key part: (["']?key["']?\s* : \s*)
-        # 2. Match value part: ([^,\n\r}]+?)
-        # 3. Lookahead to stop before a comma, newline, closing brace, or start of a comment
         escaped_key = re.escape(key)
-        pattern_str = (
-            rf'(["\\]?{escaped_key}["\\]?\s*:\s*)([^,\n\r}}]+?)'
-            r"(?=\s*(?:,|\n|\r|\}|\/\/|\/\*))"
+        # capture key prefix and value while stopping before boundary delimiters
+        pattern = re.compile(
+            rf"""
+            (                   # capture group 1: key part with optional quotes and colon
+                ["']?           # optional quote before key
+                {escaped_key}   # escaped key name
+                ["']?           # optional quote after key
+                \s*:\s*         # colon separator with optional whitespace
+            )
+            (                   # capture group 2: value part
+                [^,\n\r}}]+?    # value characters up to boundary delimiter
+            )
+            (?=                 # positive lookahead boundary
+                \s*             # optional whitespace
+                (?:,|\n|\r|\}}|\/\/|\/\*) # stop before comma, newline, closing brace, or comment
+            )
+            """,
+            re.VERBOSE | re.MULTILINE,
         )
-        pattern = re.compile(pattern_str, re.MULTILINE)
 
         match = pattern.search(content)
         if match:
-            # Key exists, replace the value part
-            # full_match = match.group(0)
+            # key exists, replace the value part
             key_part = match.group(1)
-            # Replace the value part (group 2) with new value
+            # replace the value part (group 2) with new value
             new_entry = f"{key_part}{val_str}"
             content = content[: match.start()] + new_entry + content[match.end() :]
         else:
-            # Insert new key
+            # insert new key
             last_brace_idx = content.rfind("}")
             if last_brace_idx != -1:
                 insertion_point = last_brace_idx
 
-                # Look backwards for the first non-whitespace character before the brace
+                # look backwards for the first non-whitespace character before the brace
                 prev_char_idx = insertion_point - 1
                 while prev_char_idx >= 0 and content[prev_char_idx].isspace():
                     prev_char_idx -= 1
 
-                # Detect indentation from the previous line if possible
+                # detect indentation from the previous line if possible
                 line_start = content.rfind("\n", 0, insertion_point)
                 if line_start != -1:
-                    indent_match = re.match(r"^(\s*)", content[line_start + 1 :])
+                    indent_pattern = re.compile(
+                        r"""
+                        ^       # start of line
+                        (\s*)   # leading whitespace indentation
+                        """,
+                        re.VERBOSE,
+                    )
+                    indent_match = indent_pattern.match(content[line_start + 1 :])
                     indent = indent_match.group(1) if indent_match else "  "
                 else:
                     indent = "  "
 
                 if prev_char_idx >= 0:
                     prev_char = content[prev_char_idx]
-                    # If the last thing wasn't a comma or opening brace, we need a comma
+                    # if the last thing wasn't a comma or opening brace, we need a comma
                     if prev_char not in ["{", ","]:
                         new_entry = f',\n{indent}"{key}": {val_str}'
                     else:
@@ -97,7 +114,8 @@ def modify_json_file(file_path: Path, updates: dict[str, Any]) -> bool:
 
 
 def resolve_target_dir(base_dir: Path, glob_pattern: str | None) -> Path:
-    """Resolve the target directory for a glob pattern by finding the deepest existing directory."""
+    "resolve the target directory for a glob pattern by finding the deepest existing directory"
+
     if not glob_pattern or "**" not in glob_pattern:
         return base_dir
 
@@ -112,13 +130,14 @@ def resolve_target_dir(base_dir: Path, glob_pattern: str | None) -> Path:
 
 
 def find_project_root(start_path: Path | None = None) -> Path:
-    """Find the project root by looking for common markers."""
+    "find the project root by looking for common markers"
+
     if start_path is None:
         start_path = Path.cwd()
 
     path = start_path.resolve()
-    # Check current directory and parents
-    for parent in [path] + list(path.parents):
+    # check current directory and parents
+    for parent in [path, *path.parents]:
         if (parent / ".git").exists():
             return parent
         if (parent / "pyproject.toml").exists():
@@ -130,7 +149,8 @@ def find_project_root(start_path: Path | None = None) -> Path:
         if (parent / ".github").exists():
             return parent
 
-    return start_path  # Fallback to current directory
+    # fallback to current directory
+    return start_path
 
 
 def preserve_custom_content(
@@ -139,6 +159,7 @@ def preserve_custom_content(
     default_marker: str = INSTRUCTIONS_MARKER,
 ) -> str:
     "combine base content with preserved custom content from existing file"
+
     marker = default_marker
     if default_marker not in existing_content and COMMANDS_MARKER in existing_content:
         marker = COMMANDS_MARKER

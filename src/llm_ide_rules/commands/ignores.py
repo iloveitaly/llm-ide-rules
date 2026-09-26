@@ -57,23 +57,23 @@ def ignores_main(
     ignored_files = []
 
     def mock_write_text(self, data, encoding=None, errors=None):
-        # Instead of writing to disk, we record the path that would have been written
+        # instead of writing to disk, record the path that would have been written
         ignored_files.append(self)
         return len(data)
 
     def mock_mkdir(self, mode=0o777, parents=False, exist_ok=False):
-        # We suppress directory creation
+        # suppress directory creation
         pass
 
-    # Capture stdout/stderr to suppress explode output (logs, success messages)
+    # capture stdout/stderr to suppress explode output (logs, success messages)
     f_out = io.StringIO()
     f_err = io.StringIO()
 
     exit_exception = None
 
     try:
-        # We patch Path.write_text and Path.mkdir to intercept file creation calls.
-        # This is a creative way to "dry run" the explode command without refactoring it.
+        # patch Path.write_text and Path.mkdir to intercept file creation calls
+        # creative way to "dry run" the explode command without refactoring it
         with (
             patch(
                 "pathlib.Path.write_text", autospec=True, side_effect=mock_write_text
@@ -88,11 +88,11 @@ def ignores_main(
         exit_exception = e
 
     if exit_exception and exit_exception.exit_code != 0:
-        # If explode failed, print captured stderr to real stderr and re-raise
+        # if explode failed, print captured stderr to real stderr and re-raise
         print(f_err.getvalue(), file=sys.stderr)
         raise exit_exception
 
-    # Process files to relative paths with forward slashes
+    # process files to relative paths with forward slashes
     relative_files = []
     seen = set()
     for file_path in ignored_files:
@@ -101,11 +101,13 @@ def ignores_main(
         except ValueError:
             rel_path = file_path.as_posix()
 
-        if rel_path not in seen:
-            seen.add(rel_path)
-            relative_files.append(rel_path)
+        if rel_path in seen:
+            continue
 
-    # Sort files to ensure stable output
+        seen.add(rel_path)
+        relative_files.append(rel_path)
+
+    # sort files to ensure stable output
     relative_files.sort()
 
     if print_output:
@@ -114,7 +116,7 @@ def ignores_main(
 
         return
 
-    # Update .gitignore
+    # update .gitignore
     gitignore_path = cwd / ".gitignore"
     gitignore_content = ""
     if gitignore_path.exists():
@@ -129,11 +131,18 @@ def ignores_main(
     ignores_block += end_marker
 
     if start_marker in gitignore_content and end_marker in gitignore_content:
-        # Replace existing block
-        pattern = f"{re.escape(start_marker)}.*?{re.escape(end_marker)}"
-        new_content = re.sub(pattern, ignores_block, gitignore_content, flags=re.DOTALL)
+        # replace existing block
+        block_pattern = re.compile(
+            rf"""
+            {re.escape(start_marker)}  # start ignore block marker
+            .*?                        # non-greedy match of ignored file entries
+            {re.escape(end_marker)}    # end ignore block marker
+            """,
+            re.VERBOSE | re.DOTALL,
+        )
+        new_content = block_pattern.sub(ignores_block, gitignore_content)
     else:
-        # Append to end
+        # append to end
         if gitignore_content and not gitignore_content.endswith("\n"):
             gitignore_content += "\n"
 

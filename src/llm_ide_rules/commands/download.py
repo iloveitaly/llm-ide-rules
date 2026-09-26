@@ -1,4 +1,4 @@
-"""Download command: Download LLM instruction files from GitHub repositories."""
+"download command: download LLM instruction files from GitHub repositories"
 
 import os
 import re
@@ -32,26 +32,31 @@ def normalize_repo(repo: str) -> str:
     - user/repo (unchanged)
     - https://github.com/user/repo/ (extracts user/repo)
     """
-    # If it's already in user/repo format, return as-is
+    # if it's already in user/repo format, return as-is
     if "/" in repo and not repo.startswith("http"):
         return repo
 
-    # Extract user/repo from GitHub URL
-    github_pattern = r"https?://github\.com/([^/]+/[^/]+)/?.*"
-    match = re.match(github_pattern, repo)
+    # extract user/repo from github URL
+    github_pattern = re.compile(
+        r"""
+        https?://github\.com/   # match scheme and domain
+        ([^/]+/[^/]+)           # capture group 1: user/repo path
+        /?.*                    # optional trailing slash and rest of URL
+        """,
+        re.VERBOSE,
+    )
+    match = github_pattern.match(repo)
 
     if match:
         return match.group(1)
 
-    # If no pattern matches, assume it's already in the correct format
+    # if no pattern matches, assume it's already in the correct format
     return repo
 
 
-# Define what files/directories each instruction type includes
-# For agents supported by 'explode' (cursor, github, claude, opencode),
-# we don't download specific directories anymore. Instead, we download the source
-# files (instructions.md, commands.md) and generate them locally using explode.
-# The directories listed here are what gets created by explode and what delete removes.
+# define what files/directories each instruction type includes
+# for explode-supported agents, download source files (instructions.md, commands.md) and generate locally
+# directories listed here are created by explode and removed by delete
 INSTRUCTION_TYPES = {
     "cursor": {
         "directories": [".cursor/rules", ".cursor/commands"],
@@ -96,7 +101,7 @@ INSTRUCTION_TYPES = {
     },
 }
 
-# Default types to download when no specific types are specified
+# default types to download when no specific types are specified
 # grok and codex share .agents/ with antigravity; exclude them to avoid duplicate work
 DEFAULT_TYPES = [
     k for k in INSTRUCTION_TYPES if k not in SHARED_DOTAGENTS_DEFAULT_EXCLUDES
@@ -104,7 +109,8 @@ DEFAULT_TYPES = [
 
 
 def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
-    """Download a GitHub repository as a ZIP and extract it to a temporary directory."""
+    "download a GitHub repository as a ZIP and extract it to a temporary directory"
+
     normalized_repo = normalize_repo(repo)
     zip_url = f"https://github.com/{normalized_repo}/archive/{branch}.zip"
 
@@ -129,28 +135,28 @@ def download_and_extract_repo(repo: str, branch: str = DEFAULT_BRANCH) -> Path:
         log.error("failed to download repository", error=str(e), url=zip_url)
         raise typer.Exit(1) from e
 
-    # Create temporary directory and file
+    # create temporary directory and file
     temp_dir = Path(tempfile.mkdtemp())
     zip_path = temp_dir / "repo.zip"
 
-    # Write ZIP content
+    # write ZIP content
     zip_path.write_bytes(response.content)
 
-    # Extract ZIP
+    # extract ZIP
     extract_dir = temp_dir / "extracted"
     extract_dir.mkdir(exist_ok=True)
 
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
         zip_ref.extractall(extract_dir)
 
-    # Find the extracted repository directory (should be the only directory)
+    # find the extracted repository directory (should be the only directory)
     repo_dirs = [d for d in extract_dir.iterdir() if d.is_dir()]
     if not repo_dirs:
         log.error("no directories found in extracted zip")
         raise typer.Exit(1)
 
     repo_dir = repo_dirs[0]
-    log.info("repository extracted", path=str(repo_dir))
+    log.info("repository extracted", path=repo_dir)
 
     return repo_dir
 
@@ -161,7 +167,8 @@ def copy_instruction_files(
     target_dir: Path,
     exclude_filenames: set[str] | None = None,
 ):
-    """Copy instruction files from the repository to the target directory."""
+    "copy instruction files from the repository to the target directory"
+
     copied_items = []
 
     for inst_type in instruction_types:
@@ -171,7 +178,7 @@ def copy_instruction_files(
 
         config = INSTRUCTION_TYPES[inst_type]
 
-        # Copy directories
+        # copy directories
         for dir_name in config["directories"]:
             source_dir = repo_dir / dir_name
             target_subdir = target_dir / dir_name
@@ -179,14 +186,14 @@ def copy_instruction_files(
             if source_dir.exists():
                 log.info(
                     "copying directory",
-                    source=str(source_dir),
-                    target=str(target_subdir),
+                    source=source_dir,
+                    target=target_subdir,
                 )
 
-                # Create target directory
+                # create target directory
                 target_subdir.mkdir(parents=True, exist_ok=True)
 
-                # Copy all files from source to target
+                # copy all files from source to target
                 copy_directory_contents(
                     source_dir,
                     target_subdir,
@@ -196,24 +203,24 @@ def copy_instruction_files(
                 )
                 copied_items.append(f"{dir_name}/")
 
-        # Copy individual files
+        # copy individual files
         for file_name in config["files"]:
             source_file = repo_dir / file_name
             target_file = target_dir / file_name
 
             if source_file.exists():
                 log.info(
-                    "copying file", source=str(source_file), target=str(target_file)
+                    "copying file", source=source_file, target=target_file
                 )
 
-                # Create parent directories if needed
+                # create parent directories if needed
                 target_file.parent.mkdir(parents=True, exist_ok=True)
 
-                # Copy file
+                # copy file
                 target_file.write_bytes(source_file.read_bytes())
                 copied_items.append(file_name)
 
-        # Copy recursive files (search throughout repository)
+        # copy recursive files (search throughout repository)
         for file_pattern in config.get("recursive_files", []):
             copied_recursive = copy_recursive_files(repo_dir, target_dir, file_pattern)
             copied_items.extend(copied_recursive)
@@ -239,29 +246,29 @@ def copy_recursive_files(
     """
     copied_items = []
 
-    # Find all matching files recursively
+    # find all matching files recursively
     matching_files = list(repo_dir.rglob(file_pattern))
 
     for source_file in matching_files:
-        # Calculate relative path from repo root
+        # calculate relative path from repo root
         relative_path = source_file.relative_to(repo_dir)
         target_file = target_dir / relative_path
 
-        # Check if target directory already exists
+        # check if target directory already exists
         target_parent = target_file.parent
         if not target_parent.exists():
             log.warning(
                 "target directory does not exist, skipping file copy",
-                target_directory=str(target_parent),
-                file=str(relative_path),
+                target_directory=target_parent,
+                file=relative_path,
             )
             continue
 
         log.info(
-            "copying recursive file", source=str(source_file), target=str(target_file)
+            "copying recursive file", source=source_file, target=target_file
         )
 
-        # Copy file (parent directory already exists)
+        # copy file (parent directory already exists)
         target_file.write_bytes(source_file.read_bytes())
         copied_items.append(str(relative_path))
 
@@ -275,7 +282,8 @@ def copy_directory_contents(
     include_patterns: list[str] | None = None,
     exclude_filenames: set[str] | None = None,
 ):
-    """Recursively copy directory contents, excluding specified patterns."""
+    "recursively copy directory contents, excluding specified patterns"
+
     include_patterns = include_patterns or []
     for item in source_dir.rglob("*"):
         if item.is_file():
@@ -290,13 +298,13 @@ def copy_directory_contents(
                     )
                     continue
 
-            # Check if file matches any exclude pattern
+            # check if file matches any exclude pattern
             should_exclude = False
             pattern = ""
             for pattern in exclude_patterns:
                 if pattern.endswith("/*"):
-                    # Pattern like "workflows/*" - exclude if path starts with "workflows/"
-                    pattern_prefix = pattern[:-1]  # Remove the "*"
+                    # pattern like "workflows/*" - exclude if path starts with "workflows/"
+                    pattern_prefix = pattern[:-1]  # remove the "*"
                     if relative_str.startswith(pattern_prefix):
                         should_exclude = True
                         break
@@ -308,11 +316,11 @@ def copy_directory_contents(
                 log.debug("excluding file", file=relative_str, pattern=pattern)
                 continue
 
-            # Check if file matches any include pattern (if any provided)
+            # check if file matches any include pattern (if any provided)
             if include_patterns:
                 matched_include = False
                 for include_pattern in include_patterns:
-                    # Match against filename only, or full relative path
+                    # match against filename only, or full relative path
                     if item.match(include_pattern):
                         matched_include = True
                         break
@@ -408,7 +416,7 @@ def download_main(
 
     instruction_types = parse_client_names(instruction_types)
 
-    # Use detected types, then runtime environment, then default types
+    # use detected types, then runtime environment, then default types
     if not instruction_types:
         instruction_types, source = resolve_target_agents(
             target_path, fallback=DEFAULT_TYPES
@@ -418,7 +426,7 @@ def download_main(
 
     instruction_types = ensure_agents_adapter(instruction_types)
 
-    # Validate instruction types
+    # validate instruction types
     invalid_types = [t for t in instruction_types if t not in INSTRUCTION_TYPES]
     if invalid_types:
         log.error(
@@ -435,10 +443,10 @@ def download_main(
         repo=repo,
         branch=branch,
         instruction_types=instruction_types,
-        target_dir=str(target_path),
+        target_dir=target_path,
     )
 
-    # Download and extract repository
+    # download and extract repository
     repo_dir = download_and_extract_repo(repo, branch)
 
     exclude_glob_list: list[str] = []
@@ -470,7 +478,7 @@ def download_main(
     staging_dir: Path | None = None
 
     try:
-        # Copy instruction files
+        # copy instruction files
         copied_items = [
             f"Downloaded: {item}"
             for item in copy_instruction_files(
@@ -481,12 +489,12 @@ def download_main(
             )
         ]
 
-        # Check for source files (instructions.md, commands.md) and copy or stage them
-        # These are needed for 'explode' logic
+        # check for source files (instructions.md, commands.md) and copy or stage them
+        # needed for explode logic
         source_files = ["instructions.md", "commands.md"]
         sources_copied = False
 
-        # Only copy source files if we have at least one agent that uses explode
+        # only copy source files if we have at least one agent that uses explode
         has_explode_agent = any(t in VALID_AGENTS for t in instruction_types)
 
         if inline:
@@ -502,10 +510,10 @@ def download_main(
                 if inline:
                     log.info(
                         "staging source file in temporary directory",
-                        source=str(src),
+                        source=src,
                     )
                 else:
-                    log.info("copying source file", source=str(src), target=str(dst))
+                    log.info("copying source file", source=src, target=dst)
                     dst.parent.mkdir(parents=True, exist_ok=True)
 
                 local_content = ""
@@ -566,7 +574,7 @@ def download_main(
 
                         shutil.rmtree(stale.parent, ignore_errors=True)
 
-        # Generate rule files locally for supported agents
+        # generate rule files locally for supported agents
         explodable_agents = [t for t in instruction_types if t in VALID_AGENTS]
 
         if explodable_agents:
@@ -607,7 +615,7 @@ def download_main(
         else:
             log.info("no files were copied or generated")
 
-            # Build list of expected files
+            # build list of expected files
             expected_files = []
             for inst_type in instruction_types:
                 config = INSTRUCTION_TYPES[inst_type]
@@ -624,7 +632,7 @@ def download_main(
                     typer.echo(f"  - {expected}", err=True)
 
     finally:
-        # Clean up temporary directory
+        # clean up temporary directory
         import shutil
 
         if staging_dir and staging_dir.exists():

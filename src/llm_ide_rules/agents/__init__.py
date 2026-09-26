@@ -1,4 +1,4 @@
-"""Agent registry for LLM IDE rules."""
+"agent registry for LLM IDE rules"
 
 from llm_ide_rules.agents.agents import AgentsAgent
 from llm_ide_rules.agents.antigravity import AntigravityAgent
@@ -23,25 +23,32 @@ AGENTS: dict[str, type[BaseAgent]] = {
     "codex": CodexAgent,
 }
 
-# Aliases for user-friendly names
+# aliases for user-friendly names
 AGENT_ALIASES: dict[str, str] = {}
 
 
 def get_agent(name: str) -> BaseAgent:
-    """Get an agent instance by name."""
+    "get an agent instance by name"
+
     if name in AGENT_ALIASES:
         name = AGENT_ALIASES[name]
+
     if name not in AGENTS:
         raise ValueError(f"Unknown agent: {name}. Available: {list(AGENTS.keys())}")
+
     return AGENTS[name]()
 
 
 def get_all_agents() -> list[BaseAgent]:
-    """Get instances of all registered agents."""
+    "get instances of all registered agents"
+
     seen: set[type[BaseAgent]] = set()
     result: list[BaseAgent] = []
     for agent_cls in AGENTS.values():
-        if agent_cls not in seen:
-            seen.add(agent_cls)
-            result.append(agent_cls())
+        if agent_cls in seen:
+            continue
+
+        seen.add(agent_cls)
+        result.append(agent_cls())
+
     return result

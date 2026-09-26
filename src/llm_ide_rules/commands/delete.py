@@ -1,4 +1,4 @@
-"""Delete command: Remove downloaded LLM instruction files."""
+"delete command: remove downloaded LLM instruction files"
 
 import shutil
 from pathlib import Path
@@ -17,16 +17,17 @@ from llm_ide_rules.markdown_parser import parse_sections
 
 
 def get_generated_files(target_dir: Path) -> set[Path]:
-    """Identify files that would be generated from local instruction files."""
+    "identify files that would be generated from local instruction files"
+
     generated = set()
 
-    # Check instructions.md
+    # check instructions.md
     instructions_path = target_dir / "instructions.md"
     if instructions_path.exists():
         try:
             general, sections = parse_sections(instructions_path.read_text())
 
-            # If general instructions exist, these files are generated
+            # if general instructions exist, these files are generated
             if any(line.strip() for line in general):
                 generated.add(target_dir / ".cursor/rules/general.mdc")
                 generated.add(target_dir / ".github/copilot-instructions.md")
@@ -34,11 +35,11 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(target_dir / ".agents/rules/general.md")
                 generated.add(target_dir / "AGENTS.md")
 
-            # If any sections exist, AGENTS.md is definitely generated
+            # if any sections exist, AGENTS.md is definitely generated
             if sections:
                 generated.add(target_dir / "AGENTS.md")
 
-            # Section specific files
+            # section specific files
             from llm_ide_rules.utils import resolve_target_dir
 
             for header, section_data in sections.items():
@@ -50,7 +51,7 @@ def get_generated_files(target_dir: Path) -> set[Path]:
                 generated.add(target_dir / f".claude/rules/{filename}.md")
                 generated.add(target_dir / f".agents/rules/{filename}.md")
 
-                # Add subdirectory AGENTS.md for sections with ** glob patterns
+                # add subdirectory AGENTS.md for sections with ** glob patterns
                 glob_pattern = section_data.glob_pattern
                 section_target_dir = resolve_target_dir(target_dir, glob_pattern)
 
@@ -60,7 +61,7 @@ def get_generated_files(target_dir: Path) -> set[Path]:
         except (OSError, ValueError, TypeError, KeyError) as e:
             log.warning("failed to parse instructions.md", error=str(e))
 
-    # Check commands.md
+    # check commands.md
     commands_path = target_dir / "commands.md"
     if commands_path.exists():
         try:
@@ -82,7 +83,8 @@ IGNORED_DIRS = {"node_modules", ".venv"}
 
 
 def find_recursive_files(target_dir: Path, file_pattern: str) -> list[Path]:
-    """Find files matching pattern while ignoring dependency and environment directories."""
+    "find files matching pattern while ignoring dependency and environment directories"
+
     if not target_dir.is_dir():
         return []
 
@@ -141,7 +143,7 @@ def find_files_to_delete(
             matching_files = find_recursive_files(target_dir, file_pattern)
             files_to_delete.extend(matching_files)
 
-    # Deduplicate files to delete while preserving order
+    # deduplicate files to delete while preserving order
     files_to_delete = list(dict.fromkeys(files_to_delete))
 
     return dirs_to_delete, files_to_delete
@@ -222,7 +224,7 @@ def delete_main(
     target_path = Path(target_dir).resolve()
 
     if not target_path.exists():
-        log.error("target directory does not exist", target_dir=str(target_path))
+        log.error("target directory does not exist", target_dir=target_path)
         error_msg = f"Target directory does not exist: {target_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1)
@@ -230,7 +232,7 @@ def delete_main(
     log.info(
         "finding files to delete",
         instruction_types=instruction_types,
-        target_dir=str(target_path),
+        target_dir=target_path,
     )
 
     dirs_to_delete, files_to_delete = find_files_to_delete(
@@ -243,23 +245,23 @@ def delete_main(
         log.info("filtering files to delete based on local sources")
         generated_files = get_generated_files(target_path)
 
-        # Expand directories to files for granular filtering
+        # expand directories to files for granular filtering
         expanded_files = []
         for d in dirs_to_delete:
             expanded_files.extend(find_recursive_files(d, "*"))
 
         all_candidates = files_to_delete + expanded_files
 
-        # Filter: keep only files that are in the generated set
-        # We compare resolved paths to be safe
+        # filter: keep only files that are in the generated set
+        # compare resolved paths to be safe
         files_to_delete = [f for f in all_candidates if f.resolve() in generated_files]
 
-        # Identify skipped files (candidates that were NOT in generated set)
+        # identify skipped files (candidates that were not in generated set)
         skipped_files = [
             f for f in all_candidates if f.resolve() not in generated_files
         ]
 
-        # We are no longer deleting whole directories in safe mode
+        # do not delete whole directories in safe mode
         dirs_to_delete = []
 
     if not dirs_to_delete and not files_to_delete:
@@ -306,20 +308,20 @@ def delete_main(
 
     for dir_path in dirs_to_delete:
         try:
-            log.info("deleting directory", path=str(dir_path))
+            log.info("deleting directory", path=dir_path)
             shutil.rmtree(dir_path)
             deleted_count += 1
         except OSError as e:
-            log.error("failed to delete directory", path=str(dir_path), error=str(e))
+            log.error("failed to delete directory", path=dir_path, error=str(e))
             typer.echo(f"Error deleting {dir_path}: {e}", err=True)
 
     for file_path in files_to_delete:
         try:
-            log.info("deleting file", path=str(file_path))
+            log.info("deleting file", path=file_path)
             file_path.unlink()
             deleted_count += 1
         except OSError as e:
-            log.error("failed to delete file", path=str(file_path), error=str(e))
+            log.error("failed to delete file", path=file_path, error=str(e))
             typer.echo(f"Error deleting {file_path}: {e}", err=True)
 
     success_msg = f"Successfully deleted {deleted_count} of {total_items} items."

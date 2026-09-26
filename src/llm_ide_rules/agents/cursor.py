@@ -1,4 +1,4 @@
-"""Cursor IDE agent implementation."""
+"cursor IDE agent implementation"
 
 from pathlib import Path
 
@@ -15,7 +15,7 @@ from llm_ide_rules.agents.base import (
 
 
 class CursorAgent(BaseAgent):
-    """Agent for Cursor IDE."""
+    "agent for Cursor IDE"
 
     name = "cursor"
     rules_dir = ".cursor/rules"
@@ -29,7 +29,7 @@ class CursorAgent(BaseAgent):
         section_globs: dict[str, str | None] | None = None,
         filename: str = "AGENTS.md",
     ) -> bool:
-        """Bundle Cursor rule files (.mdc) into a single output file."""
+        "bundle Cursor rule files (.mdc) into a single output file"
         rules_dir = self.rules_dir
         if not rules_dir:
             return False
@@ -92,7 +92,8 @@ class CursorAgent(BaseAgent):
         return True
 
     def _extract_glob_from_frontmatter(self, content: str) -> str | None:
-        """Extract glob pattern from YAML frontmatter."""
+        "extract glob pattern from YAML frontmatter"
+
         lines = content.splitlines()
         if not lines or lines[0].strip() != "---":
             return None
@@ -109,7 +110,8 @@ class CursorAgent(BaseAgent):
     def bundle_commands(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
-        """Bundle Cursor command files (.md) into a single output file."""
+        "bundle Cursor command files (.md) into a single output file"
+
         commands_dir = self.commands_dir
         if not commands_dir:
             return False
@@ -160,7 +162,8 @@ class CursorAgent(BaseAgent):
         glob_pattern: str | None = None,
         description: str | None = None,
     ) -> None:
-        """Write a Cursor rule file (.mdc) with YAML frontmatter."""
+        "write a Cursor rule file (.mdc) with YAML frontmatter"
+
         extension = self.rule_extension or ".mdc"
         filepath = rules_dir / f"{filename}{extension}"
 
@@ -196,7 +199,8 @@ alwaysApply: true
         commands_dir: Path,
         section_name: str | None = None,
     ) -> None:
-        """Write a Cursor command file (.md) - plain markdown, no frontmatter."""
+        "write a Cursor command file (.md) - plain markdown, no frontmatter"
+
         extension = self.command_extension or ".md"
         filepath = commands_dir / f"{filename}{extension}"
 
@@ -211,7 +215,8 @@ alwaysApply: true
         prompts_dir: Path,
         section_name: str | None = None,
     ) -> None:
-        """Write a Cursor prompt file (.mdc) with optional frontmatter."""
+        "write a Cursor prompt file (.mdc) with optional frontmatter"
+
         extension = self.rule_extension or ".mdc"
         filepath = prompts_dir / f"{filename}{extension}"
 
@@ -227,9 +232,11 @@ alwaysApply: true
         filepath.write_text("".join(output_parts))
 
     def configure_agents_md(self, base_dir: Path) -> bool:
-        """Cursor doesn't require explicit configuration for AGENTS.md."""
+        "cursor doesn't require explicit configuration for AGENTS.md"
+
         return False
 
     def detect(self, base_dir: Path) -> bool:
         "detect if Cursor is in use in the given directory"
+
         return (base_dir / ".cursor").exists() or (base_dir / ".cursorrules").exists()

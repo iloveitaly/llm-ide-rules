@@ -1,4 +1,4 @@
-"""Agents documentation agent implementation."""
+"agents documentation agent implementation"
 
 from pathlib import Path
 
@@ -8,7 +8,7 @@ from llm_ide_rules.agents.base import BaseAgent
 
 
 class AgentsAgent(BaseAgent):
-    """Agent for generating AGENTS.md documentation."""
+    "agent for generating AGENTS.md documentation"
 
     name = "agents"
     rules_dir = None
@@ -22,14 +22,15 @@ class AgentsAgent(BaseAgent):
         section_globs: dict[str, str | None] | None = None,
         filename: str = "AGENTS.md",
     ) -> bool:
-        """Bundle all AGENTS.md files into a single output file."""
+        "bundle all AGENTS.md files into a single output file"
+
         base_dir = output_file.parent
-        # Find all AGENTS.md files recursively
+        # find all AGENTS.md files recursively
         agents_files = list(base_dir.rglob(filename))
         if not agents_files:
             return False
 
-        # Sort files: root first, then by depth and name
+        # sort files: root first, then by depth and name
         root_agents = [f for f in agents_files if f.parent == base_dir]
         subdir_agents = sorted(
             [f for f in agents_files if f.parent != base_dir],
@@ -49,7 +50,7 @@ class AgentsAgent(BaseAgent):
 
             general, sections = parse_sections(content)
 
-            # Only include general instructions once (from root)
+            # only include general instructions once (from root)
             if general and agents_file.parent == base_dir:
                 from llm_ide_rules.agents.base import trim_content
 
@@ -65,7 +66,7 @@ class AgentsAgent(BaseAgent):
                 processed_sections.add(section_name)
                 section_content = section_data.content
 
-                # Reconstruct header and globs if it's from a subdirectory
+                # reconstruct header and globs if it's from a subdirectory
                 content_parts.append(f"## {section_name}\n\n")
 
                 if agents_file.parent != base_dir:
@@ -75,7 +76,7 @@ class AgentsAgent(BaseAgent):
                 from llm_ide_rules.agents.base import trim_content
 
                 trimmed = trim_content(section_content)
-                # Remove the section header from content as we already added it
+                # remove the section header from content as we already added it
                 if trimmed and trimmed[0].startswith("## "):
                     trimmed = trimmed[1:]
                     trimmed = trim_content(trimmed)
@@ -93,7 +94,8 @@ class AgentsAgent(BaseAgent):
     def bundle_commands(
         self, output_file: Path, section_globs: dict[str, str | None] | None = None
     ) -> bool:
-        """Agents doesn't support bundling commands."""
+        "agents doesn't support bundling commands"
+
         return False
 
     def write_rule(
@@ -104,7 +106,7 @@ class AgentsAgent(BaseAgent):
         glob_pattern: str | None = None,
         description: str | None = None,
     ) -> None:
-        """Agents doesn't support writing rules."""
+        "agents doesn't support writing rules"
 
     def write_command(
         self,
@@ -113,7 +115,7 @@ class AgentsAgent(BaseAgent):
         commands_dir: Path,
         section_name: str | None = None,
     ) -> None:
-        """Agents doesn't support writing commands."""
+        "agents doesn't support writing commands"
 
     def generate_root_doc(
         self,
@@ -124,18 +126,19 @@ class AgentsAgent(BaseAgent):
         section_globs: dict[str, str | None] | None = None,
         filename: str = "AGENTS.md",
     ) -> None:
-        """Generate AGENTS.md files, potentially distributed based on globs."""
+        "generate AGENTS.md files, potentially distributed based on globs"
+
         if not section_globs:
-            # Fallback to single root AGENTS.md
+            # fallback to single root AGENTS.md
             content = self.build_root_doc_content(general_lines, rules_sections)
             if content.strip():
                 (output_dir / filename).write_text(content)
             return
 
-        # Group rules by target directory
+        # group rules by target directory
         rules_by_dir: dict[Path, dict[str, list[str]]] = {}
 
-        # Always include root directory for rules without specific directory targets
+        # always include root directory for rules without specific directory targets
         rules_by_dir[output_dir] = {}
 
         from llm_ide_rules.utils import resolve_target_dir
@@ -162,12 +165,12 @@ class AgentsAgent(BaseAgent):
 
             rules_by_dir[target_dir][section_name] = lines
 
-        # Generate AGENTS.md for each directory
+        # generate AGENTS.md for each directory
         for target_dir, sections in rules_by_dir.items():
             if not sections:
                 continue
 
-            # Only include general instructions in the root AGENTS.md
+            # only include general instructions in the root AGENTS.md
             current_general_lines = general_lines if target_dir == output_dir else []
 
             content = self.build_root_doc_content(current_general_lines, sections)
@@ -176,4 +179,5 @@ class AgentsAgent(BaseAgent):
 
     def detect(self, base_dir: Path) -> bool:
         "detect if AGENTS.md is in use in the given directory"
+
         return (base_dir / "AGENTS.md").exists()
