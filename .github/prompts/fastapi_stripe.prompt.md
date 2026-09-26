@@ -1,6 +1,5 @@
 ---
 mode: 'agent'
-description: ''
 ---
 ## Fastapi_Stripe
 

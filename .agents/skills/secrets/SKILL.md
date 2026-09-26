@@ -1,6 +1,5 @@
 ---
 name: secrets
-description: Secrets
 ---
 
 # Secrets

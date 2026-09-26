@@ -1,6 +1,5 @@
 ---
 name: react-router-client-loader
-description: React Router Client Loader
 ---
 
 # React Router Client Loader

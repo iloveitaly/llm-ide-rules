@@ -1,6 +1,5 @@
 ---
 name: stripe-backend
-description: Stripe Backend
 ---
 
 # Stripe Backend

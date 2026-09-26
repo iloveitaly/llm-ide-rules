@@ -28,6 +28,9 @@ Here's how the python application is organized:
 - When queuing a job or `perform`ing it in a test, use the full-qualified name, e.g. `app.jobs.transcript_deletion.perform`.
 - `app/cli/` is for scripts or CLI tools that are specific to the application.
 - Webhooks should be fired in the model layer, not in a router or command.
+- Alias classes which are commonly used in the application. This makes it easier to grep for instances of that class without worrying about namespace clashes.
+  - Example: `from botocore.exceptions import ClientError as BotoCoreClientError` instead of a plain `ClientError`.
+  - `BaseModel` from `activemodel` is commonly used in `models/*.py`, so `pydantic`'s `BaseModel` should be aliased to `PydanticBaseModel`
 
 ### 3rd Party APIs
 

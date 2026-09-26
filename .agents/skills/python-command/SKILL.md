@@ -1,6 +1,5 @@
 ---
 name: python-command
-description: Python Command
 ---
 
 # Python Command

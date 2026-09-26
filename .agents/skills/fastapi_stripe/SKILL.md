@@ -1,6 +1,5 @@
 ---
 name: fastapi_stripe
-description: Fastapi_Stripe
 ---
 
 # Fastapi_Stripe

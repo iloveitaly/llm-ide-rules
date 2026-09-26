@@ -1,6 +1,5 @@
 ---
 name: dev-in-browser
-description: Dev In Browser
 ---
 
 # Dev In Browser

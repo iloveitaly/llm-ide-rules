@@ -1,6 +1,5 @@
 ---
 name: typescript-docstring
-description: Typescript Docstring
 ---
 
 # Typescript Docstring

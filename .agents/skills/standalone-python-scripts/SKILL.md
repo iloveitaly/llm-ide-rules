@@ -1,6 +1,5 @@
 ---
 name: standalone-python-scripts
-description: Standalone Python Scripts
 ---
 
 # Standalone Python Scripts

@@ -1,6 +1,5 @@
 ---
 mode: 'agent'
-description: ''
 ---
 ## React Router Client Loader
 

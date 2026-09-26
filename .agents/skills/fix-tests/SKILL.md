@@ -1,6 +1,5 @@
 ---
 name: fix-tests
-description: Fix Tests
 ---
 
 # Fix Tests
