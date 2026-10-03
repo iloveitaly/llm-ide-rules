@@ -158,6 +158,7 @@ globs: **/*.test.tsx
 
 globs: just/*.just
 
+- Docs: https://raw.githubusercontent.com/casey/just/master/README.md
 - Never use `just_executable()` to reference the executable for `just`. If `just` DNE, then something is wrong adn you should stop your work and let me know.
 - You should not have to mutate `$PATH`. If you cannot find an expected binary, stop your work and let me know.
 - Do not create aliases unless explicitly asked
@@ -827,5 +828,26 @@ Here's how frontend code is organized in `web/app/`:
 * Use `Temporal` for any date or time manipulation. You can assume it's available in the browser.
 * DateTime objects should always be converted to UTC before included in any API request. Never send a timestamp with the user's timezone.
 * Unless otherwise specified, do not shift server-provided times based on the user's timezone.
+
+## Terraform
+
+globs: infra/**/*.tf
+
+- All "bootstrap" secrets required to run the terraform code should be `export`ed in the Justfile. The Justfile is guarded so agents cannot run it, ensuring that required secrets are not available to agents ensures that terraform cannot be run by an agent.
+- Don't add a `locals` for a variable only used a single time
+- Do not add to terraform output unless asked to
+- Consult the terraform MCP when using an external module. Module surfaces change often.
+- When creating a worker, always set the `compatibility_date` to the current date.
+- Add `# sourced from ENV` for any `variable` sourced from the ENV.
+- Use `_` convention, not `[private]`
+
+### File Structure
+
+* `mise.toml` opentofu, environment variables, and other configuration required for terraform.
+* `onepassword_secrets.tf` extracts secrets from 1Password that are required to run the terraform code. Secrets should be pulled from here, and not ENV.
+* `providers.tf` defines the providers to use.
+* `variables.tf` defines "global" variables, including those sourced from the ENV.
+* `deployment_state.tf` stores the terraform state in a remote bucket.
+* `Justfile` contains the commands to run the terraform code. Never run it directly.
 
 <!-- END CLONED INSTRUCTIONS -->
