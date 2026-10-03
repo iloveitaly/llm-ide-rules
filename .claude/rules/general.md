@@ -6,6 +6,7 @@ Coding instructions for all programming languages:
 - Prefer early returns over nested if statements.
 - Prefer `continue` within a loop vs nested if statements.
 - Prefer smaller functions over larger functions. Break up logic into smaller chunks with well-named functions.
+- Use named constants for magic numbers, service urls, etc. Do not duplicate magic strings or numbers in code.
 - Prefer constants with separators: `10_000` is preferred to `10000` (or `10_00` over `1000` in the case of a integer representing cents).
 - Prefix feature-flag style constants with `{DISABLED,ENABLED}_`
 - When I ask you to write code, prioritize simplicity and legibility over covering all edge cases, handling all errors, etc.
@@ -50,6 +51,11 @@ In other words, embed the business requirements as comments in the code when the
 - Do not remove existing comments.
 - Do not capitalize or add periods at the end of single-line comments.
 
+### Git Usage
+
+- Do not automatically commit changes unless I explicitly ask you to.
+- Never generate merge commits.
+
 ### Important Workflow Rules
 
 Pay careful attention to these instructions when running tests, generating database migrations, or otherwise figuring out how to operate this project:
@@ -57,7 +63,6 @@ Pay careful attention to these instructions when running tests, generating datab
 - Run `just` to understand the more important workflow commands.
   - Run `just --list` to see all available pre-written workflow development commands.
 - **IMPORTANT:** Never manually set environment variables that are required. You can set optional variables for debugging, but any missing required environment variables is an error that should be reported and you should stop your work immediately.
-- **NEVER** git commit changes. Always let me run any git commands which are not read-only.
 - Do not worry about cleaning up the environment. This is done automatically.
 - Run python code with `uv run python`
 - Use `pytest` to run tests. If tests fail because of a configuration, environment, or system error: let me know and stop working.

@@ -28,6 +28,7 @@ Here's how the python application is organized:
 - When queuing a job or `perform`ing it in a test, use the full-qualified name, e.g. `app.jobs.transcript_deletion.perform`.
 - `app/cli/` is for scripts or CLI tools that are specific to the application.
 - Webhooks should be fired in the model layer, not in a router or command.
+- Lifecycle logic (status/state transitions, webhook enqueue, access grants) should live on the model. Commands, routes, etc should not re-implement `after_save`-style logic.
 - Alias classes which are commonly used in the application. This makes it easier to grep for instances of that class without worrying about namespace clashes.
   - Example: `from botocore.exceptions import ClientError as BotoCoreClientError` instead of a plain `ClientError`.
   - `BaseModel` from `activemodel` is commonly used in `models/*.py`, so `pydantic`'s `BaseModel` should be aliased to `PydanticBaseModel`
@@ -36,6 +37,7 @@ Here's how the python application is organized:
 
 - Always use an official client library if it exists.
 - Be thoughtful about metadata fields. Only put data there for (a) reporting or (b) a joining key a downstream consumer actually reads. Do not duplicate keys or data in metadata fields without a clear and documented purpose.
+- Log unexpected API responses or shapes to Sentry.
 
 ### Python Test Code Organization
 
@@ -53,10 +55,11 @@ Here's how the python application is organized:
 
 globs: app/factories/**/.py
 
-* Each model should get it's own file under app/factories/model_name.py
+* Each model should get it's own file under `app/factories/model_name.py`
 * `ActiveModelFactory` (which is a polyfactory subclass) should be used.
 * Use `BaseFactory.__faker__` to generate more specific fake data for important fields (used in routes, etc)
 * Prefer `slug = BaseFactory.__faker__.unique.slug` to `slug = Use(lambda: BaseFactory.__faker__.unique.slug())`
+* Only override factory fields that differ from defaults.
 
 #### Factory Example
 
@@ -115,8 +118,32 @@ When writing database models:
 Example:
 
 ```python
+from pydantic import BaseModel as PydanticBaseModel
+from activemodel import BaseModel
+from typeid import TypeID
+from activemodel.mixins import (
+    PydanticJSONMixin,
+    SoftDeletionMixin,
+    TimestampsMixin,
+    TypeIDPrimaryKey,
+)
+
+# pydantic models should be defined outside of the model class if they are used in other codes or models
+class Video(PydanticBaseModel):
+    title: str
+    "name of the video"
+
 class Distribution(BaseModel, TimestampsMixin, SoftDeletionMixin, table=True):
-    """Triple-quoted strings for multi-line class docstring"""
+    """
+    Triple-quoted strings for multi-line class docstring
+    """
+
+    # nest enum definition classes inside the model
+    # use `DistributionState` instead of `State` to avoid postgres enum name conflicts
+    class DistributionState(StrEnum):
+        pending = "pending"
+        active = "active"
+        archived = "archived"
 
     id: TypeID[Literal["dst"]] = TypeIDPrimaryKey("dst")
 
@@ -125,9 +152,18 @@ class Distribution(BaseModel, TimestampsMixin, SoftDeletionMixin, table=True):
 
     # no need to add a comment about an obvious field; no need for line breaks if there are no field-level docstrings
     title: str = Field(unique=True)
-    state: str
+    state: DistributionState = DistributionState.pending
 
     optional_field: str | None = None
+
+    videos: list[Video] = Field(
+        sa_type=JSONB,
+        nullable=False,
+        default_factory=list,
+        # ensures there is a empty list when the record is created
+        sa_column_kwargs={"server_default": sa.text("'[]'")},
+    )
+    "videos available alongside the main film"
 
     # here's how relationships are constructed
     doctor_id: TypeID = Doctor.foreign_key()

@@ -17,6 +17,8 @@ alwaysApply: false
 - Omit obvious docstrs and comments. Add comments for non-obvious but easy-to-miss lines that are key to what the test is checking.
 - Do not add multiple tests for a one-line change.
 - If test state setup requires more than three distinct factories, you should probably create a new factory to represent this particular state.
+- Add pre-condition assertions when setup is load-bearing.
+- If a `monkeypatch` is truly needed, a one-line comment on why. Prefer full-stack testing over mocking.
 
 ### Example Test
 
@@ -54,3 +56,5 @@ def test_calculate_quote_unknown_county(client):
   * Example: `app/routes/unauthenticated/quote.py` should be `tests/routes/unauthenticated/quote_test.py`
 * `tests/routes/{unauthenticated,authenticated}` and a handful of top-level test files for fastapi API route testing.
 * `tests/integration/` for browser tests
+* Reusable test helpers go in `tests/**/utils.py`.
+* Duplicating assertion setup once or twice is fine; beyond that, put it in `tests/**/assertions.py`

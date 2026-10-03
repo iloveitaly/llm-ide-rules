@@ -1,6 +1,5 @@
 ## Pytest Integration Tests
 
-
 - Look to `app/factories/` to generate any required database state
   - Here's an example of how to create + persist a factory `DistributionFactory.save(domain=PYTHON_TEST_SERVER_HOST)`
 - Add the `server` factory to each test
@@ -107,7 +106,6 @@ def test_streaming_checkout_creates_user_and_links_order(
 
 ## Pytest Tests
 
-
 - Look first to `app.factories.*` instead of `app.models.*` to generate any required database state
   - For example, to create and persist a `Distribution` record `DistributionFactory.save()`
   - If a factory doesn't exist for the model you are working with, create one.
@@ -120,6 +118,8 @@ def test_streaming_checkout_creates_user_and_links_order(
 - Omit obvious docstrs and comments. Add comments for non-obvious but easy-to-miss lines that are key to what the test is checking.
 - Do not add multiple tests for a one-line change.
 - If test state setup requires more than three distinct factories, you should probably create a new factory to represent this particular state.
+- Add pre-condition assertions when setup is load-bearing.
+- If a `monkeypatch` is truly needed, a one-line comment on why. Prefer full-stack testing over mocking.
 
 ### Example Test
 
@@ -157,10 +157,11 @@ def test_calculate_quote_unknown_county(client):
   * Example: `app/routes/unauthenticated/quote.py` should be `tests/routes/unauthenticated/quote_test.py`
 * `tests/routes/{unauthenticated,authenticated}` and a handful of top-level test files for fastapi API route testing.
 * `tests/integration/` for browser tests
+* Reusable test helpers go in `tests/**/utils.py`.
+* Duplicating assertion setup once or twice is fine; beyond that, put it in `tests/**/assertions.py`
 
 
 ## Python Route Tests
-
 
 - Polyfactory is the [factory](app/factories/) library in use. `ModelNameFactory.build()` is how you generate factories.
 - Use `assert_status(response)` instead of `assert response.status_code == status.HTTP_200_OK`

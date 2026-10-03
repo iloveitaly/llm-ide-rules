@@ -6,6 +6,7 @@ Coding instructions for all programming languages:
 - Prefer early returns over nested if statements.
 - Prefer `continue` within a loop vs nested if statements.
 - Prefer smaller functions over larger functions. Break up logic into smaller chunks with well-named functions.
+- Use named constants for magic numbers, service urls, etc. Do not duplicate magic strings or numbers in code.
 - Prefer constants with separators: `10_000` is preferred to `10000` (or `10_00` over `1000` in the case of a integer representing cents).
 - Prefix feature-flag style constants with `{DISABLED,ENABLED}_`
 - When I ask you to write code, prioritize simplicity and legibility over covering all edge cases, handling all errors, etc.
@@ -50,6 +51,11 @@ In other words, embed the business requirements as comments in the code when the
 - Do not remove existing comments.
 - Do not capitalize or add periods at the end of single-line comments.
 
+### Git Usage
+
+- Do not automatically commit changes unless I explicitly ask you to.
+- Never generate merge commits.
+
 ### Important Workflow Rules
 
 Pay careful attention to these instructions when running tests, generating database migrations, or otherwise figuring out how to operate this project:
@@ -57,7 +63,6 @@ Pay careful attention to these instructions when running tests, generating datab
 - Run `just` to understand the more important workflow commands.
   - Run `just --list` to see all available pre-written workflow development commands.
 - **IMPORTANT:** Never manually set environment variables that are required. You can set optional variables for debugging, but any missing required environment variables is an error that should be reported and you should stop your work immediately.
-- **NEVER** git commit changes. Always let me run any git commands which are not read-only.
 - Do not worry about cleaning up the environment. This is done automatically.
 - Run python code with `uv run python`
 - Use `pytest` to run tests. If tests fail because of a configuration, environment, or system error: let me know and stop working.
@@ -68,6 +73,11 @@ Pay careful attention to these instructions when running tests, generating datab
 
 
 ## Alembic Migrations
+
+- Migrations must stay compatible with offline SQL generation.
+- Pass the session connection into helpers rather than opening a new connection.
+- Prefer Alembic's enum integration over hand-written enum migrations when it works.
+- Migration logic should not use model classes.
 
 ### Default Content for New Non-Nullable Columns
 
@@ -144,6 +154,7 @@ op.execute(
 
 ## Justfiles
 
+- Docs: https://raw.githubusercontent.com/casey/just/master/README.md
 - Never use `just_executable()` to reference the executable for `just`. If `just` DNE, then something is wrong adn you should stop your work and let me know.
 - You should not have to mutate `$PATH`. If you cannot find an expected binary, stop your work and let me know.
 - Do not create aliases unless explicitly asked
@@ -188,6 +199,7 @@ Here's how the python application is organized:
 - When queuing a job or `perform`ing it in a test, use the full-qualified name, e.g. `app.jobs.transcript_deletion.perform`.
 - `app/cli/` is for scripts or CLI tools that are specific to the application.
 - Webhooks should be fired in the model layer, not in a router or command.
+- Lifecycle logic (status/state transitions, webhook enqueue, access grants) should live on the model. Commands, routes, etc should not re-implement `after_save`-style logic.
 - Alias classes which are commonly used in the application. This makes it easier to grep for instances of that class without worrying about namespace clashes.
   - Example: `from botocore.exceptions import ClientError as BotoCoreClientError` instead of a plain `ClientError`.
   - `BaseModel` from `activemodel` is commonly used in `models/*.py`, so `pydantic`'s `BaseModel` should be aliased to `PydanticBaseModel`
@@ -196,6 +208,7 @@ Here's how the python application is organized:
 
 - Always use an official client library if it exists.
 - Be thoughtful about metadata fields. Only put data there for (a) reporting or (b) a joining key a downstream consumer actually reads. Do not duplicate keys or data in metadata fields without a clear and documented purpose.
+- Log unexpected API responses or shapes to Sentry.
 
 ### Python Test Code Organization
 
@@ -213,10 +226,11 @@ Here's how the python application is organized:
 
 globs: app/factories/**/.py
 
-* Each model should get it's own file under app/factories/model_name.py
+* Each model should get it's own file under `app/factories/model_name.py`
 * `ActiveModelFactory` (which is a polyfactory subclass) should be used.
 * Use `BaseFactory.__faker__` to generate more specific fake data for important fields (used in routes, etc)
 * Prefer `slug = BaseFactory.__faker__.unique.slug` to `slug = Use(lambda: BaseFactory.__faker__.unique.slug())`
+* Only override factory fields that differ from defaults.
 
 #### Factory Example
 
@@ -275,8 +289,32 @@ When writing database models:
 Example:
 
 ```python
+from pydantic import BaseModel as PydanticBaseModel
+from activemodel import BaseModel
+from typeid import TypeID
+from activemodel.mixins import (
+    PydanticJSONMixin,
+    SoftDeletionMixin,
+    TimestampsMixin,
+    TypeIDPrimaryKey,
+)
+
+# pydantic models should be defined outside of the model class if they are used in other codes or models
+class Video(PydanticBaseModel):
+    title: str
+    "name of the video"
+
 class Distribution(BaseModel, TimestampsMixin, SoftDeletionMixin, table=True):
-    """Triple-quoted strings for multi-line class docstring"""
+    """
+    Triple-quoted strings for multi-line class docstring
+    """
+
+    # nest enum definition classes inside the model
+    # use `DistributionState` instead of `State` to avoid postgres enum name conflicts
+    class DistributionState(StrEnum):
+        pending = "pending"
+        active = "active"
+        archived = "archived"
 
     id: TypeID[Literal["dst"]] = TypeIDPrimaryKey("dst")
 
@@ -285,9 +323,18 @@ class Distribution(BaseModel, TimestampsMixin, SoftDeletionMixin, table=True):
 
     # no need to add a comment about an obvious field; no need for line breaks if there are no field-level docstrings
     title: str = Field(unique=True)
-    state: str
+    state: DistributionState = DistributionState.pending
 
     optional_field: str | None = None
+
+    videos: list[Video] = Field(
+        sa_type=JSONB,
+        nullable=False,
+        default_factory=list,
+        # ensures there is a empty list when the record is created
+        sa_column_kwargs={"server_default": sa.text("'[]'")},
+    )
+    "videos available alongside the main film"
 
     # here's how relationships are constructed
     doctor_id: TypeID = Doctor.foreign_key()
@@ -598,3 +645,23 @@ Here's how frontend code is organized in `web/app/`:
 * Use `Temporal` for any date or time manipulation. You can assume it's available in the browser.
 * DateTime objects should always be converted to UTC before included in any API request. Never send a timestamp with the user's timezone.
 * Unless otherwise specified, do not shift server-provided times based on the user's timezone.
+
+
+## Terraform
+
+- All "bootstrap" secrets required to run the terraform code should be `export`ed in the Justfile. The Justfile is guarded so agents cannot run it, ensuring that required secrets are not available to agents ensures that terraform cannot be run by an agent.
+- Don't add a `locals` for a variable only used a single time
+- Do not add to terraform output unless asked to
+- Consult the terraform MCP when using an external module. Module surfaces change often.
+- When creating a worker, always set the `compatibility_date` to the current date.
+- Add `# sourced from ENV` for any `variable` sourced from the ENV.
+- Use `_` convention, not `[private]`
+
+### File Structure
+
+* `mise.toml` opentofu, environment variables, and other configuration required for terraform.
+* `onepassword_secrets.tf` extracts secrets from 1Password that are required to run the terraform code. Secrets should be pulled from here, and not ENV.
+* `providers.tf` defines the providers to use.
+* `variables.tf` defines "global" variables, including those sourced from the ENV.
+* `deployment_state.tf` stores the terraform state in a remote bucket.
+* `Justfile` contains the commands to run the terraform code. Never run it directly.

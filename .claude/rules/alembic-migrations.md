@@ -5,6 +5,11 @@ paths:
 
 ## Alembic Migrations
 
+- Migrations must stay compatible with offline SQL generation.
+- Pass the session connection into helpers rather than opening a new connection.
+- Prefer Alembic's enum integration over hand-written enum migrations when it works.
+- Migration logic should not use model classes.
+
 ### Default Content for New Non-Nullable Columns
 
 To add a non-nullable column and set a specific value for all existing rows without a persistent server default:
