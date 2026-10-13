@@ -7,7 +7,8 @@ alwaysApply: false
 
 - All "bootstrap" secrets required to run the terraform code should be `export`ed in the Justfile. The Justfile is guarded so agents cannot run it, ensuring that required secrets are not available to agents ensures that terraform cannot be run by an agent.
 - Don't add a `locals` for a variable only used a single time
-- Do not add to terraform output unless asked to
+- Don't add `output` resources unless specifically asked
+- Use `~> 9.9.0` style provider version pinning
 - Consult the terraform MCP when using an external module. Module surfaces change often.
 - When creating a worker, always set the `compatibility_date` to the current date.
 - Add `# sourced from ENV` for any `variable` sourced from the ENV.

@@ -19,6 +19,7 @@ Coding instructions for all programming languages:
 - Don't worry about fixing lint errors or running lint scripts unless I specifically ask you to.
 - When implementing workarounds for tooling limitations (like using `Any` for unresolvable types) or handling non-obvious edge cases, always add a brief inline comment explaining the technical reasoning.
 - Reserve exact-width `#`-box section separators for long files requiring organization, though they should not be necessary in the large majority of cases (separate files is generally better).
+- Complex functions, classes, etc (i.e. more than 10 lines or so) should have a concise docstr or comment describing their purpose.
 
 Use line breaks to organize code into logical groups. Instead of:
 
