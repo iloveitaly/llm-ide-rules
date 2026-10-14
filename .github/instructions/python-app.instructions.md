@@ -128,10 +128,12 @@ from activemodel.mixins import (
     TypeIDPrimaryKey,
 )
 
+
 # pydantic models should be defined outside of the model class if they are used in other codes or models
 class Video(PydanticBaseModel):
     title: str
     "name of the video"
+
 
 class Distribution(BaseModel, TimestampsMixin, SoftDeletionMixin, table=True):
     """
