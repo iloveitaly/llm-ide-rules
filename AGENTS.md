@@ -47,9 +47,12 @@ In other words, embed the business requirements as comments in the code when the
 
 ### Code Comments
 
-- Describe behavior as it exists today—don’t frame comments around version history or “old vs new.”
-- Only add comments if the code is not self-explanatory. Do not add obvious comments.
-- Do not remove existing comments.
+- Describe behavior as it exists today—don't frame comments around version history or "old vs new."
+- Only add comments if the code is not self-explanatory. Do not add obvious comments. This does not allow deleting a comment that is already there.
+- Do not remove existing comments. This includes `#` and `//` comments, block comments, TODOs, and docstrings.
+- Do not replace an existing comment or docstring with a shorter paraphrase. Add a new line under it if you have something to add.
+- Moving, merging, or renaming a function does not allow dropping its comments or docstring. Carry them to the code that still does that work.
+- Delete a comment, TODO, or docstring only when the code it describes is gone and the comment would now be false.
 - Do not capitalize or add periods at the end of single-line comments.
 
 ### Git Usage
