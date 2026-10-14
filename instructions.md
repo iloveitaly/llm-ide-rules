@@ -843,6 +843,7 @@ globs: infra/**/*.tf
 - When creating a worker, always set the `compatibility_date` to the current date.
 - Add `# sourced from ENV` for any `variable` sourced from the ENV.
 - Uppercase all `TF_VAR_*`
+- Put `locals` at the top of the file
 
 ### File Structure
 
