@@ -844,6 +844,7 @@ globs: infra/**/*.tf
 - Add `# sourced from ENV` for any `variable` sourced from the ENV.
 - Uppercase all `TF_VAR_*`
 - Put `locals` at the top of the file
+- Reference Terraform-managed resources directly; add a data source only when a verified provider limitation requires it or the resource is managed elsewhere.
 
 ### File Structure
 
