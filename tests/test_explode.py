@@ -145,7 +145,7 @@ Instructions without explicit description.
 
         ag_no = Path(".agents/skills/no-desc/SKILL.md").read_text()
         assert "name: no-desc" in ag_no
-        assert "description:" not in ag_no
+        assert "description:" in ag_no
 
         # Claude (.claude/commands)
         claude_with = Path(".claude/commands/with-desc.md").read_text()

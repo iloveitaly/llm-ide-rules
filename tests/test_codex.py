@@ -79,7 +79,7 @@ def test_codex_write_command():
 
 
 def test_codex_write_command_without_description():
-    """Test that CodexAgent omits description in frontmatter when not provided."""
+    """Test that CodexAgent writes an empty description field when none is provided."""
     agent = CodexAgent()
     with tempfile.TemporaryDirectory() as temp_dir:
         commands_dir = Path(temp_dir) / ".agents/skills"
@@ -99,7 +99,7 @@ def test_codex_write_command_without_description():
         assert skill_file.exists()
         content = skill_file.read_text()
         assert "name: deploy-app" in content
-        assert "description:" not in content
+        assert "description:" in content
         assert "# Deploy App" in content
         assert "Run fab deploy." in content
 

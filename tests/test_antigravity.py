@@ -115,7 +115,7 @@ def test_antigravity_write_command():
 
 
 def test_antigravity_write_command_without_description():
-    """Test that AntigravityAgent omits description in frontmatter when not provided."""
+    """Test that AntigravityAgent writes an empty description field when none is provided."""
     agent = AntigravityAgent()
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
@@ -136,7 +136,7 @@ def test_antigravity_write_command_without_description():
         assert skill_file.exists()
         content = skill_file.read_text()
         assert "name: deploy-app" in content
-        assert "description:" not in content
+        assert "description:" in content
         assert "# Deploy App" in content
         assert "Run fab deploy." in content
 

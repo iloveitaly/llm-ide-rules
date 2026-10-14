@@ -314,10 +314,9 @@ class DotAgentsBaseAgent(BaseAgent):
                 continue
             final_content.append(line)
 
-        if desc:
-            frontmatter = f"---\nname: {filename}\ndescription: {desc}\n---\n\n"
-        else:
-            frontmatter = f"---\nname: {filename}\n---\n\n"
+        # agents reject skill files that omit description, including when it is empty
+        description_value = f" {desc}" if desc else ""
+        frontmatter = f"---\nname: {filename}\ndescription:{description_value}\n---\n\n"
 
         trimmed = trim_content(final_content)
         filepath.parent.mkdir(parents=True, exist_ok=True)
