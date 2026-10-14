@@ -165,6 +165,7 @@ globs: just/*.just
 - Do not create aliases unless explicitly asked
 - Separate scripts larger than 5 lines with newlines and comments for non-obvious logic
 - Do not use inline shebang unless it differs from the default
+- Use `_` convention, not `[private]`
 
 Use the following script execution configuration:
 
@@ -841,7 +842,7 @@ globs: infra/**/*.tf
 - Consult the terraform MCP when using an external module. Module surfaces change often.
 - When creating a worker, always set the `compatibility_date` to the current date.
 - Add `# sourced from ENV` for any `variable` sourced from the ENV.
-- Use `_` convention, not `[private]`
+- Uppercase all `TF_VAR_*`
 
 ### File Structure
 
