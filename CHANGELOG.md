@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.21.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.21.0...v0.21.1) (2026-10-14)
+
+
+### Bug Fixes
+
+* **dotagents:** always include description field in skill frontmatter ([7d5e77d](https://github.com/iloveitaly/llm-ide-rules/commit/7d5e77db10f47e4b75f605379c994e6a645193c3))
+
+
+### Documentation
+
+* add convention for placing terraform locals at top of file ([99bcbc0](https://github.com/iloveitaly/llm-ide-rules/commit/99bcbc0550394e9a91812e5337394c9f0236f081))
+* add docstring guidance and update terraform rules ([7e9ff02](https://github.com/iloveitaly/llm-ide-rules/commit/7e9ff022590f6aaebc5930c802215c40a210f92d))
+* add guidelines for complex code docs and terraform versions ([40933bc](https://github.com/iloveitaly/llm-ide-rules/commit/40933bcca0f2c3eb99aeb3da039d811c94d1103a))
+* clarify conventions in justfile and terraform rules ([d01176e](https://github.com/iloveitaly/llm-ide-rules/commit/d01176ee585bff3ff4899c7a6fc5ca74d54f83d3))
+* clarify resource vs data source usage in terraform ([f29a251](https://github.com/iloveitaly/llm-ide-rules/commit/f29a25123823f73ded12cedefa6c13e47446e780))
+* clarify rules for preserving code comments and docstrings ([c66a288](https://github.com/iloveitaly/llm-ide-rules/commit/c66a2889bc9bb353e2d253ca0a77fb18d0397e43))
+* clarify rules for preserving existing comments ([3db608a](https://github.com/iloveitaly/llm-ide-rules/commit/3db608a258d7715bba57406958768c6a868985b8))
+* update agent terraform rules and skill frontmatter ([659cb1c](https://github.com/iloveitaly/llm-ide-rules/commit/659cb1cbcdb3dfc8f3d123d5e8862ae6653c31e1))
+* update justfile and terraform conventions in instructions ([c2c258f](https://github.com/iloveitaly/llm-ide-rules/commit/c2c258f343d279759abec41cc8047b33005b6c10))
+
 ## [0.21.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.20.1...v0.21.0) (2026-09-28)
 
 
