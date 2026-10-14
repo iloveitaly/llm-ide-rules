@@ -1,5 +1,6 @@
 ---
 name: implement-fastapi-routes
+description:
 ---
 
 # Implement Fastapi Routes
