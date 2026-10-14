@@ -12,7 +12,7 @@ paths:
 - Consult the terraform MCP when using an external module. Module surfaces change often.
 - When creating a worker, always set the `compatibility_date` to the current date.
 - Add `# sourced from ENV` for any `variable` sourced from the ENV.
-- Use `_` convention, not `[private]`
+- Uppercase all `TF_VAR_*`
 
 ### File Structure
 
