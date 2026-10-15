@@ -10,10 +10,11 @@ applyTo: "just/*.just"
 - Separate scripts larger than 5 lines with newlines and comments for non-obvious logic
 - Do not use inline shebang unless it differs from the default
 - Use `_` convention, not `[private]`
+- Use uppercase for shell variable
 
 Use the following script execution configuration:
 
-```
+```justfile
 # zsh is the default shell under macos, let's mirror it everywhere
 set shell := ["zsh", "-ceuB", "-o", "pipefail", "-o", "extended_glob"]
 

@@ -25,7 +25,7 @@ Use line breaks to organize code into logical groups. Instead of:
 
 ```python
 if not client_secret_id:
-    raise HTTPException(status.HTTP_400_BAD_REQUEST)
+    raise ClientError("Invalid client secret")
 session_id = client_secret_id.split("_secret")[0]
 ```
 
@@ -33,7 +33,7 @@ Prefer:
 
 ```python
 if not client_secret_id:
-    raise HTTPException(status.HTTP_400_BAD_REQUEST)
+    raise ClientError("Invalid client secret")
 
 session_id = client_secret_id.split("_secret")[0]
 ```

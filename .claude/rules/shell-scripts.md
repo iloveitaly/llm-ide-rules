@@ -1,0 +1,13 @@
+---
+paths:
+  - "**/*.sh"
+---
+
+## Shell Scripts
+
+- Prefer zsh (assume latest version) over bash when you are certain it exists
+- Prefer stricter error handling over silent failure.
+- Hoist common environment variables to the top of the script.
+- Add a `Description:` comment at the top of the script to describe what the script does. 1-4 lines max.
+- Document conditional exits with a one-line explanation if it's not obvious.
+- Add line breaks between logical groups of code.
