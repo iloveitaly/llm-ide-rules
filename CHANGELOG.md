@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.21.2](https://github.com/iloveitaly/llm-ide-rules/compare/v0.21.1...v0.21.2) (2026-10-15)
+
+
+### Documentation
+
+* add shell script guidelines and update route error handling instructions ([597c0ed](https://github.com/iloveitaly/llm-ide-rules/commit/597c0ed5e447c9e7754343c51f9dfda9f34a1c1a))
+* clarify guidelines for writing code comments ([061c6cd](https://github.com/iloveitaly/llm-ide-rules/commit/061c6cdb2e07c1a6a36e2dabb1049206da36d32f))
+* refine AI coding agent guidelines on code comments ([35ad2d0](https://github.com/iloveitaly/llm-ide-rules/commit/35ad2d0545ba59574133f3fc450e7a7a424eb1dc))
+* update agent instructions for FastAPI, shell scripts, and justfiles ([a0e2fb4](https://github.com/iloveitaly/llm-ide-rules/commit/a0e2fb42c7c19da5a0504727b41f0743c3705982))
+
 ## [0.21.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.21.0...v0.21.1) (2026-10-14)
 
 

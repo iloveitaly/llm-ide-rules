@@ -1,6 +1,6 @@
 [project]
 name = "llm-ide-rules"
-version = "0.21.1"
+version = "0.21.2"
 description = "CLI tool for managing LLM IDE prompts and rules"
 keywords = ["llm", "ide", "prompts", "cursor", "copilot"]
 readme = "README.md"
