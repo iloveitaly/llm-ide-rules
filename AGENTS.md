@@ -172,6 +172,12 @@ op.execute(
 - Do not add unit tests that duplicate Playwright coverage. Only add unit tests for edge cases which are not covered by Playwright.
 
 
+## Mise
+
+- Docs: https://mise.jdx.dev/llms.txt
+- When using mise tasks prefer `#MISE` comments over shell implementation of argument parsing, input validation, etc
+
+
 ## Shell Scripts
 
 - Prefer zsh (assume latest version) over bash when you are certain it exists
