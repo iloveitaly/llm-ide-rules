@@ -447,3 +447,146 @@ React rules.
     assert "## Alembic Migrations" not in filtered
     assert "## React" not in filtered
     assert "## Python" in filtered
+
+
+def test_filter_markdown_by_globs_exclude_regex_globbed_and_unglobbed():
+    "test exclude_regex matching both globbed and unglobbed headers"
+
+    text = """# Instructions
+General content.
+
+## General Coding
+Unglobbed content.
+
+## Python
+globs: **/*.py
+
+Python content.
+
+## React
+globs: **/*.tsx
+
+React content.
+"""
+    filtered, omitted = filter_markdown_by_globs(
+        text,
+        exclude_regex="^(General Coding|Python)$",
+    )
+
+    assert omitted == ["General Coding", "Python"]
+    assert "General content." in filtered
+    assert "## General Coding" not in filtered
+    assert "Unglobbed content." not in filtered
+    assert "## Python" not in filtered
+    assert "Python content." not in filtered
+    assert "## React" in filtered
+    assert "React content." in filtered
+
+
+def test_filter_markdown_by_globs_exclude_regex_not_split_on_commas():
+    "test exclude_regex is not split on commas"
+
+    text = """# Instructions
+
+## Header, With Comma
+globs: **/*.txt
+
+Comma content.
+
+## AAB
+globs: **/*.aab
+
+Quantifier content.
+
+## Other
+globs: **/*.other
+
+Other content.
+"""
+    # test regex quantifier containing comma like a{1,2}b
+    filtered, omitted = filter_markdown_by_globs(
+        text,
+        exclude_regex=r"A{1,2}B",
+    )
+    assert omitted == ["AAB"]
+    assert "## Header, With Comma" in filtered
+    assert "## Other" in filtered
+
+    # test regex matching literal comma in header
+    filtered2, omitted2 = filter_markdown_by_globs(
+        text,
+        exclude_regex=r"Header,\s*With\s*Comma",
+    )
+    assert omitted2 == ["Header, With Comma"]
+    assert "## AAB" in filtered2
+    assert "## Other" in filtered2
+
+
+def test_filter_markdown_by_globs_exclude_regex_combined_with_globs():
+    "test exclude_regex combined with include_globs and exclude_globs"
+
+    text = """# Instructions
+
+## Python
+globs: **/*.py
+
+Python rules.
+
+## React
+globs: **/*.tsx
+
+React rules.
+
+## Shell
+globs: **/*.sh
+
+Shell rules.
+
+## Docker
+globs: Dockerfile
+
+Docker rules.
+"""
+    filtered, omitted = filter_markdown_by_globs(
+        text,
+        exclude_globs=["Dockerfile"],
+        include_globs=["**/*.py,**/*.tsx,Dockerfile"],
+        exclude_regex="React",
+    )
+
+    assert "React" in omitted
+    assert "Docker" in omitted
+    assert "Shell" in omitted
+    assert "## React" not in filtered
+    assert "## Docker" not in filtered
+    assert "## Shell" not in filtered
+    assert "## Python" in filtered
+    assert "Python rules." in filtered
+
+
+def test_filter_markdown_by_globs_exclude_regex_subheaders_not_excluded():
+    "test h3 subheaders matching exclude_regex do not exclude parent h2 section"
+
+    text = """# Instructions
+
+## General Coding
+
+### Python Details
+Some details about python inside general coding.
+
+## Python
+globs: **/*.py
+
+Python rules.
+"""
+    filtered, omitted = filter_markdown_by_globs(
+        text,
+        exclude_regex="^Python$",
+    )
+
+    assert omitted == ["Python"]
+    assert "## General Coding" in filtered
+    assert "### Python Details" in filtered
+    assert "Some details about python inside general coding." in filtered
+    assert "## Python\n" not in filtered
+    assert "Python rules." not in filtered

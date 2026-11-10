@@ -1412,3 +1412,239 @@ Python rules.
     assert (target_dir / "AGENTS.md").exists()
     agents_content = (target_dir / "AGENTS.md").read_text(encoding="utf-8")
     assert "Python rules." in agents_content
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+def test_download_exclude_regex_filters_instructions_and_commands(
+    mock_zipfile, mock_requests, tmp_path: Path
+):
+    "test download with --exclude-regex filters instructions and commands"
+
+    runner = CliRunner()
+
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+
+    def mock_extractall(path):
+        extract_path = Path(path)
+        extracted_dir = extract_path / "llm_ide_rules-master"
+        extracted_dir.mkdir(parents=True, exist_ok=True)
+        instructions = """# Instructions
+
+## Python
+globs: **/*.py
+
+Python rules.
+
+## React
+globs: **/*.tsx
+
+React rules.
+"""
+        commands = """# Commands
+
+## Deploy
+globs: manual
+
+Deploy command.
+
+## Test Runner
+globs: manual
+
+Test runner command.
+"""
+        (extracted_dir / "instructions.md").write_text(instructions, encoding="utf-8")
+        (extracted_dir / "commands.md").write_text(commands, encoding="utf-8")
+
+    mock_zip_instance.extractall = mock_extractall
+
+    target_dir = tmp_path / "project"
+    target_dir.mkdir()
+
+    result = runner.invoke(
+        app,
+        [
+            "download",
+            "cursor",
+            "agents",
+            "--target",
+            str(target_dir),
+            "--exclude-regex",
+            "React|Deploy",
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    # verify instructions.md content
+    instructions_content = (target_dir / "instructions.md").read_text(encoding="utf-8")
+    assert "## Python" in instructions_content
+    assert "## React" not in instructions_content
+
+    # verify commands.md content
+    commands_content = (target_dir / "commands.md").read_text(encoding="utf-8")
+    assert "## Test Runner" in commands_content
+    assert "## Deploy" not in commands_content
+
+    # verify exploded cursor rules
+    assert (target_dir / ".cursor" / "rules" / "python.mdc").exists()
+    assert not (target_dir / ".cursor" / "rules" / "react.mdc").exists()
+
+    # verify exploded cursor commands
+    assert (target_dir / ".cursor" / "commands" / "test-runner.md").exists()
+    assert not (target_dir / ".cursor" / "commands" / "deploy.md").exists()
+
+    # verify AGENTS.md
+    agents_content = (target_dir / "AGENTS.md").read_text(encoding="utf-8")
+    assert "Python rules." in agents_content
+    assert "React rules." not in agents_content
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+def test_download_exclude_regex_inline(mock_zipfile, mock_requests, tmp_path: Path):
+    "test download with --exclude-regex and --inline"
+
+    runner = CliRunner()
+
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+
+    def mock_extractall(path):
+        extract_path = Path(path)
+        extracted_dir = extract_path / "llm_ide_rules-master"
+        extracted_dir.mkdir(parents=True, exist_ok=True)
+        instructions = """## Python
+globs: **/*.py
+
+Python rules.
+
+## React
+globs: **/*.tsx
+
+React rules.
+"""
+        (extracted_dir / "instructions.md").write_text(instructions, encoding="utf-8")
+
+    mock_zip_instance.extractall = mock_extractall
+
+    target_dir = tmp_path / "project"
+    target_dir.mkdir()
+
+    result = runner.invoke(
+        app,
+        [
+            "download",
+            "cursor",
+            "agents",
+            "--inline",
+            "--target",
+            str(target_dir),
+            "--exclude-regex",
+            "React",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert not (target_dir / "instructions.md").exists()
+    assert (target_dir / ".cursor" / "rules" / "python.mdc").exists()
+    assert not (target_dir / ".cursor" / "rules" / "react.mdc").exists()
+
+    agents_content = (target_dir / "AGENTS.md").read_text(encoding="utf-8")
+    assert "Python rules." in agents_content
+    assert "React rules." not in agents_content
+
+
+@patch("llm_ide_rules.commands.download.requests.get")
+@patch("llm_ide_rules.commands.download.zipfile.ZipFile")
+def test_download_exclude_regex_skips_preexploded_files_and_skills(
+    mock_zipfile, mock_requests, tmp_path: Path
+):
+    "test download with --exclude-regex skips pre-exploded files and skill subdirectories"
+
+    runner = CliRunner()
+
+    mock_response = Mock()
+    mock_response.content = b"fake zip content"
+    mock_response.raise_for_status = Mock()
+    mock_requests.return_value = mock_response
+
+    mock_zip_instance = Mock()
+    mock_zipfile.return_value.__enter__.return_value = mock_zip_instance
+
+    def mock_extractall(path):
+        extract_path = Path(path)
+        extracted_dir = extract_path / "llm_ide_rules-master"
+        extracted_dir.mkdir(parents=True, exist_ok=True)
+        instructions = """## Python
+globs: **/*.py
+
+Python rules.
+
+## React
+globs: **/*.tsx
+
+React rules.
+"""
+        commands = """## Deploy
+globs: manual
+
+Deploy command.
+"""
+        (extracted_dir / "instructions.md").write_text(instructions, encoding="utf-8")
+        (extracted_dir / "commands.md").write_text(commands, encoding="utf-8")
+
+        cursor_rules = extracted_dir / ".cursor" / "rules"
+        cursor_rules.mkdir(parents=True, exist_ok=True)
+        (cursor_rules / "python.mdc").write_text("old python rule")
+        (cursor_rules / "react.mdc").write_text("old react rule")
+
+        cursor_commands = extracted_dir / ".cursor" / "commands"
+        cursor_commands.mkdir(parents=True, exist_ok=True)
+        (cursor_commands / "deploy.md").write_text("old deploy command")
+
+        skills_dir = extracted_dir / ".agents" / "skills"
+        python_skill = skills_dir / "python"
+        python_skill.mkdir(parents=True, exist_ok=True)
+        (python_skill / "SKILL.md").write_text("python skill")
+
+        react_skill = skills_dir / "react"
+        react_skill.mkdir(parents=True, exist_ok=True)
+        (react_skill / "SKILL.md").write_text("react skill")
+
+    mock_zip_instance.extractall = mock_extractall
+
+    target_dir = tmp_path / "project"
+    target_dir.mkdir()
+
+    result = runner.invoke(
+        app,
+        [
+            "download",
+            "cursor",
+            "antigravity",
+            "--target",
+            str(target_dir),
+            "--exclude-regex",
+            "React|Deploy",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert (target_dir / ".cursor" / "rules" / "python.mdc").exists()
+    assert not (target_dir / ".cursor" / "rules" / "react.mdc").exists()
+    assert not (target_dir / ".cursor" / "commands" / "deploy.md").exists()
+    assert (target_dir / ".agents" / "skills" / "python" / "SKILL.md").exists()
+    assert not (target_dir / ".agents" / "skills" / "react" / "SKILL.md").exists()
+    assert not (target_dir / ".agents" / "skills" / "react").exists()

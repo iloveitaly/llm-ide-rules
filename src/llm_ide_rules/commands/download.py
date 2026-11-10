@@ -288,7 +288,14 @@ def copy_directory_contents(
 
             if exclude_filenames:
                 file_stem = item.name.split(".")[0]
-                if file_stem in exclude_filenames or item.stem in exclude_filenames:
+                if (
+                    file_stem in exclude_filenames
+                    or item.stem in exclude_filenames
+                    or (
+                        item.parent != source_dir
+                        and item.parent.name in exclude_filenames
+                    )
+                ):
                     log.debug(
                         "excluding file matching excluded section", file=relative_str
                     )
@@ -363,6 +370,13 @@ def download_main(
             help="Include only sections matching glob patterns (comma-separated or multiple flags).",
         ),
     ] = None,
+    exclude_regex: Annotated[
+        str | None,
+        typer.Option(
+            "--exclude-regex",
+            help="Exclude sections with headers matching a regex pattern.",
+        ),
+    ] = None,
     inline: Annotated[
         bool,
         typer.Option(
@@ -402,6 +416,10 @@ def download_main(
     \b
     # Include only sections matching glob patterns
     llm_ide_rules download --include-glob "**/*.py"
+
+    \b
+    # Exclude sections with headers matching a regex pattern
+    llm_ide_rules download --exclude-regex "Python|React"
 
     \b
     # Explode directly without saving instructions.md or commands.md to disk
@@ -457,10 +475,16 @@ def download_main(
     elif include_glob:
         include_glob_list = [str(item) for item in include_glob]
 
+    exclude_regex_pattern = (
+        exclude_regex if isinstance(exclude_regex, str) and exclude_regex else None
+    )
+
     # identify omitted filenames from source instructions if present
     omitted_filenames: set[str] = set()
     instructions_src = repo_dir / "instructions.md"
-    if (exclude_glob_list or include_glob_list) and instructions_src.exists():
+    if (
+        exclude_glob_list or include_glob_list or exclude_regex_pattern
+    ) and instructions_src.exists():
         from llm_ide_rules.constants import header_to_filename
         from llm_ide_rules.markdown_parser import filter_markdown_by_globs
 
@@ -468,8 +492,20 @@ def download_main(
             instructions_src.read_text(encoding="utf-8"),
             exclude_globs=exclude_glob_list,
             include_globs=include_glob_list,
+            exclude_regex=exclude_regex_pattern,
         )
-        omitted_filenames = {header_to_filename(h) for h in omitted_headers}
+        omitted_filenames.update(header_to_filename(h) for h in omitted_headers)
+
+    commands_src = repo_dir / "commands.md"
+    if exclude_regex_pattern and commands_src.exists():
+        from llm_ide_rules.constants import header_to_filename
+        from llm_ide_rules.markdown_parser import filter_markdown_by_globs
+
+        _, omitted_cmd_headers = filter_markdown_by_globs(
+            commands_src.read_text(encoding="utf-8"),
+            exclude_regex=exclude_regex_pattern,
+        )
+        omitted_filenames.update(header_to_filename(h) for h in omitted_cmd_headers)
 
     staging_dir: Path | None = None
 
@@ -518,7 +554,7 @@ def download_main(
 
                 remote_content = src.read_text(encoding="utf-8")
                 if (
-                    exclude_glob_list or include_glob_list
+                    exclude_glob_list or include_glob_list or exclude_regex_pattern
                 ) and source_file == "instructions.md":
                     from llm_ide_rules.markdown_parser import (
                         filter_markdown_by_globs,
@@ -526,12 +562,28 @@ def download_main(
 
                     remote_content, omitted_headers = filter_markdown_by_globs(
                         remote_content,
-                        exclude_glob_list,
-                        include_glob_list,
+                        exclude_globs=exclude_glob_list,
+                        include_globs=include_glob_list,
+                        exclude_regex=exclude_regex_pattern,
                     )
                     if omitted_headers:
                         log.info(
                             "omitted sections matching glob filters",
+                            source_file=source_file,
+                            omitted=omitted_headers,
+                        )
+                elif exclude_regex_pattern and source_file == "commands.md":
+                    from llm_ide_rules.markdown_parser import (
+                        filter_markdown_by_globs,
+                    )
+
+                    remote_content, omitted_headers = filter_markdown_by_globs(
+                        remote_content,
+                        exclude_regex=exclude_regex_pattern,
+                    )
+                    if omitted_headers:
+                        log.info(
+                            "omitted sections matching regex filter",
                             source_file=source_file,
                             omitted=omitted_headers,
                         )

@@ -1,6 +1,7 @@
 "markdown parsing utilities using markdown-it-py"
 
 import fnmatch
+import re
 from collections.abc import Sequence
 from typing import NamedTuple
 
@@ -135,6 +136,7 @@ def filter_markdown_by_globs(
     text: str,
     exclude_globs: Sequence[str] | None = None,
     include_globs: Sequence[str] | None = None,
+    exclude_regex: str | None = None,
 ) -> tuple[str, list[str]]:
     "filter markdown sections based on exclude and include glob patterns"
 
@@ -149,8 +151,11 @@ def filter_markdown_by_globs(
         else []
     )
 
-    if not exclude_patterns and not include_patterns:
+    if not exclude_patterns and not include_patterns and not exclude_regex:
         return text, []
+
+    # re.verbose is omitted because the pattern is user-supplied at runtime and spaces in section headers are literal
+    compiled_exclude_regex = re.compile(exclude_regex) if exclude_regex else None
 
     include_has_wildcard = any(pat in ("*", "**/*", "**") for pat in include_patterns)
     # patterns for matching section globs (bare '*' designates unglobbed sections)
@@ -185,6 +190,11 @@ def filter_markdown_by_globs(
             section_starts[i + 1][0] if i + 1 < len(section_starts) else len(lines)
         )
         section_content = lines[start_line:end_line]
+
+        if compiled_exclude_regex and compiled_exclude_regex.search(header_name):
+            omitted_headers.append(header_name)
+            continue
+
         _, glob_pattern = extract_glob_directive(section_content)
 
         if glob_pattern is None:
