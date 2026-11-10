@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.22.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.21.1...v0.22.0) (2026-11-10)
+
+
+### Features
+
+* add regex-based section exclusion filter ([a790a54](https://github.com/iloveitaly/llm-ide-rules/commit/a790a54ebdecbc113dbc1d773cb1ea66124684a2))
+
+
+### Documentation
+
+* add guideline for lazy loading env vars in Vite ([d0c9b54](https://github.com/iloveitaly/llm-ide-rules/commit/d0c9b542165dba17739bd2b34a37970629744b36))
+* add mise instructions and rules for agents ([fa6feec](https://github.com/iloveitaly/llm-ide-rules/commit/fa6feec3f39f58fa376ee7c2bc87c02bc9071790))
+* add mise instructions for task configuration ([c0ab72a](https://github.com/iloveitaly/llm-ide-rules/commit/c0ab72a96c715b83077e3bd147a7f473409f2fb2))
+* add Python function naming conventions for predicates and assertions ([13b3941](https://github.com/iloveitaly/llm-ide-rules/commit/13b394174e8b55c6aef5ef187dc4234504c7c7ad))
+* add shell script guidelines and update route error handling instructions ([597c0ed](https://github.com/iloveitaly/llm-ide-rules/commit/597c0ed5e447c9e7754343c51f9dfda9f34a1c1a))
+* clarify code organization guidelines for python directories ([677fbd5](https://github.com/iloveitaly/llm-ide-rules/commit/677fbd53d7549a008d2a1fa38a027b484a687898))
+* clarify comments and snapshots in integration test guidelines ([7d186e7](https://github.com/iloveitaly/llm-ide-rules/commit/7d186e7e41e8be3ae9dde3a1fb3150ce06ab4bd3))
+* clarify guidelines for writing code comments ([061c6cd](https://github.com/iloveitaly/llm-ide-rules/commit/061c6cdb2e07c1a6a36e2dabb1049206da36d32f))
+* clarify multiline docstring formatting rules ([4f7092b](https://github.com/iloveitaly/llm-ide-rules/commit/4f7092b7c67bd42634e1643c7bf14242d7f3b96f))
+* clarify Python docstring formatting instructions ([e3f8105](https://github.com/iloveitaly/llm-ide-rules/commit/e3f81053bebd1723c2650a907dc406da4d66af72))
+* clarify roles of lib, helpers, and utils directories ([b6d6d99](https://github.com/iloveitaly/llm-ide-rules/commit/b6d6d99ac0da2743035051ed89aeea1453cd3628))
+* clarify test examples and snapshot guidelines in instructions ([39cdf77](https://github.com/iloveitaly/llm-ide-rules/commit/39cdf77c7d16b65228c57225a0157b5cc89b7fc6))
+* refine AI coding agent guidelines on code comments ([35ad2d0](https://github.com/iloveitaly/llm-ide-rules/commit/35ad2d0545ba59574133f3fc450e7a7a424eb1dc))
+* update agent instructions for FastAPI, shell scripts, and justfiles ([a0e2fb4](https://github.com/iloveitaly/llm-ide-rules/commit/a0e2fb42c7c19da5a0504727b41f0743c3705982))
+* update python and typescript rules for agent workflows ([3c6a97d](https://github.com/iloveitaly/llm-ide-rules/commit/3c6a97d3f92a213e50bd7bcf5d2dfd3e95fc20ac))
+
 ## [0.21.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.21.0...v0.21.1) (2026-10-14)
 
 
