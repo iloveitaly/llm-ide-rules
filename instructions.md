@@ -43,6 +43,8 @@ session_id = client_secret_id.split("_secret")[0]
 
 Default to no comment. Names, structure, and the command itself should explain what the code does.
 
+Comments and docstrings should explain actual business rules, user-visible behavior, or non-obvious technical constraints; avoid restating code structure or claiming unenforced behavior.
+
 The reader is a world-class engineer who may not know this domain or every third-party system. Add a concise one-line comment only when they would otherwise miss *why*:
 
 - a business rule the code can't express
@@ -80,12 +82,13 @@ docker cp tmp-js-container:/app/build/production/client public
 
 Pay careful attention to these instructions when running tests, generating database migrations, or otherwise figuring out how to operate this project:
 
+- When addressing review feedback, apply the underlying lesson to comparable code added or changed on the branch, not just the commented location.
 - Run `just` to understand the more important workflow commands.
   - Run `just --list` to see all available pre-written workflow development commands.
 - **IMPORTANT:** Never manually set environment variables that are required. You can set optional variables for debugging, but any missing required environment variables is an error that should be reported and you should stop your work immediately.
 - Do not worry about cleaning up the environment. This is done automatically.
 - Run python code with `uv run python`
-- Use `pytest` to run tests. If tests fail because of a configuration, environment, or system error: let me know and stop working.
+- Build required test assets before running `pytest`; report the exact failure and stop when configuration, environment, system, or migration issues block validation.
   - Initially run `pytest --ignore=tests/integration` then only run `pytest tests/integration`
   - When debugging integration tests look at `$PLAYWRIGHT_RESULT_DIRECTORY`. There's a directory for each test failure. In that directory you fill find a `failure.html` containing the rendered DOM of the page on failure and a screenshot of the contents. Use these to debug why it failed.
 - Do not attempt to create or run database migrations. Pause your work and let me know you need a migration run.
@@ -204,6 +207,7 @@ globs: just/*.just
 - Do not use inline shebang unless it differs from the default
 - Use `_` convention, not `[private]`
 - Use uppercase for shell variable
+- File path constants must end with `_PATH` (e.g. `SHARED_ENV_PATH`, `JAVASCRIPT_PACKAGE_JSON_PATH`); directory constants must end with `_DIR` (e.g. `WEB_DIR`, `JINJA_TEMPLATE_DIR`); do not use `_FILE`
 
 Use the following script execution configuration:
 
@@ -504,6 +508,7 @@ When accessing database records:
 
 When writing database models:
 
+* ActiveModel maps model docstrings and field documentation to database comments; changing them can require a migration even when no tables or columns change.
 * Don't use `Field(...)` unless required (i.e. when specifying a JSON type for a `dict` or pydantic model using `Field(sa_type=JSONB)`). For instance, use `= None` instead of `= Field(default=None)`.
 * Add enum classes close to where they are used, unless they are used across multiple classes (then put them at the top of the file)
 * Use `ModelName.foreign_key()` when generating a foreign key field
