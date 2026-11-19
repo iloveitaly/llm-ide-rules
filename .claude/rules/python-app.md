@@ -110,6 +110,7 @@ When accessing database records:
 
 When writing database models:
 
+* ActiveModel maps model docstrings and field documentation to database comments; changing them can require a migration even when no tables or columns change.
 * Don't use `Field(...)` unless required (i.e. when specifying a JSON type for a `dict` or pydantic model using `Field(sa_type=JSONB)`). For instance, use `= None` instead of `= Field(default=None)`.
 * Add enum classes close to where they are used, unless they are used across multiple classes (then put them at the top of the file)
 * Use `ModelName.foreign_key()` when generating a foreign key field

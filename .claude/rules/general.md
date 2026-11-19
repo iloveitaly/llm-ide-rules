@@ -43,6 +43,8 @@ session_id = client_secret_id.split("_secret")[0]
 
 Default to no comment. Names, structure, and the command itself should explain what the code does.
 
+Comments and docstrings should explain actual business rules, user-visible behavior, or non-obvious technical constraints; avoid restating code structure or claiming unenforced behavior.
+
 The reader is a world-class engineer who may not know this domain or every third-party system. Add a concise one-line comment only when they would otherwise miss *why*:
 
 - a business rule the code can't express
@@ -80,12 +82,13 @@ docker cp tmp-js-container:/app/build/production/client public
 
 Pay careful attention to these instructions when running tests, generating database migrations, or otherwise figuring out how to operate this project:
 
+- When addressing review feedback, apply the underlying lesson to comparable code added or changed on the branch, not just the commented location.
 - Run `just` to understand the more important workflow commands.
   - Run `just --list` to see all available pre-written workflow development commands.
 - **IMPORTANT:** Never manually set environment variables that are required. You can set optional variables for debugging, but any missing required environment variables is an error that should be reported and you should stop your work immediately.
 - Do not worry about cleaning up the environment. This is done automatically.
 - Run python code with `uv run python`
-- Use `pytest` to run tests. If tests fail because of a configuration, environment, or system error: let me know and stop working.
+- Build required test assets before running `pytest`; report the exact failure and stop when configuration, environment, system, or migration issues block validation.
   - Initially run `pytest --ignore=tests/integration` then only run `pytest tests/integration`
   - When debugging integration tests look at `$PLAYWRIGHT_RESULT_DIRECTORY`. There's a directory for each test failure. In that directory you fill find a `failure.html` containing the rendered DOM of the page on failure and a screenshot of the contents. Use these to debug why it failed.
 - Do not attempt to create or run database migrations. Pause your work and let me know you need a migration run.
