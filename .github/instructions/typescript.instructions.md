@@ -9,7 +9,7 @@ applyTo: "**/*.ts,**/*.tsx"
 - Use `lib/` for generic code, `utils/` for project utilities, `hooks/` for React hooks, and `helpers/` for page-specific helpers.
 - Prefer `function theName() {` over `const theName = () =>`
 - Use `import { invariant } from @epic-web/invariant` instead of another invariant library
-- Use `requireEnv("VITE_THE_ENV_VAR")` instead of `process.env.THE_ENV_VAR`
+- Use `requireEnv("VITE_THE_ENV_VAR")` instead of `process.env.THE_ENV_VAR`.  `import {requireEnv} from '~/utils/environment'`
 - Use `import.meta.env.VITE_THE_VAR` to lazy load an environment variable and never setup `define:` configuration in vite for an environment variable.
 - Don't use `console.{log,error}`. Use `from ~/configuration/logging import log` and `log.info("string", {structured: "log"})` instead.
 

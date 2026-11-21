@@ -42,7 +42,7 @@ session_id = client_secret_id.split("_secret")[0]
 
 ### Code Comments
 
-Default to no comment. Names, structure, and the command itself should explain what the code does.
+Focus on self-documentation. Names, structure, and the command itself should explain what the code does.
 
 Comments and docstrings should explain actual business rules, user-visible behavior, or non-obvious technical constraints; avoid restating code structure or claiming unenforced behavior.
 
