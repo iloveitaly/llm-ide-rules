@@ -11,6 +11,8 @@ Terraform code is very important because it controls production systems. For thi
 
 Instructions when writing terraform:
 
+- Implement the requested behavior directly. Add a boolean, feature flag, or optional setting only when I explicitly request configurability or the feature needs to support multiple modes.
+  If quota, permissions, or cost block deployment, report the blocker and use the existing plan and apply workflow. Don’t add a toggle as a precaution.
 - All "bootstrap" secrets (i.e. vars required to run the terraform code) should be `export`ed in the Justfile. The Justfile is guarded so agents cannot run it, ensuring that required secrets are not available to agents ensures that terraform cannot be run by an agent.
 - Don't add a `locals` for a variable only used a single time
 - Don't add `output` resources unless specifically asked
