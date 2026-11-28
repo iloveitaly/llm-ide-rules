@@ -41,35 +41,6 @@ Here are Python rules for development.
         assert not Path(".github").exists()
 
 
-def test_ignores_with_commands():
-    """Test ignores with commands.md."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        instructions_content = """# Sample Instructions
-"""
-        Path("instructions.md").write_text(instructions_content)
-
-        commands_content = """## Fix Tests
-
-Description: Fix failing tests
-"""
-        Path("commands.md").write_text(commands_content)
-
-        result = runner.invoke(app, ["ignores", "--print"])
-
-        assert result.exit_code == 0
-        output = result.stdout
-
-        assert ".cursor/commands/fix-tests.md" in output
-        assert ".claude/commands/fix-tests.md" in output
-        assert ".github/prompts/fix-tests.prompt.md" in output
-
-        assert not Path(".cursor").exists()
-
-
 def test_ignores_missing_file():
     """Test ignores with missing file."""
     runner = CliRunner()

@@ -347,11 +347,11 @@ def test_agents_instruction_type_configuration():
 
 
 def test_claude_instruction_type_configuration():
-    """Test that Claude instruction type includes rules and commands directories."""
+    """Test that Claude instruction type includes the rules directory."""
     from llm_ide_rules.commands.download import INSTRUCTION_TYPES
 
     claude_config = INSTRUCTION_TYPES["claude"]
-    assert claude_config["directories"] == [".claude/rules", ".claude/commands"]
+    assert claude_config["directories"] == [".claude/rules"]
     assert claude_config["files"] == []
 
 
@@ -509,9 +509,6 @@ def test_download_does_not_accumulate_newlines_on_repeated_runs(
             (extracted_dir / "instructions.md").write_text(
                 "# Remote Instructions\n\nRule 1\n", encoding="utf-8"
             )
-            (extracted_dir / "commands.md").write_text(
-                "# Remote Commands\n\nCommand 1\n", encoding="utf-8"
-            )
             (extracted_dir / ".cursor").mkdir(parents=True, exist_ok=True)
             (extracted_dir / ".cursor" / "rules").mkdir(parents=True, exist_ok=True)
 
@@ -523,21 +520,14 @@ def test_download_does_not_accumulate_newlines_on_repeated_runs(
             assert result.exit_code == 0
 
         inst_content = Path("instructions.md").read_text(encoding="utf-8")
-        cmd_content = Path("commands.md").read_text(encoding="utf-8")
 
         assert inst_content == (
             "# Remote Instructions\n\nRule 1\n\n<!-- END CLONED INSTRUCTIONS -->\n"
         )
-        assert cmd_content == (
-            "# Remote Commands\n\nCommand 1\n\n<!-- END CLONED INSTRUCTIONS -->\n"
-        )
+        assert not Path("commands.md").exists()
 
-        # append custom content to both files and run 3 more times
         Path("instructions.md").write_text(
             f"{inst_content}\n# Custom Instruction\n", encoding="utf-8"
-        )
-        Path("commands.md").write_text(
-            f"{cmd_content}\n# Custom Command\n", encoding="utf-8"
         )
 
         for _ in range(3):
@@ -545,13 +535,9 @@ def test_download_does_not_accumulate_newlines_on_repeated_runs(
             assert result.exit_code == 0
 
         inst_with_custom = Path("instructions.md").read_text(encoding="utf-8")
-        cmd_with_custom = Path("commands.md").read_text(encoding="utf-8")
 
         assert inst_with_custom == (
             "# Remote Instructions\n\nRule 1\n\n<!-- END CLONED INSTRUCTIONS -->\n\n# Custom Instruction\n"
-        )
-        assert cmd_with_custom == (
-            "# Remote Commands\n\nCommand 1\n\n<!-- END CLONED INSTRUCTIONS -->\n\n# Custom Command\n"
         )
 
 
@@ -1198,7 +1184,7 @@ def test_download_help_shows_inline():
 @patch("llm_ide_rules.commands.download.requests.get")
 @patch("llm_ide_rules.commands.download.zipfile.ZipFile")
 def test_download_inline_basic(mock_zipfile, mock_requests, tmp_path: Path):
-    """Test download with --inline does not persist instructions or commands to disk"""
+    """Test download with --inline does not persist instructions.md to disk"""
     runner = CliRunner()
 
     mock_response = Mock()
@@ -1221,11 +1207,10 @@ globs: **/*.py
 
 Python rules.
 """
-        commands = """## Test
-Run tests with pytest.
-"""
         (extracted_dir / "instructions.md").write_text(instructions, encoding="utf-8")
-        (extracted_dir / "commands.md").write_text(commands, encoding="utf-8")
+        (extracted_dir / "commands.md").write_text(
+            "## Test\nRun tests with pytest.\n", encoding="utf-8"
+        )
 
     mock_zip_instance.extractall = mock_extractall
 
@@ -1248,7 +1233,7 @@ Run tests with pytest.
     assert not (target_dir / "commands.md").exists()
     assert (target_dir / ".cursor" / "rules" / "general.mdc").exists()
     assert (target_dir / ".cursor" / "rules" / "python.mdc").exists()
-    assert (target_dir / ".cursor" / "commands" / "test.md").exists()
+    assert not (target_dir / ".cursor" / "commands").exists()
     assert "Downloaded: instructions.md" not in result.stdout
     assert "Downloaded: commands.md" not in result.stdout
     assert "Generated: cursor rules" in result.stdout
@@ -1416,10 +1401,10 @@ Python rules.
 
 @patch("llm_ide_rules.commands.download.requests.get")
 @patch("llm_ide_rules.commands.download.zipfile.ZipFile")
-def test_download_exclude_regex_filters_instructions_and_commands(
+def test_download_exclude_regex_filters_instructions(
     mock_zipfile, mock_requests, tmp_path: Path
 ):
-    "test download with --exclude-regex filters instructions and commands"
+    "test download with --exclude-regex filters instructions"
 
     runner = CliRunner()
 
@@ -1447,20 +1432,7 @@ globs: **/*.tsx
 
 React rules.
 """
-        commands = """# Commands
-
-## Deploy
-globs: manual
-
-Deploy command.
-
-## Test Runner
-globs: manual
-
-Test runner command.
-"""
         (extracted_dir / "instructions.md").write_text(instructions, encoding="utf-8")
-        (extracted_dir / "commands.md").write_text(commands, encoding="utf-8")
 
     mock_zip_instance.extractall = mock_extractall
 
@@ -1476,29 +1448,19 @@ Test runner command.
             "--target",
             str(target_dir),
             "--exclude-regex",
-            "React|Deploy",
+            "React",
         ],
     )
 
     assert result.exit_code == 0
 
-    # verify instructions.md content
     instructions_content = (target_dir / "instructions.md").read_text(encoding="utf-8")
     assert "## Python" in instructions_content
     assert "## React" not in instructions_content
+    assert not (target_dir / "commands.md").exists()
 
-    # verify commands.md content
-    commands_content = (target_dir / "commands.md").read_text(encoding="utf-8")
-    assert "## Test Runner" in commands_content
-    assert "## Deploy" not in commands_content
-
-    # verify exploded cursor rules
     assert (target_dir / ".cursor" / "rules" / "python.mdc").exists()
     assert not (target_dir / ".cursor" / "rules" / "react.mdc").exists()
-
-    # verify exploded cursor commands
-    assert (target_dir / ".cursor" / "commands" / "test-runner.md").exists()
-    assert not (target_dir / ".cursor" / "commands" / "deploy.md").exists()
 
     # verify AGENTS.md
     agents_content = (target_dir / "AGENTS.md").read_text(encoding="utf-8")
@@ -1568,10 +1530,10 @@ React rules.
 
 @patch("llm_ide_rules.commands.download.requests.get")
 @patch("llm_ide_rules.commands.download.zipfile.ZipFile")
-def test_download_exclude_regex_skips_preexploded_files_and_skills(
+def test_download_exclude_regex_skips_preexploded_files(
     mock_zipfile, mock_requests, tmp_path: Path
 ):
-    "test download with --exclude-regex skips pre-exploded files and skill subdirectories"
+    "test download with --exclude-regex skips pre-exploded rule files"
 
     runner = CliRunner()
 
@@ -1644,7 +1606,6 @@ Deploy command.
     assert result.exit_code == 0
     assert (target_dir / ".cursor" / "rules" / "python.mdc").exists()
     assert not (target_dir / ".cursor" / "rules" / "react.mdc").exists()
-    assert not (target_dir / ".cursor" / "commands" / "deploy.md").exists()
-    assert (target_dir / ".agents" / "skills" / "python" / "SKILL.md").exists()
-    assert not (target_dir / ".agents" / "skills" / "react" / "SKILL.md").exists()
-    assert not (target_dir / ".agents" / "skills" / "react").exists()
+    assert not (target_dir / ".cursor" / "commands").exists()
+    assert not (target_dir / ".agents" / "skills").exists()
+    assert not (target_dir / "commands.md").exists()

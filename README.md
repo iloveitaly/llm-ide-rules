@@ -15,21 +15,18 @@ Some of the glob assumptions in this repo are specific to how I've chosen to org
 
 ## IDE Format Comparison
 
-Different AI coding assistants use different formats for instructions and commands:
+Different AI coding assistants use different formats for instructions:
 
-| IDE | type | folder | Notes |
-|-----|------|--------|-------|
-| **Cursor** | instructions | `.cursor/rules/*.mdc` | Multiple plain markdown files |
-| **Cursor** | commands | `.cursor/commands/*.md` | Plain markdown, no frontmatter |
-| **Claude Code** | instructions | `.claude/rules/**/*.md` | Markdown rules, optional `paths:` frontmatter |
-| **Claude Code** | commands | `.claude/commands/*.md` | Plain markdown, no frontmatter |
-| **GitHub Copilot** | instructions | `.github/copilot-instructions.md` | Single markdown file |
-| **GitHub Copilot** | instructions | `.github/instructions/*.instructions.md` | Multiple instruction files |
-| **GitHub Copilot** | prompts | `.github/prompts/*.prompt.md` | YAML frontmatter with `mode: 'agent'` |
-| **OpenCode** | instructions | `AGENTS.md` | Single markdown file at root |
-| **OpenCode** | commands | `.opencode/commands/*.md` | Plain markdown, no frontmatter |
-| **Codex** | instructions | `AGENTS.md` | Root and nested markdown files |
-| **Codex** | commands | `.agents/skills/*/SKILL.md` | YAML frontmatter with `name` and `description` |
+| IDE | folder | Notes |
+|-----|--------|-------|
+| **Cursor** | `.cursor/rules/*.mdc` | Multiple plain markdown files |
+| **Claude Code** | `.claude/rules/**/*.md` | Markdown rules, optional `paths:` frontmatter |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | Single markdown file |
+| **GitHub Copilot** | `.github/instructions/*.instructions.md` | Multiple instruction files |
+| **OpenCode** | `AGENTS.md` | Single markdown file at root |
+| **Codex** | `AGENTS.md` | Root and nested markdown files |
+| **Antigravity** | `AGENTS.md` | Root and nested markdown files |
+| **Grok** | `.agents/rules/*.md` | Markdown rules with YAML frontmatter |
 
 ## Installation
 
@@ -61,17 +58,17 @@ uvx llm-ide-rules explode cursor --input path.md
 # Bundle rule files back into a single instruction file
 uvx llm-ide-rules implode cursor [output_file]     # Bundle Cursor rules
 uvx llm-ide-rules implode github [output_file]     # Bundle GitHub/Copilot instructions
-uvx llm-ide-rules implode claude [output_file]     # Bundle Claude Code rules + commands
-uvx llm-ide-rules implode opencode [output_file]   # Bundle OpenCode commands
-uvx llm-ide-rules implode codex [output_file]      # Bundle Codex skills + AGENTS.md
+uvx llm-ide-rules implode claude [output_file]     # Bundle Claude Code rules
+uvx llm-ide-rules implode opencode [output_file]   # Bundle OpenCode AGENTS.md
+uvx llm-ide-rules implode codex [output_file]      # Bundle Codex AGENTS.md
 
-# Download instructions.md/commands.md, then explode for the given agents.
+# Download instructions.md, then explode for the given agents.
 # Defaults to already-exploded agents on disk, then the current runtime, then all.
 uvx llm-ide-rules download [agents...]
 uvx llm-ide-rules download cursor github
 uvx llm-ide-rules download cursor,github
 uvx llm-ide-rules download --repo other/repo
-uvx llm-ide-rules download --inline               # Explode without saving instructions.md or commands.md
+uvx llm-ide-rules download --inline               # Explode without saving instructions.md
 
 # Delete exploded agent files
 uvx llm-ide-rules delete [agents...]              # Delete everything by default
@@ -136,10 +133,10 @@ uvx llm-ide-rules implode cursor bundled-instructions.md
 # Bundle GitHub instructions with verbose logging
 uvx llm-ide-rules implode github --verbose instructions.md
 
-# Bundle OpenCode commands into commands.md
+# Bundle OpenCode AGENTS.md into instructions.md
 uvx llm-ide-rules implode opencode
 
-# Bundle Codex skills into commands.md and AGENTS.md into instructions.md
+# Bundle Codex AGENTS.md into instructions.md
 uvx llm-ide-rules implode codex
 
 # Download everything from default repository
@@ -152,7 +149,7 @@ uvx llm-ide-rules download cursor,github
 # Download from a different repository
 uvx llm-ide-rules download --repo other-user/other-repo --target ./my-project
 
-# Download and explode directly without saving instructions.md or commands.md
+# Download and explode directly without saving instructions.md
 uvx llm-ide-rules download --inline
 
 # Delete all downloaded files (with confirmation)

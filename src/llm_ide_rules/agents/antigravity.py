@@ -8,8 +8,8 @@ from llm_ide_rules.agents.dotagents import DotAgentsBaseAgent
 class AntigravityAgent(DotAgentsBaseAgent):
     """Agent for Antigravity CLI.
 
-    Antigravity reads standing project rules from AGENTS.md and skills from
-    `.agents/skills`. It does not load `.agents/rules`.
+    Antigravity reads standing project rules from AGENTS.md. It does not load
+    `.agents/rules`.
     """
 
     name = "antigravity"

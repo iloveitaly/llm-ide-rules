@@ -12,9 +12,7 @@ class BaseAgent(ABC):
 
     name: str
     rules_dir: str | None = None
-    commands_dir: str | None = None
     rule_extension: str | None = None
-    command_extension: str | None = None
 
     @abstractmethod
     def bundle_rules(
@@ -27,13 +25,6 @@ class BaseAgent(ABC):
         ...
 
     @abstractmethod
-    def bundle_commands(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
-    ) -> bool:
-        "bundle command files into a single output file"
-        ...
-
-    @abstractmethod
     def write_rule(
         self,
         content_lines: list[str],
@@ -43,17 +34,6 @@ class BaseAgent(ABC):
         description: str | None = None,
     ) -> None:
         "write a single rule file"
-        ...
-
-    @abstractmethod
-    def write_command(
-        self,
-        content_lines: list[str],
-        filename: str,
-        commands_dir: Path,
-        section_name: str | None = None,
-    ) -> None:
-        "write a single command file"
         ...
 
     def detect(self, base_dir: Path) -> bool:
@@ -74,7 +54,6 @@ class BaseAgent(ABC):
         self,
         general_lines: list[str],
         rules_sections: dict[str, list[str]],
-        command_sections: dict[str, list[str]],
         output_dir: Path,
         section_globs: dict[str, str | None] | None = None,
         filename: str = "AGENTS.md",
@@ -114,13 +93,6 @@ class BaseAgent(ABC):
         if not self.rules_dir:
             raise NotImplementedError(f"{self.name} does not support rules")
         return base_dir / self.rules_dir
-
-    def get_commands_path(self, base_dir: Path) -> Path:
-        "get the full path to the commands directory"
-
-        if not self.commands_dir:
-            raise NotImplementedError(f"{self.name} does not support commands")
-        return base_dir / self.commands_dir
 
     def _write_bundled_content(self, output_file: Path, content: str) -> None:
         "write bundled content to output file, preserving custom instructions after marker"
@@ -191,11 +163,11 @@ def strip_header(text: str) -> str:
 
 
 def _file_sort_key(p: Path) -> str:
-    return p.parent.name if p.name == "SKILL.md" else p.name
+    return p.name
 
 
 def _file_stem_key(p: Path) -> str:
-    return p.parent.name if p.name == "SKILL.md" else p.stem
+    return p.stem
 
 
 def get_ordered_files(

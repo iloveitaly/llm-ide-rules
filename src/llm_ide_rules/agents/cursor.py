@@ -4,12 +4,10 @@ from pathlib import Path
 
 from llm_ide_rules.agents.base import (
     BaseAgent,
-    extract_description_and_filter_content,
     get_ordered_files,
     resolve_header_from_stem,
     strip_header,
     strip_yaml_frontmatter,
-    trim_content,
     write_rule_file,
 )
 
@@ -19,9 +17,7 @@ class CursorAgent(BaseAgent):
 
     name = "cursor"
     rules_dir = ".cursor/rules"
-    commands_dir = ".cursor/commands"
     rule_extension = ".mdc"
-    command_extension = ".md"
 
     def bundle_rules(
         self,
@@ -107,53 +103,6 @@ class CursorAgent(BaseAgent):
 
         return None
 
-    def bundle_commands(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
-    ) -> bool:
-        "bundle Cursor command files (.md) into a single output file"
-
-        commands_dir = self.commands_dir
-        if not commands_dir:
-            return False
-
-        commands_path = output_file.parent / commands_dir
-        if not commands_path.exists():
-            return False
-
-        command_ext = self.command_extension
-        if not command_ext:
-            return False
-
-        command_files = list(commands_path.glob(f"*{command_ext}"))
-        if not command_files:
-            return False
-
-        ordered_commands = get_ordered_files(
-            command_files, list(section_globs.keys()) if section_globs else None
-        )
-
-        content_parts: list[str] = []
-        for command_file in ordered_commands:
-            content = command_file.read_text().strip()
-            if not content:
-                continue
-
-            content = strip_yaml_frontmatter(content)
-            content = strip_header(content)
-
-            header = resolve_header_from_stem(
-                command_file.stem, section_globs if section_globs else {}
-            )
-            content_parts.append(f"## {header}\n\n")
-            content_parts.append(content)
-            content_parts.append("\n\n")
-
-        if not content_parts:
-            return False
-
-        self._write_bundled_content(output_file, "".join(content_parts))
-        return True
-
     def write_rule(
         self,
         content_lines: list[str],
@@ -191,45 +140,6 @@ alwaysApply: true
 ---
 """
         write_rule_file(filepath, header_yaml, content_lines)
-
-    def write_command(
-        self,
-        content_lines: list[str],
-        filename: str,
-        commands_dir: Path,
-        section_name: str | None = None,
-    ) -> None:
-        "write a Cursor command file (.md) - plain markdown, no frontmatter"
-
-        extension = self.command_extension or ".md"
-        filepath = commands_dir / f"{filename}{extension}"
-
-        trimmed = trim_content(content_lines)
-        filepath.parent.mkdir(parents=True, exist_ok=True)
-        filepath.write_text("".join(trimmed))
-
-    def write_prompt(
-        self,
-        content_lines: list[str],
-        filename: str,
-        prompts_dir: Path,
-        section_name: str | None = None,
-    ) -> None:
-        "write a Cursor prompt file (.mdc) with optional frontmatter"
-
-        extension = self.rule_extension or ".mdc"
-        filepath = prompts_dir / f"{filename}{extension}"
-
-        description, filtered_content = extract_description_and_filter_content(
-            content_lines, ""
-        )
-
-        output_parts: list[str] = []
-        if description:
-            output_parts.append(f"---\ndescription: {description}\n---\n")
-
-        output_parts.extend(filtered_content)
-        filepath.write_text("".join(output_parts))
 
     def configure_agents_md(self, base_dir: Path) -> bool:
         "cursor doesn't require explicit configuration for AGENTS.md"

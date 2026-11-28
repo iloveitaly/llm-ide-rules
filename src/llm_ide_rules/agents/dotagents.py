@@ -18,9 +18,7 @@ class DotAgentsBaseAgent(BaseAgent):
     "base agent for tools using the .agents specification"
 
     rules_dir = ".agents/rules"
-    commands_dir = ".agents/skills"
     rule_extension = ".md"
-    command_extension = "/SKILL.md"
 
     def bundle_rules(
         self,
@@ -165,85 +163,6 @@ class DotAgentsBaseAgent(BaseAgent):
 
         return description, glob_pattern, always_apply
 
-    def bundle_commands(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
-    ) -> bool:
-        "bundle .agents skill files (SKILL.md) into a single output file"
-
-        commands_dir = self.commands_dir
-        if not commands_dir:
-            return False
-
-        commands_path = output_file.parent / commands_dir
-        if not commands_path.exists():
-            return False
-
-        skill_files = list(commands_path.glob("**/SKILL.md"))
-        if not skill_files:
-            return False
-
-        # order by parent directory name (which is the skill/stem name)
-        ordered_skills = get_ordered_files(
-            skill_files, list(section_globs.keys()) if section_globs else None
-        )
-
-        content_parts: list[str] = []
-        for skill_file in ordered_skills:
-            file_content = skill_file.read_text().strip()
-            if not file_content:
-                continue
-
-            lines = file_content.splitlines()
-            desc = extract_frontmatter_description(lines)
-
-            content = strip_yaml_frontmatter(file_content)
-
-            content_lines = content.splitlines()
-            if content_lines and content_lines[0].startswith("# "):
-                header_name = content_lines[0][2:].strip()
-                content_lines[0] = f"## {header_name}"
-            else:
-                header_name = resolve_header_from_stem(
-                    skill_file.parent.name, section_globs if section_globs else {}
-                )
-                content_parts.append(f"## {header_name}\n\n")
-
-            content = "\n".join(content_lines)
-
-            if desc and f"Description: {desc}" not in content:
-                stem_title = resolve_header_from_stem(
-                    skill_file.parent.name, section_globs if section_globs else {}
-                )
-                if desc.strip().lower() not in (
-                    header_name.strip().lower(),
-                    stem_title.strip().lower(),
-                ):
-                    lines = content.splitlines()
-                    if lines and lines[0].startswith("## "):
-                        lines.insert(1, f"Description: {desc}")
-                        lines.insert(2, "")
-                        content = "\n".join(lines)
-
-            # collapse consecutive empty lines in content
-            content_lines = content.splitlines()
-            cleaned_lines = []
-            for line in content_lines:
-                if not line.strip():
-                    if cleaned_lines and cleaned_lines[-1].strip():
-                        cleaned_lines.append("")
-                else:
-                    cleaned_lines.append(line)
-            content = "\n".join(cleaned_lines)
-
-            content_parts.append(content)
-            content_parts.append("\n\n")
-
-        if not content_parts:
-            return False
-
-        self._write_bundled_content(output_file, "".join(content_parts))
-        return True
-
     def write_rule(
         self,
         content_lines: list[str],
@@ -276,49 +195,6 @@ class DotAgentsBaseAgent(BaseAgent):
         frontmatter = f"---\ndescription: {desc}\nglobs: {globs_str}\nalwaysApply: {always_apply}\n---\n\n"
 
         trimmed = trim_content(filtered_content)
-        filepath.parent.mkdir(parents=True, exist_ok=True)
-        filepath.write_text(frontmatter + "".join(trimmed))
-
-    def write_command(
-        self,
-        content_lines: list[str],
-        filename: str,
-        commands_dir: Path,
-        section_name: str | None = None,
-    ) -> None:
-        "write a .agents skill file (.agents/skills/<filename>/SKILL.md) with YAML frontmatter"
-
-        filepath = commands_dir / filename / "SKILL.md"
-
-        desc, filtered_content = extract_description_and_filter_content(
-            content_lines, ""
-        )
-
-        # find the header
-        header = None
-        for line in content_lines:
-            if line.startswith("## "):
-                header = line[3:].strip()
-                break
-
-        if not header:
-            header = section_name or filename.replace("-", " ").title()
-
-        # replace first ## header with # header
-        final_content = []
-        found_header = False
-        for line in filtered_content:
-            if not found_header and line.startswith("## "):
-                found_header = True
-                final_content.append(f"# {header}\n")
-                continue
-            final_content.append(line)
-
-        # agents reject skill files that omit description, including when it is empty
-        description_value = f" {desc}" if desc else ""
-        frontmatter = f"---\nname: {filename}\ndescription:{description_value}\n---\n\n"
-
-        trimmed = trim_content(final_content)
         filepath.parent.mkdir(parents=True, exist_ok=True)
         filepath.write_text(frontmatter + "".join(trimmed))
 

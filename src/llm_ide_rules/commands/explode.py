@@ -11,7 +11,6 @@ from llm_ide_rules.agents.base import (
     replace_header_with_proper_casing,
 )
 from llm_ide_rules.constants import (
-    COMMANDS_MARKER,
     DOTAGENTS_LAYOUT_CLIENTS,
     EXPLODE_AGENTS,
     INSTRUCTIONS_MARKER,
@@ -23,29 +22,6 @@ from llm_ide_rules.constants import (
 from llm_ide_rules.detect import describe_resolved_agents, resolve_target_agents
 from llm_ide_rules.log import log
 from llm_ide_rules.markdown_parser import parse_sections
-
-
-def process_command_section(
-    section_name: str,
-    section_content: list[str],
-    agents: list[BaseAgent],
-    dirs: dict[str, Path],
-) -> bool:
-    "process a section as a command for all agents"
-
-    if not any(line.strip() for line in section_content):
-        return False
-
-    filename = header_to_filename(section_name)
-    section_content = replace_header_with_proper_casing(section_content, section_name)
-
-    for agent in agents:
-        if agent.commands_dir:
-            agent.write_command(
-                section_content, filename, dirs[agent.name], section_name
-            )
-
-    return True
 
 
 def process_unmapped_as_always_apply(
@@ -142,8 +118,6 @@ def explode_implementation(
         agent_dir_map = {}
         if current_agent.rules_dir:
             agent_dir_map["rules"] = working_dir / current_agent.rules_dir
-        if current_agent.commands_dir:
-            agent_dir_map["commands"] = working_dir / current_agent.commands_dir
 
         agent_dirs[agent_name] = agent_dir_map
 
@@ -167,24 +141,6 @@ def explode_implementation(
         error_msg = f"Input file not found: {input_path}"
         typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
         raise typer.Exit(1) from e
-
-    commands_path = input_path.parent / "commands.md"
-    commands_text = ""
-    if commands_path.exists():
-        commands_text = commands_path.read_text()
-        log.info("found commands file", commands_file=commands_path)
-
-        # also strip marker for commands.md
-        commands_marker = COMMANDS_MARKER
-        if commands_marker in commands_text:
-            log.info(
-                "ignoring content after marker in commands file",
-                marker=commands_marker,
-            )
-            commands_text = commands_text.split(commands_marker, 1)[0]
-        elif marker in commands_text:
-            log.info("ignoring content after marker in commands file", marker=marker)
-            commands_text = commands_text.split(marker, 1)[0]
 
     # parse instructions
     general, instruction_sections = parse_sections(input_text)
@@ -259,35 +215,6 @@ def explode_implementation(
                     description=section_name,
                 )
 
-    # process commands for all agents
-    command_sections_data = {}
-    command_sections = {}
-    commands_count = 0
-    if commands_text:
-        _, command_sections_data = parse_sections(commands_text)
-
-        # calculate commands count
-        for section_data in command_sections_data.values():
-            if any(line.strip() for line in section_data.content):
-                commands_count += 1
-
-        agents_with_commands = [
-            agent_instances[name]
-            for name in agents_to_process
-            if agent_instances[name].commands_dir
-        ]
-        command_dirs = {
-            name: agent_dirs[name]["commands"]
-            for name in agents_to_process
-            if "commands" in agent_dirs[name]
-        }
-
-        for section_name, section_data in command_sections_data.items():
-            command_sections[section_name] = section_data.content
-            process_command_section(
-                section_name, section_data.content, agents_with_commands, command_dirs
-            )
-
     # generate root documentation for agents that support it
     for agent_name, agent_inst in agent_instances.items():
         # special case for 'agents' adapter to use custom filename
@@ -295,7 +222,6 @@ def explode_implementation(
             agent_inst.generate_root_doc(
                 general,
                 rules_sections,
-                command_sections,
                 working_dir,
                 section_globs=section_globs,
                 filename=agents_filename,
@@ -304,20 +230,13 @@ def explode_implementation(
             agent_inst.generate_root_doc(
                 general,
                 rules_sections,
-                command_sections,
                 working_dir,
                 section_globs=section_globs,
             )
 
-    # build log message and user output based on processed agents
-    log_data: dict[str, object] = {"agent": requested_agents}
     created_dirs = []
 
     for agent_name in agents_to_process:
-        if "rules" in agent_dirs[agent_name]:
-            log_data[f"{agent_name}_rules"] = agent_dirs[agent_name]["rules"]
-        if "commands" in agent_dirs[agent_name]:
-            log_data[f"{agent_name}_commands"] = agent_dirs[agent_name]["commands"]
         if agent_dirs[agent_name]:
             dir_name = (
                 ".agents/"
@@ -329,21 +248,13 @@ def explode_implementation(
 
     created_dirs = list(dict.fromkeys(created_dirs))
 
-    # build summary message
-    parts = []
-    if rules_count > 0:
-        rules_word = "rule" if rules_count == 1 else "rules"
-        parts.append(f"{rules_count} {rules_word}")
-    if commands_count > 0:
-        commands_word = "command" if commands_count == 1 else "commands"
-        parts.append(f"{commands_count} {commands_word}")
-
-    if not parts:
+    if rules_count == 0:
         success_msg = "Created root documentation files"
         typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
         return
 
-    counts_msg = "Created " + " and ".join(parts)
+    rules_word = "rule" if rules_count == 1 else "rules"
+    counts_msg = f"Created {rules_count} {rules_word}"
 
     if not created_dirs:
         success_msg = f"{counts_msg} in root documentation files"

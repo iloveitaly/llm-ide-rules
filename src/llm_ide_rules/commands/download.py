@@ -55,41 +55,42 @@ def normalize_repo(repo: str) -> str:
 
 
 # define what files/directories each instruction type includes
-# for explode-supported agents, download source files (instructions.md, commands.md) and generate locally
+# for explode-supported agents, download instructions.md and generate locally
 # directories listed here are created by explode and removed by delete
+# clients whose standing rules live in AGENTS.md have no directories of their own
 INSTRUCTION_TYPES = {
     "cursor": {
-        "directories": [".cursor/rules", ".cursor/commands"],
+        "directories": [".cursor/rules"],
         "files": [],
         "include_patterns": [],
     },
     "github": {
-        "directories": [".github/instructions", ".github/prompts"],
+        "directories": [".github/instructions"],
         "files": [".github/copilot-instructions.md"],
         "include_patterns": [],
     },
     "claude": {
-        "directories": [".claude/rules", ".claude/commands"],
+        "directories": [".claude/rules"],
         "files": [],
         "include_patterns": [],
     },
     "antigravity": {
-        "directories": [".agents/skills"],
+        "directories": [],
         "files": [],
         "include_patterns": [],
     },
     "grok": {
-        "directories": [".agents/rules", ".agents/skills"],
+        "directories": [".agents/rules"],
         "files": [],
         "include_patterns": [],
     },
     "opencode": {
-        "directories": [".opencode/commands"],
+        "directories": [],
         "files": [],
         "include_patterns": [],
     },
     "codex": {
-        "directories": [".agents/skills"],
+        "directories": [],
         "files": [],
         "include_patterns": [],
     },
@@ -381,7 +382,7 @@ def download_main(
         bool,
         typer.Option(
             "--inline",
-            help="Explode instruction files directly without persisting instructions.md or commands.md to disk.",
+            help="Explode instruction files directly without persisting instructions.md to disk.",
         ),
     ] = False,
 ):
@@ -422,7 +423,7 @@ def download_main(
     llm_ide_rules download --exclude-regex "Python|React"
 
     \b
-    # Explode directly without saving instructions.md or commands.md to disk
+    # Explode directly without saving instructions.md to disk
     llm_ide_rules download --inline
     """
     target_path = Path(target_dir).resolve()
@@ -496,17 +497,6 @@ def download_main(
         )
         omitted_filenames.update(header_to_filename(h) for h in omitted_headers)
 
-    commands_src = repo_dir / "commands.md"
-    if exclude_regex_pattern and commands_src.exists():
-        from llm_ide_rules.constants import header_to_filename
-        from llm_ide_rules.markdown_parser import filter_markdown_by_globs
-
-        _, omitted_cmd_headers = filter_markdown_by_globs(
-            commands_src.read_text(encoding="utf-8"),
-            exclude_regex=exclude_regex_pattern,
-        )
-        omitted_filenames.update(header_to_filename(h) for h in omitted_cmd_headers)
-
     staging_dir: Path | None = None
 
     try:
@@ -521,9 +511,7 @@ def download_main(
             )
         ]
 
-        # check for source files (instructions.md, commands.md) and copy or stage them
-        # needed for explode logic
-        source_files = ["instructions.md", "commands.md"]
+        # instructions.md is the explode source; stage it when --inline
         sources_copied = False
 
         # only copy source files if we have at least one agent that uses explode
@@ -533,12 +521,10 @@ def download_main(
             staging_dir = Path(tempfile.mkdtemp())
 
         if has_explode_agent:
-            for source_file in source_files:
-                src = repo_dir / source_file
-                dst = target_path / source_file
-                if not src.exists():
-                    continue
-
+            source_file = "instructions.md"
+            src = repo_dir / source_file
+            dst = target_path / source_file
+            if src.exists():
                 if inline:
                     log.info(
                         "staging source file in temporary directory",
@@ -553,9 +539,7 @@ def download_main(
                     local_content = dst.read_text(encoding="utf-8")
 
                 remote_content = src.read_text(encoding="utf-8")
-                if (
-                    exclude_glob_list or include_glob_list or exclude_regex_pattern
-                ) and source_file == "instructions.md":
+                if exclude_glob_list or include_glob_list or exclude_regex_pattern:
                     from llm_ide_rules.markdown_parser import (
                         filter_markdown_by_globs,
                     )
@@ -569,21 +553,6 @@ def download_main(
                     if omitted_headers:
                         log.info(
                             "omitted sections matching glob filters",
-                            source_file=source_file,
-                            omitted=omitted_headers,
-                        )
-                elif exclude_regex_pattern and source_file == "commands.md":
-                    from llm_ide_rules.markdown_parser import (
-                        filter_markdown_by_globs,
-                    )
-
-                    remote_content, omitted_headers = filter_markdown_by_globs(
-                        remote_content,
-                        exclude_regex=exclude_regex_pattern,
-                    )
-                    if omitted_headers:
-                        log.info(
-                            "omitted sections matching regex filter",
                             source_file=source_file,
                             omitted=omitted_headers,
                         )
@@ -605,22 +574,13 @@ def download_main(
             for filename in omitted_filenames:
                 stale_paths = [
                     target_path / f".cursor/rules/{filename}.mdc",
-                    target_path / f".cursor/commands/{filename}.md",
                     target_path / f".claude/rules/{filename}.md",
-                    target_path / f".claude/commands/{filename}.md",
                     target_path / f".agents/rules/{filename}.md",
-                    target_path / f".agents/skills/{filename}/SKILL.md",
                     target_path / f".github/instructions/{filename}.instructions.md",
-                    target_path / f".github/prompts/{filename}.prompt.md",
-                    target_path / f".opencode/commands/{filename}.md",
                 ]
                 for stale in stale_paths:
                     if stale.is_file():
                         stale.unlink()
-                    if stale.parent.name == filename and stale.parent.is_dir():
-                        import shutil
-
-                        shutil.rmtree(stale.parent, ignore_errors=True)
 
         # generate rule files locally for supported agents
         explodable_agents = [t for t in instruction_types if t in VALID_AGENTS]

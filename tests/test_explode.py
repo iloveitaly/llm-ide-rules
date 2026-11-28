@@ -69,111 +69,6 @@ Here are React rules for frontend development.
         assert "description: Python" in content
 
 
-def test_explode_with_commands_file():
-    """Test explode with separate commands.md file."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        instructions_content = """# Sample Instructions
-
-## Python
-
-Here are Python rules for development.
-"""
-        Path("instructions.md").write_text(instructions_content)
-
-        commands_content = """## Fix Tests
-
-Description: Fix failing tests
-
-Here are instructions to fix tests.
-
-## Plan Only
-
-Description: Plan without executing
-
-Here are instructions to plan only.
-"""
-        Path("commands.md").write_text(commands_content)
-
-        result = runner.invoke(app, ["explode", "cursor"])
-
-        assert result.exit_code == 0
-
-        assert Path(".cursor/rules/python.mdc").exists()
-
-        assert Path(".cursor/commands/fix-tests.md").exists()
-        assert Path(".cursor/commands/plan-only.md").exists()
-
-        # Other agents should not have been created because we specified cursor
-        assert not Path(".claude/commands/fix-tests.md").exists()
-        assert not Path(".github/prompts/fix-tests.prompt.md").exists()
-
-
-def test_explode_commands_without_description_omits_frontmatter_description():
-    """Test explode with commands with and without explicit Description: line."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        Path("instructions.md").write_text("## General\nGeneral instructions\n")
-        Path("commands.md").write_text(
-            """## With Desc
-
-Description: Explicit description
-
-Instructions with description.
-
-## No Desc
-
-Instructions without explicit description.
-"""
-        )
-
-        result = runner.invoke(
-            app, ["explode", "antigravity", "claude", "opencode", "github"]
-        )
-        assert result.exit_code == 0
-
-        # Antigravity (.agents/skills)
-        ag_with = Path(".agents/skills/with-desc/SKILL.md").read_text()
-        assert "name: with-desc" in ag_with
-        assert "description: Explicit description" in ag_with
-
-        ag_no = Path(".agents/skills/no-desc/SKILL.md").read_text()
-        assert "name: no-desc" in ag_no
-        assert "description:" in ag_no
-
-        # Claude (.claude/commands)
-        claude_with = Path(".claude/commands/with-desc.md").read_text()
-        assert "description: Explicit description" in claude_with
-
-        claude_no = Path(".claude/commands/no-desc.md").read_text()
-        assert "---" not in claude_no
-        assert "description:" not in claude_no
-        assert "Instructions without explicit description." in claude_no
-
-        # OpenCode (.opencode/commands)
-        opencode_with = Path(".opencode/commands/with-desc.md").read_text()
-        assert "description: Explicit description" in opencode_with
-
-        opencode_no = Path(".opencode/commands/no-desc.md").read_text()
-        assert "---" not in opencode_no
-        assert "description:" not in opencode_no
-
-        # GitHub (.github/prompts)
-        gh_with = Path(".github/prompts/with-desc.prompt.md").read_text()
-        assert "mode: 'agent'" in gh_with
-        assert "description: 'Explicit description'" in gh_with
-
-        gh_no = Path(".github/prompts/no-desc.prompt.md").read_text()
-        assert "mode: 'agent'" in gh_no
-        assert "description:" not in gh_no
-
-
 def test_explode_space_separated_agents():
     runner = CliRunner()
 
@@ -585,33 +480,16 @@ This should be ignored.
 """
         Path("instructions.md").write_text(instructions_content)
 
-        commands_content = """## Remote Command
-This is a remote command.
-
-<!-- END CLONED INSTRUCTIONS -->
-
-## Local Command
-This should be ignored.
-"""
-        Path("commands.md").write_text(commands_content)
-
         result = runner.invoke(app, ["explode", "cursor"])
 
         assert result.exit_code == 0
 
-        # Verify rule from instructions.md
         assert Path(".cursor/rules/python.mdc").exists()
         python_content = Path(".cursor/rules/python.mdc").read_text()
         assert "Here are Python rules." in python_content
         assert "Custom Local Section" not in python_content
         assert "This should be ignored." not in python_content
-
-        # Verify command from commands.md
-        assert Path(".cursor/commands/remote-command.md").exists()
-        assert not Path(".cursor/commands/local-command.md").exists()
-        remote_command_content = Path(".cursor/commands/remote-command.md").read_text()
-        assert "This is a remote command." in remote_command_content
-        assert "Local Command" not in remote_command_content
+        assert not Path(".cursor/commands").exists()
 
 
 def test_explode_infers_already_exploded_agents():

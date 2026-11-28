@@ -29,7 +29,7 @@ def test_integration_full_lifecycle(monkeypatch):
 
         # Verify basic download & explode
         assert Path("instructions.md").exists()
-        assert Path("commands.md").exists()
+        assert not Path("commands.md").exists()
         assert Path(".cursor/rules/python.mdc").exists()
         assert Path("AGENTS.md").exists()
 
@@ -52,9 +52,9 @@ def test_integration_full_lifecycle(monkeypatch):
             print("EXPLODE EXCEPTION:", explode_result.exception)
         assert explode_result.exit_code == 0
 
-        # Verify explode recreated files
+        # disk detection only sees vendor rule dirs that survived safe delete
         assert Path(".cursor/rules/python.mdc").exists()
-        assert Path("AGENTS.md").exists()
+        assert not Path("AGENTS.md").exists()
 
         # 4. Implode
         # Implode requires an agent subcommand, we will use 'cursor'

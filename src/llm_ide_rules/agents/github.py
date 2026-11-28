@@ -4,15 +4,12 @@ from pathlib import Path
 
 from llm_ide_rules.agents.base import (
     BaseAgent,
-    extract_description_and_filter_content,
-    extract_frontmatter_description,
     get_ordered_files_github,
     resolve_header_from_stem,
     strip_header,
     strip_yaml_frontmatter,
     write_rule_file,
 )
-from llm_ide_rules.constants import header_to_filename
 
 
 class GitHubAgent(BaseAgent):
@@ -20,9 +17,7 @@ class GitHubAgent(BaseAgent):
 
     name = "github"
     rules_dir = ".github/instructions"
-    commands_dir = ".github/prompts"
     rule_extension = ".instructions.md"
-    command_extension = ".prompt.md"
 
     def bundle_rules(
         self,
@@ -97,76 +92,6 @@ class GitHubAgent(BaseAgent):
 
         return None
 
-    def bundle_commands(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
-    ) -> bool:
-        "bundle GitHub prompt files into a single output file"
-
-        commands_dir = self.commands_dir
-        if not commands_dir:
-            return False
-
-        prompts_path = output_file.parent / commands_dir
-        if not prompts_path.exists():
-            return False
-
-        command_ext = self.command_extension
-        if not command_ext:
-            return False
-
-        prompt_files = list(prompts_path.glob(f"*{command_ext}"))
-        if not prompt_files:
-            return False
-
-        prompt_dict = {}
-        for f in prompt_files:
-            base_stem = f.stem.replace(".prompt", "")
-            prompt_dict[base_stem] = f
-
-        ordered_prompts = []
-        if section_globs:
-            for section_name in section_globs:
-                filename = header_to_filename(section_name)
-                if filename in prompt_dict:
-                    ordered_prompts.append(prompt_dict[filename])
-                    del prompt_dict[filename]
-
-        remaining_prompts = sorted(prompt_dict.values(), key=lambda p: p.name)
-        ordered_prompts.extend(remaining_prompts)
-
-        content_parts: list[str] = []
-        for prompt_file in ordered_prompts:
-            file_content = prompt_file.read_text().strip()
-            if not file_content:
-                continue
-
-            desc = extract_frontmatter_description(file_content.splitlines())
-            content = strip_yaml_frontmatter(file_content)
-            content = strip_header(content)
-            base_stem = prompt_file.stem.replace(".prompt", "")
-            header = resolve_header_from_stem(
-                base_stem, section_globs if section_globs else {}
-            )
-            content_parts.append(f"## {header}\n\n")
-
-            stem_title = resolve_header_from_stem(
-                base_stem, section_globs if section_globs else {}
-            )
-            if desc and desc.strip().lower() not in (
-                header.strip().lower(),
-                stem_title.strip().lower(),
-            ):
-                content_parts.append(f"Description: {desc}\n\n")
-
-            content_parts.append(content)
-            content_parts.append("\n\n")
-
-        if not content_parts:
-            return False
-
-        self._write_bundled_content(output_file, "".join(content_parts))
-        return True
-
     def write_rule(
         self,
         content_lines: list[str],
@@ -189,29 +114,6 @@ applyTo: "{glob_pattern}"
             header_yaml = ""
 
         write_rule_file(filepath, header_yaml, content_lines)
-
-    def write_command(
-        self,
-        content_lines: list[str],
-        filename: str,
-        commands_dir: Path,
-        section_name: str | None = None,
-    ) -> None:
-        "write a GitHub prompt file (.prompt.md) with YAML frontmatter"
-
-        extension = self.command_extension or ".prompt.md"
-        filepath = commands_dir / f"{filename}{extension}"
-
-        description, filtered_content = extract_description_and_filter_content(
-            content_lines, ""
-        )
-
-        if description:
-            frontmatter = f"---\nmode: 'agent'\ndescription: '{description}'\n---\n"
-        else:
-            frontmatter = "---\nmode: 'agent'\n---\n"
-        filepath.parent.mkdir(parents=True, exist_ok=True)
-        filepath.write_text(frontmatter + "".join(filtered_content))
 
     def write_general_instructions(
         self, content_lines: list[str], base_dir: Path
@@ -236,8 +138,6 @@ applyTo: "{glob_pattern}"
         "detect if GitHub Copilot is in use in the given directory"
 
         github_dir = base_dir / ".github"
-        return (
-            (github_dir / "copilot-instructions.md").exists()
-            or (github_dir / "instructions").exists()
-            or (github_dir / "prompts").exists()
-        )
+        return (github_dir / "copilot-instructions.md").exists() or (
+            github_dir / "instructions"
+        ).exists()

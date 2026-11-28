@@ -8,8 +8,8 @@ from llm_ide_rules.agents.dotagents import DotAgentsBaseAgent
 class CodexAgent(DotAgentsBaseAgent):
     """Agent for OpenAI Codex.
 
-    Codex reads standing project rules from AGENTS.md and skills from
-    `.agents/skills`. It does not load `.agents/rules`.
+    Codex reads standing project rules from AGENTS.md. It does not load
+    `.agents/rules`.
     """
 
     name = "codex"

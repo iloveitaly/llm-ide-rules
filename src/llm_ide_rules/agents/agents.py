@@ -12,9 +12,7 @@ class AgentsAgent(BaseAgent):
 
     name = "agents"
     rules_dir = None
-    commands_dir = None
     rule_extension = None
-    command_extension = None
 
     def bundle_rules(
         self,
@@ -91,13 +89,6 @@ class AgentsAgent(BaseAgent):
         self._write_bundled_content(output_file, "".join(content_parts))
         return True
 
-    def bundle_commands(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
-    ) -> bool:
-        "agents doesn't support bundling commands"
-
-        return False
-
     def write_rule(
         self,
         content_lines: list[str],
@@ -108,20 +99,10 @@ class AgentsAgent(BaseAgent):
     ) -> None:
         "agents doesn't support writing rules"
 
-    def write_command(
-        self,
-        content_lines: list[str],
-        filename: str,
-        commands_dir: Path,
-        section_name: str | None = None,
-    ) -> None:
-        "agents doesn't support writing commands"
-
     def generate_root_doc(
         self,
         general_lines: list[str],
         rules_sections: dict[str, list[str]],
-        command_sections: dict[str, list[str]],
         output_dir: Path,
         section_globs: dict[str, str | None] | None = None,
         filename: str = "AGENTS.md",
