@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.22.1](https://github.com/iloveitaly/llm-ide-rules/compare/v0.22.0...v0.22.1) (2026-11-28)
+
+
+### Documentation
+
+* add secrets rules and update guidelines ([d913b34](https://github.com/iloveitaly/llm-ide-rules/commit/d913b340b42ee85b2dfafc76fcd536636b73e495))
+* discourage unnecessary toggles in terraform instructions ([ac670af](https://github.com/iloveitaly/llm-ide-rules/commit/ac670af8a8976bc75f9b6ca06a4bf0ecc63dc535))
+* expand terraform guidelines and safety rules ([5e78325](https://github.com/iloveitaly/llm-ide-rules/commit/5e78325d83ec4b947c8338fd904d2f40fdf02798))
+* **terraform:** discourage precautionary toggles ([ab8e58a](https://github.com/iloveitaly/llm-ide-rules/commit/ab8e58ac65bebc3a6c729f9d5a441b110d560280))
+* update developer instructions and guidelines ([58fe010](https://github.com/iloveitaly/llm-ide-rules/commit/58fe0102594aa749a37e1ae86cd79ca3278ff6c4))
+* update rules for justfiles, comments, and migrations ([a46b1bc](https://github.com/iloveitaly/llm-ide-rules/commit/a46b1bc9ee566569354152c8418ed849c235a1e2))
+
 ## [0.22.0](https://github.com/iloveitaly/llm-ide-rules/compare/v0.21.1...v0.22.0) (2026-11-10)
 
 
