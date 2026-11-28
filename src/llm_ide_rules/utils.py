@@ -4,7 +4,7 @@ import re
 from collections.abc import Mapping
 from pathlib import Path
 
-from llm_ide_rules.constants import COMMANDS_MARKER, INSTRUCTIONS_MARKER
+from llm_ide_rules.constants import INSTRUCTIONS_MARKER
 
 
 def modify_json_file(file_path: Path, updates: Mapping[str, object]) -> bool:
@@ -161,22 +161,13 @@ def preserve_custom_content(
     "combine base content with preserved custom content from existing file"
 
     marker = default_marker
-    if default_marker not in existing_content and COMMANDS_MARKER in existing_content:
-        marker = COMMANDS_MARKER
 
     local_custom_content = ""
     if marker in existing_content:
         local_custom_content = existing_content.split(marker, 1)[1]
-    elif default_marker in existing_content:
-        local_custom_content = existing_content.split(default_marker, 1)[1]
 
-    # strip any marker already present in base_content
     if marker in base_content:
         base_content = base_content.split(marker, 1)[0]
-    if default_marker in base_content:
-        base_content = base_content.split(default_marker, 1)[0]
-    if COMMANDS_MARKER in base_content:
-        base_content = base_content.split(COMMANDS_MARKER, 1)[0]
 
     cleaned_base = base_content.rstrip()
     custom_content = local_custom_content.strip()

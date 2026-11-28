@@ -150,54 +150,6 @@ Here are React rules for frontend development.""")
             assert "Here are React rules for frontend development" in content
 
 
-def test_implode_cursor_with_commands():
-    """Test implode cursor with both rules and commands."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        # Create .cursor/rules directory with sample files
-        cursor_rules_dir = Path(".cursor/rules")
-        cursor_rules_dir.mkdir(parents=True)
-
-        with open(cursor_rules_dir / "python.mdc", "w") as f:
-            f.write("""---
-name: Python
----
-
-Python rules.""")
-
-        # Create .cursor/commands directory with sample files
-        cursor_commands_dir = Path(".cursor/commands")
-        cursor_commands_dir.mkdir(parents=True)
-
-        with open(cursor_commands_dir / "fix-tests.md", "w") as f:
-            f.write("Here are instructions to fix tests.")
-
-        # Run implode cursor command
-        result = runner.invoke(app, ["implode", "cursor"])
-
-        # Check command succeeds
-        assert result.exit_code == 0
-
-        # Check that both output files were created
-        assert Path("instructions.md").exists()
-        assert Path("commands.md").exists()
-
-        # Check instructions.md content (rules only)
-        with open("instructions.md") as f:
-            content = f.read()
-            assert "## Python" in content
-            assert "Python rules." in content
-
-        # Check commands.md content (commands only)
-        with open("commands.md") as f:
-            content = f.read()
-            assert "## Fix Tests" in content
-            assert "Here are instructions to fix tests." in content
-
-
 def test_implode_github_basic_functionality():
     """Test basic implode github functionality."""
     runner = CliRunner()
@@ -245,59 +197,6 @@ Here are React instructions for frontend development.""")
             assert "## React" in content
             assert "Here are Python instructions for development" in content
             assert "Here are React instructions for frontend development" in content
-
-
-def test_implode_github_with_prompts():
-    """Test implode github with both instructions and prompts."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        # Create .github/instructions directory
-        github_instructions_dir = Path(".github/instructions")
-        github_instructions_dir.mkdir(parents=True)
-
-        with open(github_instructions_dir / "python.instructions.md", "w") as f:
-            f.write("""---
-pattern: "**/*.py"
----
-
-## Python
-
-Python instructions.""")
-
-        # Create .github/prompts directory
-        github_prompts_dir = Path(".github/prompts")
-        github_prompts_dir.mkdir(parents=True)
-
-        with open(github_prompts_dir / "fix-tests.prompt.md", "w") as f:
-            f.write("""---
-mode: 'agent'
-description: 'Fix tests'
----
-
-Here are instructions to fix tests.""")
-
-        # Run implode github command
-        result = runner.invoke(app, ["implode", "github"])
-
-        # Check command succeeds
-        assert result.exit_code == 0
-
-        # Check that both output files were created
-        assert Path("instructions.md").exists()
-        assert Path("commands.md").exists()
-
-        # Check instructions.md content
-        with open("instructions.md") as f:
-            content = f.read()
-            assert "## Python" in content
-
-        # Check commands.md content (prompts)
-        with open("commands.md") as f:
-            content = f.read()
-            assert "## Fix Tests" in content
 
 
 def test_implode_cursor_missing_directory():
@@ -359,23 +258,14 @@ paths:
 
 Here are Python rules for development.""")
 
-        # Create .claude/commands directory with sample files
-        claude_commands_dir = Path(".claude/commands")
-        claude_commands_dir.mkdir(parents=True)
-
-        with open(claude_commands_dir / "fix-tests.md", "w") as f:
-            f.write("Here are instructions to fix tests.")
-
-        # Run implode claude command (defaults to instructions.md)
         result = runner.invoke(app, ["implode", "claude"])
 
-        # Check command succeeds
         assert result.exit_code == 0
         assert "Bundled claude rules into instructions.md" in result.stdout
-        assert "Bundled claude commands into commands.md" in result.stdout
+        assert "commands.md" not in result.stdout
 
         assert Path("instructions.md").exists()
-        assert Path("commands.md").exists()
+        assert not Path("commands.md").exists()
 
         with open("instructions.md") as f:
             content = f.read()
@@ -383,39 +273,35 @@ Here are Python rules for development.""")
             assert "globs: **/*.py" in content
             assert "Here are Python rules for development." in content
 
-        with open("commands.md") as f:
-            content = f.read()
-            assert "## Fix Tests" in content
-
 
 def test_implode_opencode_basic_functionality():
-    """Test basic implode opencode functionality."""
+    """Test implode opencode bundles AGENTS.md into instructions.md."""
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
 
-        # Create .opencode/commands directory with sample files
-        opencode_commands_dir = Path(".opencode/commands")
-        opencode_commands_dir.mkdir(parents=True)
+        Path("AGENTS.md").write_text(
+            """# General
 
-        with open(opencode_commands_dir / "fix-tests.md", "w") as f:
-            f.write("Here are instructions to fix tests.")
+## Python
 
-        # Run implode opencode command (defaults to commands.md)
+Here are Python rules.
+"""
+        )
+
         result = runner.invoke(app, ["implode", "opencode"])
 
-        # Check command succeeds
         assert result.exit_code == 0
-        assert "Bundled opencode commands into commands.md" in result.stdout
+        assert (
+            "Bundled OpenCode rules (AGENTS.md) into instructions.md" in result.stdout
+        )
+        assert Path("instructions.md").exists()
+        assert not Path("commands.md").exists()
 
-        # Check that output file was created
-        assert Path("commands.md").exists()
-
-        with open("commands.md") as f:
-            content = f.read()
-            assert "## Fix Tests" in content
-            assert "Here are instructions to fix tests." in content
+        content = Path("instructions.md").read_text()
+        assert "## Python" in content
+        assert "Here are Python rules." in content
 
 
 def test_implode_codex_basic_functionality():
@@ -424,32 +310,14 @@ def test_implode_codex_basic_functionality():
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
 
-        skill_dir = Path(".agents/skills/fix-tests")
-        skill_dir.mkdir(parents=True)
-        (skill_dir / "SKILL.md").write_text(
-            """---
-name: fix-tests
-description: Fix failing tests
----
-
-# Fix Tests
-
-Here are instructions to fix tests.
-"""
-        )
         Path("AGENTS.md").write_text("General Codex rules.\n")
 
         result = runner.invoke(app, ["implode", "codex"])
 
         assert result.exit_code == 0
-        assert "Bundled Codex skills into commands.md" in result.stdout
         assert "Bundled Codex rules (AGENTS.md) into instructions.md" in result.stdout
-        assert Path("commands.md").exists()
+        assert not Path("commands.md").exists()
         assert Path("instructions.md").exists()
-
-        commands_content = Path("commands.md").read_text()
-        assert "## Fix Tests" in commands_content
-        assert "Here are instructions to fix tests." in commands_content
         assert "General Codex rules." in Path("instructions.md").read_text()
 
 
@@ -479,8 +347,8 @@ def test_implode_opencode_help():
     assert "Bundle OpenCode" in result.stdout
 
 
-def test_implode_opencode_missing_directory():
-    """Test implode opencode with missing .opencode/commands directory."""
+def test_implode_opencode_missing_agents_md():
+    """Test implode opencode when AGENTS.md is missing."""
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -508,34 +376,21 @@ def test_implode_claude_from_subdirectory():
 
 Here are Python rules for development.""")
 
-        claude_commands_dir = project_root / ".claude" / "commands"
-        claude_commands_dir.mkdir(parents=True)
-
-        with open(claude_commands_dir / "fix-tests.md", "w") as f:
-            f.write("Here are instructions to fix tests.")
-
         os.chdir(str(project_root / ".claude"))
 
         result = runner.invoke(app, ["implode", "claude"])
 
         assert result.exit_code == 0
         assert "Bundled claude rules into instructions.md" in result.stdout
-        assert "Bundled claude commands into commands.md" in result.stdout
 
         instructions_file = project_root / "instructions.md"
-        output_file = project_root / "commands.md"
         assert instructions_file.exists()
-        assert output_file.exists()
+        assert not (project_root / "commands.md").exists()
 
         with open(instructions_file) as f:
             content = f.read()
             assert "## Python" in content
             assert "Here are Python rules for development." in content
-
-        with open(output_file) as f:
-            content = f.read()
-            assert "## Fix Tests" in content
-            assert "Here are instructions to fix tests." in content
 
 
 def test_implode_claude_missing_rules_directory():

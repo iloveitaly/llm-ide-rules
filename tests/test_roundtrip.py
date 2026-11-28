@@ -1,7 +1,6 @@
 """Test round-trip functionality: explode → implode produces equivalent content."""
 
 import os
-import re
 import tempfile
 from pathlib import Path
 
@@ -98,64 +97,6 @@ Use strict mode.
             ) == normalize_whitespace(roundtrip_sections[section_name])
 
 
-def test_roundtrip_cursor_commands():
-    """Test explode → implode cursor produces equivalent commands.md."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        instructions_content = """# Sample Instructions
-
-## Python
-
-Python rules.
-"""
-        Path("instructions.md").write_text(instructions_content)
-
-        commands_content = """## Fix Tests
-
-Description: Fix failing tests
-
-Run pytest and fix any errors that occur.
-
-## Plan Only
-
-Description: Plan without executing
-
-Create a plan for the implementation.
-"""
-        Path("commands.md").write_text(commands_content)
-
-        explode_result = runner.invoke(app, ["explode", "cursor"])
-        assert explode_result.exit_code == 0
-
-        assert Path(".cursor/commands/fix-tests.md").exists()
-        assert Path(".cursor/commands/plan-only.md").exists()
-
-        implode_result = runner.invoke(app, ["implode", "cursor"])
-        assert implode_result.exit_code == 0
-
-        roundtrip_content = Path("commands.md").read_text()
-
-        original_sections = extract_sections(commands_content)
-        roundtrip_sections = extract_sections(roundtrip_content)
-
-        assert set(original_sections.keys()) == set(roundtrip_sections.keys())
-
-        for section_name in original_sections:
-            original_normalized = normalize_whitespace(original_sections[section_name])
-            roundtrip_normalized = normalize_whitespace(
-                roundtrip_sections[section_name]
-            )
-
-            if section_name in ["Fix Tests", "Plan Only"]:
-                original_without_desc = re.sub(
-                    r"Description:.*\n\n?", "", original_normalized
-                )
-                assert original_without_desc.strip() in roundtrip_normalized
-
-
 def test_roundtrip_github_instructions():
     """Test explode → implode github produces equivalent instructions.md."""
     runner = CliRunner()
@@ -200,52 +141,6 @@ Use JSX syntax.
             assert normalize_whitespace(
                 original_sections[section_name]
             ) == normalize_whitespace(roundtrip_sections[section_name])
-
-
-def test_roundtrip_github_prompts():
-    """Test explode → implode github produces equivalent prompts."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        instructions_content = """# Sample Instructions
-
-## Python
-
-Python instructions.
-"""
-        Path("instructions.md").write_text(instructions_content)
-
-        commands_content = """## Fix Tests
-
-Description: Fix failing tests
-
-Run pytest and fix errors.
-
-## Debug Issue
-
-Description: Debug an issue
-
-Investigate and fix the issue.
-"""
-        Path("commands.md").write_text(commands_content)
-
-        explode_result = runner.invoke(app, ["explode", "github"])
-        assert explode_result.exit_code == 0
-
-        assert Path(".github/prompts/fix-tests.prompt.md").exists()
-        assert Path(".github/prompts/debug-issue.prompt.md").exists()
-
-        implode_result = runner.invoke(app, ["implode", "github"])
-        assert implode_result.exit_code == 0
-
-        roundtrip_content = Path("commands.md").read_text()
-
-        original_sections = extract_sections(commands_content)
-        roundtrip_sections = extract_sections(roundtrip_content)
-
-        assert set(original_sections.keys()) == set(roundtrip_sections.keys())
 
 
 def test_roundtrip_preserves_section_order():
@@ -381,47 +276,6 @@ That's all.
         assert "1. Use type hints" in roundtrip_sections["Python"]
 
 
-def test_roundtrip_claude_commands():
-    """Test explode → implode claude produces equivalent instructions.md and commands.md."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-
-        instructions_content = """# Sample Instructions
-
-## Python
-
-Python rules.
-"""
-        Path("instructions.md").write_text(instructions_content)
-
-        commands_content = """## Fix Tests
-
-Description: Fix failing tests
-
-Run pytest and fix errors.
-"""
-        Path("commands.md").write_text(commands_content)
-
-        explode_result = runner.invoke(app, ["explode", "claude"])
-        assert explode_result.exit_code == 0
-
-        assert Path(".claude/rules/python.md").exists()
-        assert Path(".claude/commands/fix-tests.md").exists()
-
-        implode_result = runner.invoke(app, ["implode", "claude"])
-        assert implode_result.exit_code == 0
-
-        roundtrip_instructions = Path("instructions.md").read_text()
-        roundtrip_content = Path("commands.md").read_text()
-
-        assert "## Python" in roundtrip_instructions
-        assert "Python rules." in roundtrip_instructions
-        assert "## Fix Tests" in roundtrip_content
-        assert "Run pytest and fix errors" in roundtrip_content
-
-
 def test_roundtrip_claude_preserves_globs():
     """Test explode -> implode claude preserves scoped rule globs."""
     runner = CliRunner()
@@ -458,38 +312,30 @@ Here are Python rules.
         assert "Here are Python rules." in roundtrip_sections["Python"]
 
 
-def test_roundtrip_opencode_commands():
-    """Test explode → implode opencode produces equivalent commands.md."""
+def test_roundtrip_opencode_instructions():
+    """Test explode → implode opencode produces equivalent instructions via AGENTS.md."""
     runner = CliRunner()
 
     with tempfile.TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
 
-        instructions_content = """# Sample Instructions
+        original_content = """# Sample Instructions
 
 ## Python
 
 Python rules.
 """
-        Path("instructions.md").write_text(instructions_content)
-
-        commands_content = """## Fix Tests
-
-Description: Fix failing tests
-
-Run pytest and fix errors.
-"""
-        Path("commands.md").write_text(commands_content)
+        Path("instructions.md").write_text(original_content)
 
         explode_result = runner.invoke(app, ["explode", "opencode"])
         assert explode_result.exit_code == 0
 
-        assert Path(".opencode/commands/fix-tests.md").exists()
+        assert Path("AGENTS.md").exists()
+        assert not Path(".opencode").exists()
 
-        implode_result = runner.invoke(app, ["implode", "opencode"])
+        implode_result = runner.invoke(app, ["implode", "opencode", "roundtrip.md"])
         assert implode_result.exit_code == 0
 
-        roundtrip_content = Path("commands.md").read_text()
-
-        assert "## Fix Tests" in roundtrip_content
-        assert "Run pytest and fix errors" in roundtrip_content
+        roundtrip_content = Path("roundtrip.md").read_text()
+        assert "## Python" in roundtrip_content
+        assert "Python rules." in roundtrip_content

@@ -51,7 +51,7 @@ def test_integration_delete_safety_with_external_repo():
             assert download_result.exit_code == 0
 
         # Verify that something was actually downloaded (to make sure the test is meaningful)
-        # We expect some files like .github/prompts/ or .cursor/rules/ to appear if the repo has them.
+        # We expect some files like .cursor/rules/ to appear if the repo has them.
         # Based on the user's prompt, we assume this repo has relevant files.
         # Let's check for a few potential downloaded paths.
         downloaded_files = list(temp_path.rglob("*"))
@@ -77,12 +77,10 @@ def test_integration_delete_safety_with_external_repo():
 
         # Downloaded directories should be gone (if they were downloaded)
         # We specifically target directories defined in INSTRUCTION_TYPES
-        # e.g., .github/prompts, .github/instructions, .cursor/rules
+        # e.g., .github/instructions, .cursor/rules
 
-        prompts_dir = github_dir / "prompts"
         instructions_dir = github_dir / "instructions"
         cursor_rules_dir = temp_path / ".cursor" / "rules"
 
-        assert not prompts_dir.exists(), ".github/prompts should be deleted"
         assert not instructions_dir.exists(), ".github/instructions should be deleted"
         assert not cursor_rules_dir.exists(), ".cursor/rules should be deleted"

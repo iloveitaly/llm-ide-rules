@@ -45,8 +45,9 @@ def test_find_files_to_delete_codex():
 
         dirs, files = find_files_to_delete(["codex"], temp_path)
 
-        assert dirs == [skills_dir]
+        assert dirs == []
         assert files == []
+        assert skills_dir.exists()
 
 
 def test_find_files_to_delete_agents():
@@ -227,7 +228,7 @@ def test_delete_default_types():
         assert "Successfully deleted" in result.stdout
         assert not (temp_path / ".cursor" / "rules").exists()
         assert not (temp_path / ".github" / "instructions").exists()
-        assert not (temp_path / ".github" / "prompts").exists()
+        assert (temp_path / ".github" / "prompts").exists()
         assert not (temp_path / ".claude" / "rules").exists()
         assert not (temp_path / "AGENTS.md").exists()
 
@@ -277,10 +278,9 @@ def test_find_files_to_delete_claude():
 
         dirs, files = find_files_to_delete(["claude"], temp_path)
 
-        assert len(dirs) == 2
-        assert claude_rules_dir in dirs
-        assert claude_commands_dir in dirs
-        assert len(files) == 0
+        assert dirs == [claude_rules_dir]
+        assert files == []
+        assert claude_commands_dir.exists()
 
 
 def test_delete_directory_with_subdirectories():

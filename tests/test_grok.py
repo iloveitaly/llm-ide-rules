@@ -101,61 +101,6 @@ def test_grok_write_rule():
         assert "alwaysApply: true" in content
 
 
-def test_grok_write_command():
-    """Test that GrokAgent writes commands/skills with correct format."""
-    agent = GrokAgent()
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
-        commands_dir = temp_path / ".agents/skills"
-
-        agent.write_command(
-            content_lines=[
-                "## Deploy App\n",
-                "Description: How to deploy\n",
-                "\n",
-                "Run fab deploy.\n",
-            ],
-            filename="deploy-app",
-            commands_dir=commands_dir,
-            section_name="Deploy App",
-        )
-
-        skill_file = commands_dir / "deploy-app/SKILL.md"
-        assert skill_file.exists()
-        content = skill_file.read_text()
-        assert "name: deploy-app" in content
-        assert "description: How to deploy" in content
-        assert "# Deploy App" in content
-        assert "Run fab deploy." in content
-
-
-def test_grok_write_command_without_description():
-    """Test that GrokAgent writes an empty description field when none is provided."""
-    agent = GrokAgent()
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
-        commands_dir = temp_path / ".agents/skills"
-
-        agent.write_command(
-            content_lines=[
-                "## Deploy App\n",
-                "\n",
-                "Run fab deploy.\n",
-            ],
-            filename="deploy-app",
-            commands_dir=commands_dir,
-            section_name="Deploy App",
-        )
-
-        skill_file = commands_dir / "deploy-app/SKILL.md"
-        assert skill_file.exists()
-        content = skill_file.read_text()
-        assert "name: deploy-app" in content
-        assert "description:" in content
-        assert "# Deploy App" in content
-        assert "Run fab deploy." in content
-
-
 def test_roundtrip_grok_instructions():
     """Test explode -> implode grok produces equivalent instructions.md."""
     runner = CliRunner()
@@ -207,64 +152,6 @@ Use functional components and hooks.
                 assert normalize_whitespace(
                     original_sections[section_name]
                 ) == normalize_whitespace(roundtrip_sections[section_name])
-        finally:
-            os.chdir(original_cwd)
-
-
-def test_roundtrip_grok_commands():
-    """Test explode -> implode grok produces equivalent commands.md."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        original_cwd = os.getcwd()
-        os.chdir(temp_dir)
-        try:
-            instructions_content = """# Sample Instructions
-
-## Python
-
-Python rules.
-"""
-            Path("instructions.md").write_text(instructions_content)
-
-            commands_content = """## Fix Tests
-
-Description: Fix failing tests
-
-Run pytest and fix any errors that occur.
-
-## Plan Only
-
-Description: Plan without executing
-
-Create a plan for the implementation.
-"""
-            Path("commands.md").write_text(commands_content)
-
-            explode_result = runner.invoke(app, ["explode", "grok"])
-            assert explode_result.exit_code == 0
-
-            assert Path(".agents/skills/fix-tests/SKILL.md").exists()
-            assert Path(".agents/skills/plan-only/SKILL.md").exists()
-
-            implode_result = runner.invoke(app, ["implode", "grok"])
-            assert implode_result.exit_code == 0
-
-            roundtrip_content = Path("commands.md").read_text()
-
-            original_sections = extract_sections(commands_content)
-            roundtrip_sections = extract_sections(roundtrip_content)
-
-            assert set(original_sections.keys()) == set(roundtrip_sections.keys())
-
-            for section_name in original_sections:
-                original_normalized = normalize_whitespace(
-                    original_sections[section_name]
-                )
-                roundtrip_normalized = normalize_whitespace(
-                    roundtrip_sections[section_name]
-                )
-                assert original_normalized == roundtrip_normalized
         finally:
             os.chdir(original_cwd)
 

@@ -86,28 +86,22 @@ app.command("config", help="Configure agents to use AGENTS.md")(config_main)
 
 # create implode sub-typer
 implode_app = typer.Typer(help="Bundle rule files into a single instruction file")
+implode_app.command("cursor", help="Bundle Cursor rules into a single file")(cursor)
 implode_app.command(
-    "cursor", help="Bundle Cursor rules and commands into a single file"
-)(cursor)
-implode_app.command(
-    "github", help="Bundle GitHub/Copilot instructions and prompts into a single file"
+    "github", help="Bundle GitHub/Copilot instructions into a single file"
 )(github)
-implode_app.command(
-    "claude", help="Bundle Claude Code rules and commands into single files"
-)(claude)
-implode_app.command(
-    "antigravity",
-    help="Bundle Antigravity skills and AGENTS.md into single files",
-)(antigravity)
-implode_app.command(
-    "grok", help="Bundle Grok (.agents) rules and skills into single files"
-)(grok)
-implode_app.command("opencode", help="Bundle OpenCode commands into a single file")(
-    opencode
+implode_app.command("claude", help="Bundle Claude Code rules into a single file")(
+    claude
 )
 implode_app.command(
-    "codex", help="Bundle Codex skills and AGENTS.md into single files"
-)(codex)
+    "antigravity",
+    help="Bundle Antigravity AGENTS.md into a single file",
+)(antigravity)
+implode_app.command("grok", help="Bundle Grok (.agents) rules into a single file")(grok)
+implode_app.command("opencode", help="Bundle OpenCode AGENTS.md into a single file")(
+    opencode
+)
+implode_app.command("codex", help="Bundle Codex AGENTS.md into a single file")(codex)
 implode_app.command("agents", help="Bundle AGENTS.md files into a single file")(agents)
 app.add_typer(implode_app, name="implode")
 

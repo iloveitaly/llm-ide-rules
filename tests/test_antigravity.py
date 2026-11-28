@@ -11,45 +11,10 @@ from llm_ide_rules.agents.antigravity import AntigravityAgent
 from llm_ide_rules.constants import ensure_agents_adapter
 
 
-def normalize_whitespace(text: str) -> str:
-    """Normalize whitespace for comparison."""
-    lines = text.strip().split("\n")
-    normalized_lines = [line.rstrip() for line in lines]
-    while normalized_lines and not normalized_lines[-1]:
-        normalized_lines.pop()
-    return "\n".join(normalized_lines)
-
-
-def extract_sections(text: str) -> dict[str, str]:
-    """Extract sections from markdown text for easier comparison."""
-    marker = "<!-- END CLONED INSTRUCTIONS -->"
-    if marker in text:
-        text = text.split(marker, 1)[0]
-
-    sections = {}
-    current_section = None
-    current_content = []
-
-    for line in text.split("\n"):
-        if line.startswith("## "):
-            if current_section:
-                sections[current_section] = "\n".join(current_content).strip()
-            current_section = line[3:].strip()
-            current_content = []
-        else:
-            current_content.append(line)
-
-    if current_section:
-        sections[current_section] = "\n".join(current_content).strip()
-
-    return sections
-
-
 def test_antigravity_does_not_write_rules_dir():
     agent = AntigravityAgent()
 
     assert agent.rules_dir is None
-    assert agent.commands_dir == ".agents/skills"
 
 
 def test_explode_antigravity_writes_agents_md_not_rules():
@@ -84,61 +49,6 @@ Here are Python rules for development.
             assert not Path(".agents/rules").exists()
         finally:
             os.chdir(original_cwd)
-
-
-def test_antigravity_write_command():
-    """Test that AntigravityAgent writes commands/skills with correct format."""
-    agent = AntigravityAgent()
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
-        commands_dir = temp_path / ".agents/skills"
-
-        agent.write_command(
-            content_lines=[
-                "## Deploy App\n",
-                "Description: How to deploy\n",
-                "\n",
-                "Run fab deploy.\n",
-            ],
-            filename="deploy-app",
-            commands_dir=commands_dir,
-            section_name="Deploy App",
-        )
-
-        skill_file = commands_dir / "deploy-app/SKILL.md"
-        assert skill_file.exists()
-        content = skill_file.read_text()
-        assert "name: deploy-app" in content
-        assert "description: How to deploy" in content
-        assert "# Deploy App" in content
-        assert "Run fab deploy." in content
-
-
-def test_antigravity_write_command_without_description():
-    """Test that AntigravityAgent writes an empty description field when none is provided."""
-    agent = AntigravityAgent()
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
-        commands_dir = temp_path / ".agents/skills"
-
-        agent.write_command(
-            content_lines=[
-                "## Deploy App\n",
-                "\n",
-                "Run fab deploy.\n",
-            ],
-            filename="deploy-app",
-            commands_dir=commands_dir,
-            section_name="Deploy App",
-        )
-
-        skill_file = commands_dir / "deploy-app/SKILL.md"
-        assert skill_file.exists()
-        content = skill_file.read_text()
-        assert "name: deploy-app" in content
-        assert "description:" in content
-        assert "# Deploy App" in content
-        assert "Run fab deploy." in content
 
 
 def test_roundtrip_antigravity_instructions():
@@ -190,65 +100,6 @@ Use functional components and hooks.
             assert "## React" in roundtrip_content
             assert "Here are React rules for frontend development." in roundtrip_content
             assert "Use functional components and hooks." in roundtrip_content
-        finally:
-            os.chdir(original_cwd)
-
-
-def test_roundtrip_antigravity_commands():
-    """Test explode -> implode antigravity produces equivalent commands.md."""
-    runner = CliRunner()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        original_cwd = os.getcwd()
-        os.chdir(temp_dir)
-        try:
-            instructions_content = """# Sample Instructions
-
-## Python
-
-Python rules.
-"""
-            Path("instructions.md").write_text(instructions_content)
-
-            commands_content = """## Fix Tests
-
-Description: Fix failing tests
-
-Run pytest and fix any errors that occur.
-
-## Plan Only
-
-Description: Plan without executing
-
-Create a plan for the implementation.
-"""
-            Path("commands.md").write_text(commands_content)
-
-            explode_result = runner.invoke(app, ["explode", "antigravity"])
-            assert explode_result.exit_code == 0
-
-            assert Path(".agents/skills/fix-tests/SKILL.md").exists()
-            assert Path(".agents/skills/plan-only/SKILL.md").exists()
-            assert not Path(".agents/rules").exists()
-
-            implode_result = runner.invoke(app, ["implode", "antigravity"])
-            assert implode_result.exit_code == 0
-
-            roundtrip_content = Path("commands.md").read_text()
-
-            original_sections = extract_sections(commands_content)
-            roundtrip_sections = extract_sections(roundtrip_content)
-
-            assert set(original_sections.keys()) == set(roundtrip_sections.keys())
-
-            for section_name in original_sections:
-                original_normalized = normalize_whitespace(
-                    original_sections[section_name]
-                )
-                roundtrip_normalized = normalize_whitespace(
-                    roundtrip_sections[section_name]
-                )
-                assert original_normalized == roundtrip_normalized
         finally:
             os.chdir(original_cwd)
 
@@ -315,22 +166,3 @@ def test_extract_frontmatter_description():
     # Empty frontmatter
     assert extract_frontmatter_description([]) is None
     assert extract_frontmatter_description(["not frontmatter"]) is None
-
-
-def test_get_ordered_files_skill_paths():
-    """Test get_ordered_files correctly handles SKILL.md paths by using parent directory name."""
-    from llm_ide_rules.agents.base import get_ordered_files
-
-    skills = [
-        Path(".agents/skills/zebra/SKILL.md"),
-        Path(".agents/skills/apple/SKILL.md"),
-        Path(".agents/skills/banana/SKILL.md"),
-    ]
-
-    # Alphabetical by parent directory name
-    ordered = get_ordered_files(skills)
-    assert [p.parent.name for p in ordered] == ["apple", "banana", "zebra"]
-
-    # Explicit ordering via section_globs_keys
-    custom_ordered = get_ordered_files(skills, ["Zebra", "Apple"])
-    assert [p.parent.name for p in custom_ordered] == ["zebra", "apple", "banana"]

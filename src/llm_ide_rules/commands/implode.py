@@ -9,12 +9,39 @@ from llm_ide_rules.log import log
 from llm_ide_rules.utils import find_project_root
 
 
+def _bundle_agents_md(label: str, output: str = "instructions.md") -> bool:
+    "bundle AGENTS.md files into instructions.md (or specified output)"
+    agents_agent = get_agent("agents")
+    base_dir = find_project_root()
+    instructions_output_path = base_dir / output
+    rules_written = agents_agent.bundle_rules(instructions_output_path)
+
+    if rules_written:
+        success_msg = f"Bundled {label} rules (AGENTS.md) into {output}"
+        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
+        return True
+
+    log.info("no AGENTS.md files to bundle", provider=label)
+    return False
+
+
+def _require_agents_md(label: str, output: str) -> None:
+    "bundle AGENTS.md and exit when that is the client's only instruction file"
+
+    if _bundle_agents_md(label, output):
+        return
+
+    error_msg = f"No {label} AGENTS.md files found to bundle"
+    typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
+    raise typer.Exit(1)
+
+
 def cursor(
     output: Annotated[
         str, typer.Argument(help="Output file for rules")
     ] = "instructions.md",
 ) -> None:
-    "bundle Cursor rules into instructions.md and commands into commands.md"
+    "bundle Cursor rules into instructions.md"
 
     agent = get_agent("cursor")
     base_dir = find_project_root()
@@ -24,11 +51,7 @@ def cursor(
         log.error("cursor rules directory not configured")
         raise typer.Exit(1)
 
-    log.info(
-        "bundling cursor rules and commands",
-        rules_dir=rules_dir,
-        commands_dir=agent.commands_dir,
-    )
+    log.info("bundling cursor rules", rules_dir=rules_dir)
 
     rules_path = base_dir / rules_dir
     if not rules_path.exists():
@@ -46,21 +69,13 @@ def cursor(
         output_path.unlink(missing_ok=True)
         log.info("no cursor rules to bundle")
 
-    commands_output_path = base_dir / "commands.md"
-    commands_written = agent.bundle_commands(commands_output_path)
-    if commands_written:
-        success_msg = "Bundled cursor commands into commands.md"
-        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-    else:
-        commands_output_path.unlink(missing_ok=True)
-
 
 def github(
     output: Annotated[
         str, typer.Argument(help="Output file for instructions")
     ] = "instructions.md",
 ) -> None:
-    "bundle GitHub instructions into instructions.md and prompts into commands.md"
+    "bundle GitHub instructions into instructions.md"
 
     agent = get_agent("github")
     base_dir = find_project_root()
@@ -70,11 +85,7 @@ def github(
         log.error("github rules directory not configured")
         raise typer.Exit(1)
 
-    log.info(
-        "bundling github instructions and prompts",
-        instructions_dir=rules_dir,
-        prompts_dir=agent.commands_dir,
-    )
+    log.info("bundling github instructions", instructions_dir=rules_dir)
 
     rules_path = base_dir / rules_dir
     if not rules_path.exists():
@@ -94,21 +105,13 @@ def github(
         output_path.unlink(missing_ok=True)
         log.info("no github instructions to bundle")
 
-    commands_output_path = base_dir / "commands.md"
-    prompts_written = agent.bundle_commands(commands_output_path)
-    if prompts_written:
-        success_msg = "Bundled github prompts into commands.md"
-        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-    else:
-        commands_output_path.unlink(missing_ok=True)
-
 
 def claude(
     output: Annotated[
         str, typer.Argument(help="Output file for instructions")
     ] = "instructions.md",
 ) -> None:
-    "bundle Claude Code rules into instructions.md and commands into commands.md"
+    "bundle Claude Code rules into instructions.md"
 
     agent = get_agent("claude")
     base_dir = find_project_root()
@@ -118,11 +121,7 @@ def claude(
         log.error("claude code rules directory not configured")
         raise typer.Exit(1)
 
-    log.info(
-        "bundling claude code rules and commands",
-        rules_dir=rules_dir,
-        commands_dir=agent.commands_dir,
-    )
+    log.info("bundling claude code rules", rules_dir=rules_dir)
 
     rules_path = base_dir / rules_dir
     if not rules_path.exists():
@@ -140,14 +139,6 @@ def claude(
         output_path.unlink(missing_ok=True)
         log.info("no claude rules to bundle")
 
-    commands_output_path = base_dir / "commands.md"
-    commands_written = agent.bundle_commands(commands_output_path)
-    if commands_written:
-        success_msg = "Bundled claude commands into commands.md"
-        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-    else:
-        commands_output_path.unlink(missing_ok=True)
-
 
 def _bundle_dot_agents(
     output: str = "instructions.md",
@@ -163,12 +154,7 @@ def _bundle_dot_agents(
         log.error("rules directory not configured", provider=label)
         raise typer.Exit(1)
 
-    log.info(
-        "bundling rules and skills",
-        provider=label,
-        rules_dir=rules_dir,
-        commands_dir=agent.commands_dir,
-    )
+    log.info("bundling rules", provider=label, rules_dir=rules_dir)
 
     rules_path = base_dir / rules_dir
     if not rules_path.exists():
@@ -186,52 +172,15 @@ def _bundle_dot_agents(
         output_path.unlink(missing_ok=True)
         log.info("no rules to bundle", provider=label)
 
-    commands_output_path = base_dir / "commands.md"
-    commands_written = agent.bundle_commands(commands_output_path)
-    if commands_written:
-        success_msg = f"Bundled {label} skills into commands.md"
-        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-    else:
-        commands_output_path.unlink(missing_ok=True)
-
 
 def antigravity(
     output: Annotated[
         str, typer.Argument(help="Output file for instructions")
     ] = "instructions.md",
 ) -> None:
-    "bundle Antigravity skills into commands.md and AGENTS.md into instructions.md"
+    "bundle Antigravity AGENTS.md into instructions.md"
 
-    agent = get_agent("antigravity")
-    base_dir = find_project_root()
-
-    log.info(
-        "bundling antigravity skills",
-        commands_dir=agent.commands_dir,
-    )
-
-    commands_written = False
-    commands_path = base_dir / agent.commands_dir if agent.commands_dir else None
-
-    if commands_path and commands_path.exists():
-        commands_output_path = base_dir / "commands.md"
-        commands_written = agent.bundle_commands(commands_output_path)
-
-        if commands_written:
-            success_msg = "Bundled Antigravity skills into commands.md"
-            typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-        else:
-            commands_output_path.unlink(missing_ok=True)
-            log.info("no Antigravity skills to bundle")
-    else:
-        log.info("antigravity skills directory not found", commands_dir=commands_path)
-
-    rules_written = _bundle_agents_md("Antigravity", output)
-
-    if not commands_written and not rules_written:
-        error_msg = "No Antigravity skills or AGENTS.md files found to bundle"
-        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
-        raise typer.Exit(1)
+    _require_agents_md("Antigravity", output)
 
 
 def grok(
@@ -239,7 +188,7 @@ def grok(
         str, typer.Argument(help="Output file for instructions")
     ] = "instructions.md",
 ) -> None:
-    "bundle Grok (.agents) rules into instructions.md and skills into commands.md"
+    "bundle Grok (.agents) rules into instructions.md"
     _bundle_dot_agents(output, "grok")
 
 
@@ -270,95 +219,20 @@ def agents(
 
 
 def opencode(
-    output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
+    output: Annotated[
+        str, typer.Argument(help="Output file for instructions")
+    ] = "instructions.md",
 ) -> None:
-    "bundle OpenCode rules into instructions.md and commands into commands.md"
+    "bundle OpenCode AGENTS.md into instructions.md"
 
-    agent = get_agent("opencode")
-    base_dir = find_project_root()
-
-    log.info(
-        "bundling opencode commands",
-        commands_dir=agent.commands_dir,
-    )
-
-    commands_path = base_dir / agent.commands_dir if agent.commands_dir else None
-    if not commands_path or not commands_path.exists():
-        log.error("opencode commands directory not found", commands_dir=commands_path)
-        error_msg = f"OpenCode commands directory not found: {commands_path}"
-        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
-        raise typer.Exit(1)
-
-    output_path = base_dir / output
-    commands_written = agent.bundle_commands(output_path)
-    if commands_written:
-        success_msg = f"Bundled opencode commands into {output}"
-        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-    else:
-        output_path.unlink(missing_ok=True)
-        log.info("no opencode commands to bundle")
-
-    # opencode uses AGENTS.md for rules, so bundle them too
-    agents_agent = get_agent("agents")
-    instructions_output_path = base_dir / "instructions.md"
-    rules_written = agents_agent.bundle_rules(instructions_output_path)
-    if rules_written:
-        success_msg = "Bundled OpenCode rules (AGENTS.md) into instructions.md"
-        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-    else:
-        # do not delete instructions.md if it already exists from another process
-        # here we are bundling from scratch
-        log.info("no OpenCode rules (AGENTS.md) to bundle")
-
-
-def _bundle_agents_md(label: str, output: str = "instructions.md") -> bool:
-    "bundle AGENTS.md files into instructions.md (or specified output)"
-    agents_agent = get_agent("agents")
-    base_dir = find_project_root()
-    instructions_output_path = base_dir / output
-    rules_written = agents_agent.bundle_rules(instructions_output_path)
-
-    if rules_written:
-        success_msg = f"Bundled {label} rules (AGENTS.md) into {output}"
-        typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-        return True
-
-    log.info("no AGENTS.md files to bundle", provider=label)
-    return False
+    _require_agents_md("OpenCode", output)
 
 
 def codex(
-    output: Annotated[str, typer.Argument(help="Output file")] = "commands.md",
+    output: Annotated[
+        str, typer.Argument(help="Output file for instructions")
+    ] = "instructions.md",
 ) -> None:
-    "bundle Codex skills into commands.md and AGENTS.md into instructions.md"
+    "bundle Codex AGENTS.md into instructions.md"
 
-    agent = get_agent("codex")
-    base_dir = find_project_root()
-
-    log.info(
-        "bundling codex skills",
-        commands_dir=agent.commands_dir,
-    )
-
-    commands_written = False
-    commands_path = base_dir / agent.commands_dir if agent.commands_dir else None
-
-    if commands_path and commands_path.exists():
-        output_path = base_dir / output
-        commands_written = agent.bundle_commands(output_path)
-
-        if commands_written:
-            success_msg = f"Bundled Codex skills into {output}"
-            typer.echo(typer.style(success_msg, fg=typer.colors.GREEN))
-        else:
-            output_path.unlink(missing_ok=True)
-            log.info("no Codex skills to bundle")
-    else:
-        log.info("codex skills directory not found", commands_dir=commands_path)
-
-    rules_written = _bundle_agents_md("Codex")
-
-    if not commands_written and not rules_written:
-        error_msg = "No Codex skills or AGENTS.md files found to bundle"
-        typer.echo(typer.style(error_msg, fg=typer.colors.RED), err=True)
-        raise typer.Exit(1)
+    _require_agents_md("Codex", output)

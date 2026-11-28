@@ -23,9 +23,8 @@ DOTAGENTS_LAYOUT_CLIENTS = frozenset({"antigravity", "grok", "codex"})
 # share .agents/ with antigravity, so skip them from download/delete defaults
 SHARED_DOTAGENTS_DEFAULT_EXCLUDES = frozenset({"grok", "codex"})
 
-# persistent markers for user custom instructions and commands
+# persistent marker for user custom instructions
 INSTRUCTIONS_MARKER = "<!-- END CLONED INSTRUCTIONS -->"
-COMMANDS_MARKER = "<!-- END CLONED COMMANDS -->"
 
 
 def ensure_agents_adapter(agent_names: list[str]) -> list[str]:

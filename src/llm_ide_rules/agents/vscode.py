@@ -11,9 +11,7 @@ class VSCodeAgent(BaseAgent):
     name = "vscode"
     # vs code typically uses .github (handled by github agent)
     rules_dir = None
-    commands_dir = None
     rule_extension = None
-    command_extension = None
 
     def bundle_rules(
         self,
@@ -22,13 +20,6 @@ class VSCodeAgent(BaseAgent):
         filename: str = "AGENTS.md",
     ) -> bool:
         "vs code doesn't support rules directly (uses GitHub Copilot)"
-
-        return False
-
-    def bundle_commands(
-        self, output_file: Path, section_globs: dict[str, str | None] | None = None
-    ) -> bool:
-        "vs code doesn't support commands directly"
 
         return False
 
@@ -41,12 +32,3 @@ class VSCodeAgent(BaseAgent):
         description: str | None = None,
     ) -> None:
         "vs code doesn't support rules"
-
-    def write_command(
-        self,
-        content_lines: list[str],
-        filename: str,
-        commands_dir: Path,
-        section_name: str | None = None,
-    ) -> None:
-        "vs code doesn't support commands"
